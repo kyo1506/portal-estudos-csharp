@@ -5,6 +5,28 @@ html, body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
+/* Garante que o layout ocupe pelo menos a altura da viewport e seja flex-column,
+   para o rodapé ficar preso à base da tela (o MudLayout é display:block por padrão). */
+.mud-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.app-footer-wrap { flex-shrink: 0; }
+
+/* Utilitários de flexbox (o MudBlazor não os fornece; eram no-ops nas classes das páginas) */
+.d-flex { display: flex !important; }
+.flex-column { flex-direction: column !important; }
+.flex-fill { flex: 1 1 auto !important; min-width: 0; }
+.align-center { align-items: center !important; }
+.justify-center { justify-content: center !important; }
+.mt-auto { margin-top: auto !important; }
+.ml-auto { margin-left: auto !important; }
+
+/* Faz o card preencher totalmente o seu MudItem (largura e altura uniformes) */
+.mud-grid-item.d-flex { display: flex; }
+.mud-grid-item.d-flex > .flex-fill { flex: 1 1 auto; min-width: 0; width: 100%; }
+
 /* Garante cards de altura uniforme nas grades de lições/exercícios */
 .stretch-grid { align-items: stretch; }
 
@@ -112,7 +134,7 @@ html, body {
 .home-hero-card {
     border-radius: 1rem;
     padding: 1.4rem;
-    background: #fff;
+    background: var(--mud-palette-surface);
     color: var(--mud-palette-text-primary);
 }
 
@@ -177,5 +199,6 @@ html, body {
 
 .app-footer-links { display: flex; gap: 1rem; }
 .app-footer-link { font-weight: 500; }
+.app-footer-credit { opacity: 0.9; }
 
 
