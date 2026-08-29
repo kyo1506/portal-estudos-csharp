@@ -1,5 +1,7 @@
 using PortalEstudos.Components;
 using PortalEstudos.Services;
+using MudBlazor;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<IContentService, ContentService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddHttpClient<IGitHubService, GitHubService>();
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 

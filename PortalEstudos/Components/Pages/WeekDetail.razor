@@ -1,6 +1,7 @@
 @page "/week/{id}"
 @using PortalEstudos.Models
 @using PortalEstudos.Services
+@using MudBlazor
 @inject IContentService ContentService
 @inject IProgressService ProgressService
 @inject IGitHubService GitHubService
@@ -10,202 +11,141 @@
 
 @if (week == null)
 {
-    <div class="container-fluid py-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center p-5">
-                        <div style="font-size: 4rem;" class="mb-3">🔍</div>
-                        <h4>Semana não encontrada</h4>
-                        <p class="text-muted">A semana que você está procurando não existe.</p>
-                        <button class="btn btn-primary" @onclick="NavigateToWeeks">
-                            <i class="bi bi-arrow-left me-1"></i>Voltar para Semanas
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <MudPaper Class="pa-8 text-center" Elevation="3">
+        <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
+        <MudText Typo="Typo.h5" Class="mb-2">Semana não encontrada</MudText>
+        <MudText Class="mud-text-secondary mb-4">A semana que você procura não existe.</MudText>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="NavigateToWeeks">Voltar para Semanas</MudButton>
+    </MudPaper>
 }
 else
 {
-    <div class="container-fluid py-4">
-        <!-- WeekModel Header -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="card-body text-white p-4">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <nav aria-label="breadcrumb">
-                                    <ol class="breadcrumb mb-2" style="--bs-breadcrumb-divider: '>';">
-                                        <li class="breadcrumb-item">
-                                            <a href="/weeks" class="text-white opacity-75">Semanas</a>
-                                        </li>
-                                        <li class="breadcrumb-item active text-white" aria-current="page">Semana @week.Id</li>
-                                    </ol>
-                                </nav>
-                                <h2 class="mb-1">@week.Icon Semana @week.Id: @week.Title</h2>
-                                <p class="mb-0 opacity-75">@week.Description</p>
-                            </div>
-                            <div class="d-none d-md-flex align-items-center justify-content-center">
-                                <svg width="100" height="100" viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="6" />
-                                    <circle cx="50" cy="50" r="44" fill="none" stroke="white" stroke-width="6"
-                                            stroke-dasharray="276.46" stroke-dashoffset="@(276.46 - (276.46 * weekProgress / 100))"
-                                            stroke-linecap="round" transform="rotate(-90 50 50)" />
-                                    <text x="50" y="48" text-anchor="middle" fill="white" font-size="20" font-weight="bold">@weekProgress%</text>
-                                    <text x="50" y="65" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10">completo</text>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Cabeçalho -->
+    <MudPaper Class="pa-6 mb-4" Elevation="3" Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <MudBreadcrumbs Class="mb-2">
+                    <MudLink Href="/weeks" Style="color: rgba(255,255,255,0.75);">Semanas</MudLink>
+                    <MudText Style="color: white;">Semana @week.Id</MudText>
+                </MudBreadcrumbs>
+                <MudText Typo="Typo.h4" Class="font-weight-bold">@week.Icon Semana @week.Id: @week.Title</MudText>
+                <MudText>@week.Description</MudText>
             </div>
+            <MudProgressCircular Color="Color.Default" Size="Size.Large" Value="@weekProgress">
+                <MudText Style="color:white; font-weight:bold;">@weekProgress%</MudText>
+            </MudProgressCircular>
         </div>
+    </MudPaper>
 
-        <!-- Lessons Section -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h5 class="fw-semibold mb-3">
-                    <i class="bi bi-book me-2"></i>Lições (@completedLessons/@week.Lessons.Count)
-                </h5>
-            </div>
-            @foreach (var lesson in week.Lessons.OrderBy(l => l.Order))
-            {
-                <div class="col-12 col-md-6 col-lg-4 mb-3">
-                    <div class="card border-0 shadow-sm portal-card h-100" @onclick="() => NavigateToLesson(lesson.Id)" style="cursor: pointer;">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-start justify-content-between mb-2">
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-primary rounded-circle me-2" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">@lesson.Order</span>
-                                    <h6 class="mb-0 fw-semibold">@lesson.Title</h6>
-                                </div>
-                                @if (userProgress.CompletedLessons.Contains(lesson.Id))
-                                {
-                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 1.2rem;"></i>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-circle text-muted" style="font-size: 1.2rem;"></i>
-                                }
-                            </div>
-                            <p class="text-muted small mb-0">@GetLessonPreview(lesson)</p>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- Exercises Section -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h5 class="fw-semibold mb-3">
-                    <i class="bi bi-code-square me-2"></i>Exercícios (@completedExercises/@week.Exercises.Count)
-                </h5>
-            </div>
-            @foreach (var exercise in week.Exercises)
-            {
-                <div class="col-12 col-md-6 col-lg-4 mb-3">
-                    <div class="card border-0 shadow-sm portal-card h-100" @onclick="() => NavigateToExercise(exercise.Id)" style="cursor: pointer;">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-start justify-content-between mb-2">
-                                <h6 class="mb-0 fw-semibold">@exercise.Title</h6>
-                                @if (userProgress.CompletedExercises.Contains(exercise.Id))
-                                {
-                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 1.2rem;"></i>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-circle text-muted" style="font-size: 1.2rem;"></i>
-                                }
-                            </div>
-                            <p class="text-muted small mb-2">@exercise.Description</p>
-                            <span class="badge @GetDifficultyBadgeClass(exercise.Difficulty) rounded-pill">
-                                @GetDifficultyText(exercise.Difficulty)
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- Challenge Section -->
-        @if (week.Challenge != null)
+    <!-- Lições -->
+    <MudText Typo="Typo.h5" Class="mb-3">
+        <MudIcon Icon="@Icons.Material.Filled.MenuBook" Class="mr-2" /> Lições (@completedLessons/@week.Lessons.Count)
+    </MudText>
+    <MudGrid Spacing="3" Class="mb-4">
+        @foreach (var lesson in week.Lessons.OrderBy(l => l.Order))
         {
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h5 class="fw-semibold mb-3">
-                        <i class="bi bi-trophy me-2"></i>Desafio da Semana
-                    </h5>
-                </div>
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm challenge-card">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between mb-3">
-                                <div>
-                                    <h5 class="fw-semibold mb-1">@week.Challenge.Title</h5>
-                                    <p class="text-muted mb-2">@week.Challenge.Description</p>
-                                </div>
-                                @if (userProgress.CompletedChallenges.Contains(week.Challenge.Id))
-                                {
-                                    <span class="badge bg-success rounded-pill">
-                                        <i class="bi bi-check-circle-fill me-1"></i>Completo
-                                    </span>
-                                }
+            var done = userProgress.CompletedLessons.Contains(lesson.Id);
+            <MudItem xs="12" md="6" lg="4">
+                <MudCard Class="week-card-hover" Style="cursor:pointer;" onclick="@(() => NavigateToLesson(lesson.Id))">
+                    <MudCardContent>
+                        <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <MudAvatar Color="Color.Primary" Size="Size.Small">@lesson.Order</MudAvatar>
+                                <MudText Typo="Typo.subtitle1" Class="font-weight-bold">@lesson.Title</MudText>
                             </div>
-                            <h6 class="fw-semibold mb-2">Requisitos:</h6>
-                            <ul class="mb-3">
-                                @foreach (var req in week.Challenge.Requirements)
-                                {
-                                    <li class="text-muted small">@req</li>
-                                }
-                            </ul>
-                            <div class="d-flex gap-2 align-items-center flex-wrap">
-                                <a href="@week.Challenge.GitHubUrl" target="_blank" class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-github me-1"></i>Ver no GitHub
-                                </a>
-                                @foreach (var pr in challengePrStatuses.Where(p => p.ChallengeId == week.Challenge.Id))
-                                {
-                                    @if (pr.State == "merged")
-                                    {
-                                        <span class="badge bg-success rounded-pill" title="@pr.Title">
-                                            <i class="bi bi-git-merge me-1"></i>PR Aprovado
-                                        </span>
-                                    }
-                                    else if (pr.State == "open")
-                                    {
-                                        <span class="badge bg-warning text-dark rounded-pill" title="@pr.Title">
-                                            <i class="bi bi-git-pull-request me-1"></i>PR Aberto
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary rounded-pill" title="@pr.Title">
-                                            <i class="bi bi-x-circle me-1"></i>PR Fechado
-                                        </span>
-                                    }
-                                }
-                            </div>
+                            <MudIcon Icon="@(done ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Circle)" Color="@(done ? Color.Success : Color.Default)" />
                         </div>
-                    </div>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2">@GetLessonPreview(lesson)</MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+
+    <!-- Exercícios -->
+    <MudText Typo="Typo.h5" Class="mb-3">
+        <MudIcon Icon="@Icons.Material.Filled.Code" Class="mr-2" /> Exercícios (@completedExercises/@week.Exercises.Count)
+    </MudText>
+    <MudGrid Spacing="3" Class="mb-4">
+        @foreach (var exercise in week.Exercises)
+        {
+            var done = userProgress.CompletedExercises.Contains(exercise.Id);
+            <MudItem xs="12" md="6" lg="4">
+                <MudCard Class="week-card-hover" Style="cursor:pointer;" onclick="@(() => NavigateToExercise(exercise.Id))">
+                    <MudCardContent>
+                        <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+                            <MudText Typo="Typo.subtitle1" Class="font-weight-bold">@exercise.Title</MudText>
+                            <MudIcon Icon="@(done ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Circle)" Color="@(done ? Color.Success : Color.Default)" />
+                        </div>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2 mb-2">@exercise.Description</MudText>
+                        <MudChip T="string" Color="@GetDifficultyColor(exercise.Difficulty)" Variant="Variant.Filled" Size="Size.Small">
+                            @GetDifficultyText(exercise.Difficulty)
+                        </MudChip>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+
+    <!-- Desafio -->
+    @if (week.Challenge != null)
+    {
+        <MudText Typo="Typo.h5" Class="mb-3">
+            <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Class="mr-2" /> Desafio da Semana
+        </MudText>
+        <MudPaper Class="pa-4" Elevation="2">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+                <div style="flex:1; min-width:280px;">
+                    <MudText Typo="Typo.h6" Class="font-weight-bold mb-1">@week.Challenge.Title</MudText>
+                    <MudText Class="mud-text-secondary mb-2">@week.Challenge.Description</MudText>
+                    <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Requisitos:</MudText>
+                    <MudList T="string" Dense>
+                        @foreach (var req in week.Challenge.Requirements)
+                        {
+                            <MudListItem T="string" Icon="@Icons.Material.Filled.Check" IconColor="Color.Secondary">@req</MudListItem>
+                        }
+                    </MudList>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.5rem; align-items:flex-start;">
+                    @if (userProgress.CompletedChallenges.Contains(week.Challenge.Id))
+                    {
+                        <MudChip T="string" Color="Color.Success" Variant="Variant.Filled">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Class="mr-1" /> Completo
+                        </MudChip>
+                    }
+                    <MudButton Color="Color.Primary" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.OpenInNew" Href="@week.Challenge.GitHubUrl" Target="_blank">
+                        Ver no GitHub
+                    </MudButton>
+                    @foreach (var pr in challengePrStatuses.Where(p => p.ChallengeId == week.Challenge.Id))
+                    {
+                        @if (pr.State == "merged")
+                        {
+                            <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Title="@pr.Title">
+                                <MudIcon Icon="@Icons.Material.Filled.Merge" Class="mr-1" /> PR Aprovado
+                            </MudChip>
+                        }
+                        else if (pr.State == "open")
+                        {
+                            <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled" Title="@pr.Title">
+                                <MudIcon Icon="@Icons.Material.Filled.CallMerge" Class="mr-1" /> PR Aberto
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Color="Color.Default" Variant="Variant.Filled" Title="@pr.Title">
+                                <MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-1" /> PR Fechado
+                            </MudChip>
+                        }
+                    }
                 </div>
             </div>
-        }
-    </div>
+        </MudPaper>
+    }
 }
 
 <style>
-    .portal-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .portal-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
-    }
-    .breadcrumb-item + .breadcrumb-item::before {
-        color: rgba(255,255,255,0.5);
-    }
+    .week-card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .week-card-hover:hover { transform: translateY(-2px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1); }
 </style>
 
 @code {
@@ -255,12 +195,12 @@ else
         return preview.Length > 100 ? preview[..100] + "..." : preview;
     }
 
-    private string GetDifficultyBadgeClass(ExerciseDifficulty difficulty) => difficulty switch
+    private Color GetDifficultyColor(ExerciseDifficulty difficulty) => difficulty switch
     {
-        ExerciseDifficulty.Easy => "bg-success",
-        ExerciseDifficulty.Medium => "bg-warning text-dark",
-        ExerciseDifficulty.Hard => "bg-danger",
-        _ => "bg-secondary"
+        ExerciseDifficulty.Easy => Color.Success,
+        ExerciseDifficulty.Medium => Color.Warning,
+        ExerciseDifficulty.Hard => Color.Error,
+        _ => Color.Default
     };
 
     private string GetDifficultyText(ExerciseDifficulty difficulty) => difficulty switch

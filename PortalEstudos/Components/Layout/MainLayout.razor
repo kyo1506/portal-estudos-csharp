@@ -1,23 +1,64 @@
 ﻿@inherits LayoutComponentBase
+@using MudBlazor
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<MudLayout>
+    <MudAppBar Elevation="3">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
+        <MudText Typo="Typo.h6" Class="ml-2">Portal de Estudos C#</MudText>
+        <MudSpacer />
+        <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small">
+            <MudIcon Icon="@Icons.Material.Filled.School" Class="mr-1" /> .NET 10
+        </MudChip>
+    </MudAppBar>
 
-    <main>
-        <div class="top-row px-4">
-            <span class="portal-title">Portal de Estudos C#</span>
-        </div>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="3" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Always">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">Menu</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Início</MudNavLink>
+            <MudNavLink Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+            <MudNavLink Href="weeks" Icon="@Icons.Material.Filled.DateRange">Semanas</MudNavLink>
+            <MudNavLink Href="https://github.com/kyo1506/fundamentos-csharp" Target="_blank" Icon="@Icons.Material.Filled.EmojiEvents">Desafios (GitHub)</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
 
-        <article class="content px-4">
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
             @Body
-        </article>
-    </main>
-</div>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+<MudThemeProvider Theme="@EstudoTheme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@code {
+    private bool _drawerOpen = true;
+    private MudTheme EstudoTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#667eea",
+            Secondary = "#764ba2",
+            AppbarBackground = "#667eea",
+            Background = "#f5f6fa",
+            Surface = "#ffffff",
+        },
+        PaletteDark = new PaletteDark()
+        {
+            Primary = "#8b9cf7",
+            Secondary = "#9b6fc2",
+            AppbarBackground = "#1e1e2e",
+            Background = "#12121a",
+            Surface = "#1e1e2e",
+        }
+    };
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}
