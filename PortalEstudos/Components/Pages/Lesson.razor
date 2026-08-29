@@ -20,6 +20,10 @@
 }
 else
 {
+    <MudButton Color="Color.Default" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="NavigateToWeek" Class="mb-2">
+        Voltar para Semana @week.Id
+    </MudButton>
+
     <MudBreadcrumbs Class="mb-3">
         <MudLink Href="/weeks">Semanas</MudLink>
         <MudLink Href="@($"/week/{week.Id}")">Semana @week.Id</MudLink>
@@ -54,7 +58,7 @@ else
                         <MudSpacer />
                         <MudChip T="string" Color="Color.Default" Variant="Variant.Outlined" Size="Size.Small">@(lesson.CodeLanguage ?? "csharp")</MudChip>
                     </MudToolBar>
-                    <div class="code-block">@lesson.CodeExample</div>
+                    <pre class="code-block">@lesson.CodeExample</pre>
                 </MudPaper>
             }
         </MudItem>
@@ -65,23 +69,23 @@ else
                 <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2">
                     <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-2" />Lições da Semana
                 </MudText>
-                <MudList T="LessonModel" Dense>
+                <div class="lesson-list">
                     @foreach (var l in week.Lessons.OrderBy(l => l.Order))
                     {
-                        <MudListItem T="LessonModel"
-                                     Href="@($"/week/{week.Id}/lesson/{l.Id}")"
-                                     Icon="@(l.Id == lesson.Id ? Icons.Material.Filled.MenuBook : Icons.Material.Filled.BookmarkBorder)"
-                                     IconColor="@(l.Id == lesson.Id ? Color.Primary : Color.Default)">
-                            <div style="display:flex; align-items:center; width:100%;">
-                                <MudText Class="@(l.Id == lesson.Id ? "font-weight-bold" : "")">@l.Title</MudText>
-                                @if (userProgress.CompletedLessons.Contains(l.Id))
-                                {
-                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="ml-auto" />
-                                }
-                            </div>
-                        </MudListItem>
+                        var done = userProgress.CompletedLessons.Contains(l.Id);
+                        <a href="@($"/week/{week.Id}/lesson/{l.Id}")"
+                           class="lesson-list-item @(l.Id == lesson.Id ? "active" : "")"
+                           style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.75rem; border-radius:0.5rem; text-decoration:none; color:inherit; @(l.Id == lesson.Id ? "background:rgba(102,126,234,0.12);" : "")">
+                            <MudIcon Icon="@(l.Id == lesson.Id ? Icons.Material.Filled.MenuBook : Icons.Material.Filled.BookmarkBorder)"
+                                     Color="@(l.Id == lesson.Id ? Color.Primary : Color.Default)" Size="Size.Small" />
+                            <MudText Typo="Typo.body2" Class="@(l.Id == lesson.Id ? "font-weight-bold" : "")">@l.Title</MudText>
+                            @if (done)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="ml-auto" Size="Size.Small" />
+                            }
+                        </a>
                     }
-                </MudList>
+                </div>
             </MudPaper>
 
             <MudPaper Class="pa-3" Elevation="2">
