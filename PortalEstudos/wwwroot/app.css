@@ -38,11 +38,3 @@ html, body {
 /* Hint / solução reveal */
 .hint-box { border-left: 4px solid #764ba2; background: #f8f7ff; }
 .solution-box { border-left: 4px solid #28a745; background: #f0fff4; }
-
-/* Monaco editor wrapper */
-.editor-wrapper {
-    border-radius: 0 0 6px 6px;
-    overflow: hidden;
-    border: 1px solid #e0e0e0;
-    height: 400px;
-}

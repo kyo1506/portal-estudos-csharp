@@ -2,8 +2,6 @@
 @using PortalEstudos.Models
 @using PortalEstudos.Services
 @using MudBlazor
-@using BlazorMonaco
-@using BlazorMonaco.Editor
 @inject IContentService ContentService
 @inject IProgressService ProgressService
 @inject NavigationManager NavigationManager
@@ -47,7 +45,7 @@ else
                 <MudText Class="mb-0" Style="line-height:1.7;">@exercise.Description</MudText>
             </MudPaper>
 
-            <!-- Editor Monaco -->
+            <!-- Editor (MudTextField nativo, sem CDN) -->
             <MudPaper Class="mb-4" Elevation="2">
                 <MudToolBar Style="background:#1e1e2e; color:white;">
                     <MudIcon Icon="@Icons.Material.Filled.Code" Class="mr-2" />
@@ -55,8 +53,10 @@ else
                     <MudSpacer />
                     <MudIconButton Icon="@Icons.Material.Filled.RestartAlt" Size="Size.Small" Color="Color.Default" OnClick="ResetCode" Title="Resetar código" />
                 </MudToolBar>
-                <div class="editor-wrapper">
-                    <StandaloneCodeEditor @ref="_editor" Id="monaco-exercise" ConstructionOptions="EditorConstructionOptions" OnDidChangeModelContent="EditorOnDidChangeModelContent" />
+                <div style="padding:0.75rem; background:#1e1e2e;">
+                    <MudTextField @bind-Value="@userCode" Lines="18" FullWidth Variant="Variant.Outlined"
+                                  Style="font-family:'Cascadia Code','Fira Code',monospace; font-size:0.9rem; background:#1e1e2e; color:#d4d4d4;"
+                                  Immediate="true" />
                 </div>
             </MudPaper>
 
@@ -177,7 +177,6 @@ else
 }
 
 @code {
-    private StandaloneCodeEditor _editor = null!;
     private WeekModel? week;
     private Models.ExerciseModel? exercise;
     private UserProgress userProgress = new();
@@ -212,29 +211,6 @@ else
         userProgress = await ProgressService.LoadAsync();
     }
 
-    private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
-    {
-        return new StandaloneEditorConstructionOptions
-        {
-            Language = "csharp",
-            Theme = "vs-dark",
-            Value = userCode,
-            AutomaticLayout = true,
-            Minimap = new EditorMinimapOptions { Enabled = false },
-            FontSize = 14,
-            ScrollBeyondLastLine = false,
-            TabSize = 4
-        };
-    }
-
-    private async void EditorOnDidChangeModelContent(ModelContentChangedEvent eventArgs)
-    {
-        if (_editor != null)
-        {
-            userCode = await _editor.GetValue();
-        }
-    }
-
     private Color GetDifficultyColor(ExerciseDifficulty difficulty) => difficulty switch
     {
         ExerciseDifficulty.Easy => Color.Success,
@@ -255,7 +231,6 @@ else
     {
         if (exercise != null)
         {
-            _editor?.SetValue(exercise.InitialCode);
             userCode = exercise.InitialCode;
             resultMessage = "";
             userCodeOutput = "";
@@ -294,7 +269,7 @@ else
         submitStatus = "Verificando...";
         StateHasChanged();
 
-        await Task.Delay(800);
+        await Task.Delay(500);
 
         var codeContainsExpected = CheckCodeForExpectedOutput(userCode, exercise);
 

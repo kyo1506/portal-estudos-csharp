@@ -2,8 +2,17 @@ using PortalEstudos.Components;
 using PortalEstudos.Services;
 using MudBlazor;
 using MudBlazor.Services;
+using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Compressão de resposta: reduz o payload do Blazor Server (SignalR) e assets no Railway free tier
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+        new[] { "application/octet-stream", "text/css", "application/javascript" });
+});
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -26,6 +35,7 @@ if (!app.Environment.IsDevelopment())
     // HSTS kept off behind Railway's TLS-terminating edge proxy to avoid redirect loops.
 }
 
+app.UseResponseCompression();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
