@@ -28,8 +28,8 @@
         var completedLessons = week.Lessons.Count(l => userProgress.CompletedLessons.Contains(l.Id));
         var completedExercises = week.Exercises.Count(e => userProgress.CompletedExercises.Contains(e.Id));
         var weekChallengeDone = week.Challenge != null && userProgress.CompletedChallenges.Contains(week.Challenge.Id);
-        <MudItem xs="12" md="6" lg="4">
-            <MudCard Class="week-card-hover" Style="cursor:pointer;" onclick="@(() => NavigateToWeek(week.Id))">
+        <MudItem xs="12" md="6" lg="4" Class="d-flex">
+            <MudCard Class="week-card-hover flex-fill" Style="cursor:pointer; width:100%;" onclick="@(() => NavigateToWeek(week.Id))">
                 <MudCardContent>
                     <div style="display:flex; align-items:flex-start; justify-content:space-between;">
                         <MudPaper Width="56" Height="56" Class="d-flex align-center justify-center" Style="background: rgba(102,126,234,0.1); border-radius:14px;">

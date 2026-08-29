@@ -1,11 +1,14 @@
 ﻿@inherits LayoutComponentBase
 @using MudBlazor
+@inject IJSRuntime JS
 
 <MudLayout>
     <MudAppBar Elevation="3">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
         <MudText Typo="Typo.h6" Class="ml-2">Portal de Estudos C#</MudText>
         <MudSpacer />
+        <MudIconButton Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                       Color="Color.Inherit" OnClick="ToggleDarkMode" Title="Alternar tema claro/escuro" />
         <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small">
             <MudIcon Icon="@Icons.Material.Filled.School" Class="mr-1" /> .NET 10
         </MudChip>
@@ -30,13 +33,15 @@
     </MudMainContent>
 </MudLayout>
 
-<MudThemeProvider Theme="@EstudoTheme" />
+<MudThemeProvider Theme="@EstudoTheme" IsDarkMode="@IsDarkMode" IsDarkModeChanged="OnDarkModeChanged" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 @code {
     private bool _drawerOpen = true;
+    private bool IsDarkMode = false;
+
     private MudTheme EstudoTheme = new MudTheme()
     {
         PaletteLight = new PaletteLight()
@@ -56,6 +61,42 @@
             Surface = "#1e1e2e",
         }
     };
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var saved = await JS.InvokeAsync<string?>("localStorage.getItem", "theme-dark");
+            if (!string.IsNullOrEmpty(saved))
+            {
+                IsDarkMode = saved == "1";
+            }
+        }
+        catch
+        {
+            // localStorage indisponível (ex.: pré-render) — ignora
+        }
+    }
+
+    private async Task OnDarkModeChanged(bool value)
+    {
+        IsDarkMode = value;
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "theme-dark", value ? "1" : "0");
+        }
+        catch { }
+    }
+
+    private void ToggleDarkMode()
+    {
+        IsDarkMode = !IsDarkMode;
+        try
+        {
+            JS.InvokeVoidAsync("localStorage.setItem", "theme-dark", IsDarkMode ? "1" : "0");
+        }
+        catch { }
+    }
 
     private void DrawerToggle()
     {

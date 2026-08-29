@@ -45,8 +45,8 @@ else
         @foreach (var lesson in week.Lessons.OrderBy(l => l.Order))
         {
             var done = userProgress.CompletedLessons.Contains(lesson.Id);
-            <MudItem xs="12" md="6" lg="4">
-                <MudCard Class="week-card-hover" Style="cursor:pointer;" onclick="@(() => NavigateToLesson(lesson.Id))">
+            <MudItem xs="12" md="6" lg="4" Class="d-flex">
+                <MudCard Class="week-card-hover flex-fill" Style="cursor:pointer; width:100%;" onclick="@(() => NavigateToLesson(lesson.Id))">
                     <MudCardContent>
                         <div style="display:flex; align-items:flex-start; justify-content:space-between;">
                             <div style="display:flex; align-items:center; gap:0.5rem;">
@@ -70,8 +70,8 @@ else
         @foreach (var exercise in week.Exercises)
         {
             var done = userProgress.CompletedExercises.Contains(exercise.Id);
-            <MudItem xs="12" md="6" lg="4">
-                <MudCard Class="week-card-hover" Style="cursor:pointer;" onclick="@(() => NavigateToExercise(exercise.Id))">
+            <MudItem xs="12" md="6" lg="4" Class="d-flex">
+                <MudCard Class="week-card-hover flex-fill" Style="cursor:pointer; width:100%;" onclick="@(() => NavigateToExercise(exercise.Id))">
                     <MudCardContent>
                         <div style="display:flex; align-items:flex-start; justify-content:space-between;">
                             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">@exercise.Title</MudText>
@@ -98,11 +98,11 @@ else
                 <div style="flex:1; min-width:280px;">
                     <MudText Typo="Typo.h6" Class="font-weight-bold mb-1">@week.Challenge.Title</MudText>
                     <MudText Class="mud-text-secondary mb-2">@week.Challenge.Description</MudText>
-                    <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Requisitos:</MudText>
+                    <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Requisitos (clique para ver no GitHub):</MudText>
                     <MudList T="string" Dense>
                         @foreach (var req in week.Challenge.Requirements)
                         {
-                            <MudListItem T="string" Icon="@Icons.Material.Filled.Check" IconColor="Color.Secondary">@req</MudListItem>
+                            <MudListItem T="string" Href="@week.Challenge.GitHubUrl" Target="_blank" Icon="@Icons.Material.Filled.Check" IconColor="Color.Secondary">@req</MudListItem>
                         }
                     </MudList>
                 </div>

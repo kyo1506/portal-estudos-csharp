@@ -2,6 +2,7 @@
 @using PortalEstudos.Models
 @using PortalEstudos.Services
 @using MudBlazor
+@using Markdig
 @inject IContentService ContentService
 @inject IProgressService ProgressService
 @inject NavigationManager NavigationManager
@@ -98,10 +99,10 @@ else
                 }
                 <MudGrid Spacing="2">
                     <MudItem xs="6">
-                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetPreviousLessonId() == null)" StartIcon="@Icons.Material.Filled.ChevronLeft" OnClick="NavigateToPreviousLesson" />
+                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetPreviousLessonHref() == null)" StartIcon="@Icons.Material.Filled.ChevronLeft" Href="@GetPreviousLessonHref()" />
                     </MudItem>
                     <MudItem xs="6">
-                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetNextLessonId() == null)" EndIcon="@Icons.Material.Filled.ChevronRight" OnClick="NavigateToNextLesson" />
+                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetNextLessonHref() == null)" EndIcon="@Icons.Material.Filled.ChevronRight" Href="@GetNextLessonHref()" />
                     </MudItem>
                 </MudGrid>
             </MudPaper>
@@ -141,47 +142,26 @@ else
     private string ConvertMarkdownToHtml(string markdown)
     {
         if (string.IsNullOrEmpty(markdown)) return string.Empty;
-
-        var html = System.Net.WebUtility.HtmlEncode(markdown);
-
-        html = System.Text.RegularExpressions.Regex.Replace(html,
-            @"```(\w*)\r?\n(.*?)```",
-            "<pre><code class=\"language-$1\">$2</code></pre>",
-            System.Text.RegularExpressions.RegexOptions.Singleline);
-
-        html = System.Text.RegularExpressions.Regex.Replace(html,
-            @"`([^`]+)`",
-            "<code>$1</code>");
-
-        html = System.Text.RegularExpressions.Regex.Replace(html, @"^## (.+)$", "<h2>$1</h2>", System.Text.RegularExpressions.RegexOptions.Multiline);
-        html = System.Text.RegularExpressions.Regex.Replace(html, @"^### (.+)$", "<h3>$1</h3>", System.Text.RegularExpressions.RegexOptions.Multiline);
-        html = System.Text.RegularExpressions.Regex.Replace(html, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
-
-        html = html.Replace("\r\n", "\n").Replace("\n\n", "</p><p>").Replace("\n", "<br/>");
-        html = $"<p>{html}</p>";
-
-        html = html.Replace("<p></p>", "");
-        html = html.Replace("<p><h2>", "<h2>").Replace("</h2></p>", "</h2>");
-        html = html.Replace("<p><h3>", "<h3>").Replace("</h3></p>", "</h3>");
-        html = html.Replace("<p><pre>", "<pre>").Replace("</pre></p>", "</pre>");
-
-        return html;
+        var pipeline = new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .Build();
+        return Markdown.ToHtml(markdown, pipeline);
     }
 
-    private int? GetPreviousLessonId()
+    private string? GetPreviousLessonHref()
     {
         if (week == null || lesson == null) return null;
         var orderedLessons = week.Lessons.OrderBy(l => l.Order).ToList();
         var currentIndex = orderedLessons.FindIndex(l => l.Id == lesson.Id);
-        return currentIndex > 0 ? orderedLessons[currentIndex - 1].Id : null;
+        return currentIndex > 0 ? $"/week/{WeekId}/lesson/{orderedLessons[currentIndex - 1].Id}" : null;
     }
 
-    private int? GetNextLessonId()
+    private string? GetNextLessonHref()
     {
         if (week == null || lesson == null) return null;
         var orderedLessons = week.Lessons.OrderBy(l => l.Order).ToList();
         var currentIndex = orderedLessons.FindIndex(l => l.Id == lesson.Id);
-        return currentIndex < orderedLessons.Count - 1 ? orderedLessons[currentIndex + 1].Id : null;
+        return currentIndex < orderedLessons.Count - 1 ? $"/week/{WeekId}/lesson/{orderedLessons[currentIndex + 1].Id}" : null;
     }
 
     private async Task MarkAsComplete()
@@ -207,23 +187,5 @@ else
     private void NavigateToWeek()
     {
         NavigationManager.NavigateTo($"/week/{WeekId}");
-    }
-
-    private void NavigateToPreviousLesson()
-    {
-        var prevId = GetPreviousLessonId();
-        if (prevId != null)
-        {
-            NavigationManager.NavigateTo($"/week/{WeekId}/lesson/{prevId}");
-        }
-    }
-
-    private void NavigateToNextLesson()
-    {
-        var nextId = GetNextLessonId();
-        if (nextId != null)
-        {
-            NavigationManager.NavigateTo($"/week/{WeekId}/lesson/{nextId}");
-        }
     }
 }
