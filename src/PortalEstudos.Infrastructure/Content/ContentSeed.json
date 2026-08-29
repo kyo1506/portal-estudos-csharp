@@ -1,0 +1,285 @@
+{
+  "weeks": [
+    {
+      "id": 1,
+      "title": "Mem\u00F3ria, Tipos e a Base de Tudo",
+      "description": "Stack vs Heap, Tipos por Valor vs Refer\u00EAncia, Boxing/Unboxing",
+      "icon": "\uD83E\uDDE0",
+      "lessons": [
+        {
+          "id": 1,
+          "title": "Tipos por Valor vs Tipos por Refer\u00EAncia",
+          "content": "## Tipos por Valor vs Tipos por Refer\u00EAncia\n\nEm C#, todo dado tem um **tipo** que define:\n- Quanta mem\u00F3ria ocupa\n- Quais valores pode assumir\n- Quais opera\u00E7\u00F5es podem ser feitas\n\n### Tipos por Valor (Value Types)\nGuardam o valor diretamente na mem\u00F3ria (stack):\n- \u0060int\u0060, \u0060double\u0060, \u0060bool\u0060, \u0060char\u0060, \u0060decimal\u0060\n- \u0060struct\u0060, \u0060enum\u0060\n- \u0060DateTime\u0060\n\n### Tipos por Refer\u00EAncia (Reference Types)\nGuardam o endere\u00E7o do valor (heap):\n- \u0060class\u0060, \u0060string\u0060, \u0060array\u0060\n- \u0060interface\u0060, \u0060delegate\u0060\n\n### Exemplo Pr\u00E1tico\n\n\u0060\u0060\u0060csharp\n// Struct = tipo por valor\npublic struct Dinheiro\n{\n    public decimal Valor;\n    public string Moeda;\n}\n\n// Class = tipo por refer\u00EAncia\npublic class Estoque\n{\n    public string Nome;\n    public List\u003CProduto\u003E Produtos;\n}\n\u0060\u0060\u0060",
+          "codeExample": "using System;\n\npublic struct Dinheiro\n{\n    public decimal Valor;\n    public string Moeda;\n    \n    public Dinheiro(decimal valor, string moeda = \u0022BRL\u0022)\n    {\n        Valor = valor;\n        Moeda = moeda;\n    }\n    \n    public override string ToString() =\u003E $\u0022{Moeda} {Valor:N2}\u0022;\n}\n\npublic class Program\n{\n    public static void Main()\n    {\n        // Tipo por valor: c\u00F3pia independente\n        var d1 = new Dinheiro(15.90m);\n        var d2 = d1;  // COPIA o valor\n        d2.Valor = 20.00m;\n        \n        Console.WriteLine($\u0022d1: {d1}\u0022);  // BRL 15,90\n        Console.WriteLine($\u0022d2: {d2}\u0022);  // BRL 20,00\n    }\n}",
+          "codeLanguage": "csharp",
+          "order": 1
+        },
+        {
+          "id": 2,
+          "title": "Stack vs Heap",
+          "content": "## Stack vs Heap\n\n### Stack (Pilha)\n- Mem\u00F3ria r\u00E1pida e organizada\n- Tamanho fixo por vari\u00E1vel\n- Aloca\u00E7\u00E3o/desaloca\u00E7\u00E3o autom\u00E1tica\n- Tipos por valor vivem aqui\n\n### Heap (Monte)\n- Mem\u00F3ria din\u00E2mica\n- Objetos de classe vivem aqui\n- Coletada pelo Garbage Collector\n- Mais lenta que a stack\n\n### Visualiza\u00E7\u00E3o\n\n\u0060\u0060\u0060\nSTACK                          HEAP\n\u250C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510           \u250C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 int x = 42      \u2502           \u2502 Dinheiro object      \u2502\n\u2502 Dinheiro d1 \u2500\u2500\u2500\u2500\u2502\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2192\u2502 Valor: 15.90         \u2502\n\u2502 (valor direto)  \u2502           \u2502 Moeda: BRL           \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518           \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\u0060\u0060\u0060",
+          "codeExample": "// Demonstra\u00E7\u00E3o de Stack vs Heap\npublic struct Point { public int X, Y; }\n\npublic class Program\n{\n    public static void Main()\n    {\n        // Stack: valor direto\n        int numero = 42;\n        Point p1 = new Point { X = 1, Y = 2 };\n        \n        // Heap: refer\u00EAncia\n        var texto = new string(\u0022Hello\u0022);\n        var lista = new List\u003Cint\u003E { 1, 2, 3 };\n        \n        Console.WriteLine($\u0022int \u00E9 valor: {numero}\u0022);\n        Console.WriteLine($\u0022string \u00E9 refer\u00EAncia: {texto}\u0022);\n    }\n}",
+          "codeLanguage": "csharp",
+          "order": 2
+        },
+        {
+          "id": 3,
+          "title": "Boxing e Unboxing",
+          "content": "## Boxing e Unboxing\n\n### Boxing\n\u00C9 quando um tipo por valor \u00E9 \u0022embalado\u0022 para a heap (object).\n\n\u0060\u0060\u0060csharp\nint numero = 42;\nobject obj = numero;  // Boxing! int \u2192 object\n\u0060\u0060\u0060\n\n### Unboxing\n\u00C9 quando o valor \u00E9 desembalado de volta.\n\n\u0060\u0060\u0060csharp\nint deVolta = (int)obj;  // Unboxing\n\u0060\u0060\u0060\n\n### Performance\nBoxing/unboxing tem custo! Evite em loops.\n\n\u0060\u0060\u0060csharp\n// \u274C Lento: boxing em cada itera\u00E7\u00E3o\nArrayList lista = new ArrayList();\nfor (int i = 0; i \u003C 100000; i\u002B\u002B)\n    lista.Add(i);  // Boxing!\n\n// \u2705 R\u00E1pido: sem boxing\nList\u003Cint\u003E listaOtimizada = new List\u003Cint\u003E();\nfor (int i = 0; i \u003C 100000; i\u002B\u002B)\n    listaOtimizada.Add(i);  // Sem boxing\n\u0060\u0060\u0060",
+          "codeExample": "using System;\nusing System.Collections;\nusing System.Collections.Generic;\nusing System.Diagnostics;\n\npublic class Program\n{\n    public static void Main()\n    {\n        var sw = Stopwatch.StartNew();\n        \n        // Com boxing\n        var listaLenta = new ArrayList();\n        for (int i = 0; i \u003C 100000; i\u002B\u002B)\n            listaLenta.Add(i);\n        sw.Stop();\n        Console.WriteLine($\u0022ArrayList (boxing): {sw.ElapsedMilliseconds}ms\u0022);\n        \n        // Sem boxing\n        sw.Restart();\n        var listaRapida = new List\u003Cint\u003E();\n        for (int i = 0; i \u003C 100000; i\u002B\u002B)\n            listaRapida.Add(i);\n        sw.Stop();\n        Console.WriteLine($\u0022List\u003Cint\u003E: {sw.ElapsedMilliseconds}ms\u0022);\n    }\n}",
+          "codeLanguage": "csharp",
+          "order": 3
+        }
+      ],
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Criar struct Dinheiro",
+          "description": "Crie um struct chamado Dinheiro com propriedades Valor (decimal) e Moeda (string). Implemente um construtor e o m\u00E9todo ToString().",
+          "initialCode": "using System;\n\n// Crie seu struct aqui\n\n\npublic class Program\n{\n    public static void Main()\n    {\n        var preco = new Dinheiro(15.90m, \u0022BRL\u0022);\n        Console.WriteLine(preco);\n    }\n}",
+          "expectedOutput": "BRL 15,90",
+          "difficulty": 0,
+          "hints": [
+            "Use \u0027struct\u0027 em vez de \u0027class\u0027",
+            "ToString() pode usar interpola\u00E7\u00E3o de strings"
+          ],
+          "solution": "public struct Dinheiro\n{\n    public decimal Valor { get; }\n    public string Moeda { get; }\n    \n    public Dinheiro(decimal valor, string moeda = \u0022BRL\u0022)\n    {\n        Valor = valor;\n        Moeda = moeda;\n    }\n    \n    public override string ToString() =\u003E $\u0022{Moeda} {Valor:N2}\u0022;\n}"
+        },
+        {
+          "id": 2,
+          "title": "Diferen\u00E7a entre c\u00F3pia e refer\u00EAncia",
+          "description": "Demonstre a diferen\u00E7a entre copiar um struct e copiar uma refer\u00EAncia de classe.",
+          "initialCode": "using System;\n\npublic struct Ponto { public int X, Y; }\npublic class Circulo { public int Raio; }\n\npublic class Program\n{\n    public static void Main()\n    {\n        // Demonstre a diferen\u00E7a aqui\n        \n    }\n}",
+          "expectedOutput": "p1.X = 1\r\np2.X = 10\r\nc1.Raio = 10\r\nc2.Raio = 10",
+          "difficulty": 0,
+          "hints": [
+            "Structs s\u00E3o copiados por valor",
+            "Classes compartilham a refer\u00EAncia"
+          ],
+          "solution": "var p1 = new Ponto { X = 1, Y = 2 };\nvar p2 = p1;  // C\u00F3pia independente\np2.X = 10;\n\nvar c1 = new Circulo { Raio = 5 };\nvar c2 = c1;  // Mesma refer\u00EAncia!\nc2.Raio = 10;\n\nConsole.WriteLine($\u0022p1.X = {p1.X}\u0022);  // 1\nConsole.WriteLine($\u0022p2.X = {p2.X}\u0022);  // 10\nConsole.WriteLine($\u0022c1.Raio = {c1.Raio}\u0022);  // 10\nConsole.WriteLine($\u0022c2.Raio = {c2.Raio}\u0022);  // 10"
+        },
+        {
+          "id": 3,
+          "title": "Performance: ArrayList vs List\u003CT\u003E",
+          "description": "Compare a performance entre ArrayList (com boxing) e List\u003Cint\u003E (sem boxing) adicionando 100.000 elementos.",
+          "initialCode": "using System;\nusing System.Collections;\nusing System.Collections.Generic;\nusing System.Diagnostics;\n\npublic class Program\n{\n    public static void Main()\n    {\n        // Me\u00E7a o tempo de ambos\n        \n    }\n}",
+          "expectedOutput": "ArrayList: *ms\r\nList\u003Cint\u003E: *ms",
+          "difficulty": 1,
+          "hints": [
+            "Use Stopwatch.StartNew()",
+            "ArrayList faz boxing, List\u003Cint\u003E n\u00E3o"
+          ],
+          "solution": "var sw = Stopwatch.StartNew();\nvar arrayList = new ArrayList();\nfor (int i = 0; i \u003C 100000; i\u002B\u002B)\n    arrayList.Add(i);\nsw.Stop();\nConsole.WriteLine($\u0022ArrayList: {sw.ElapsedMilliseconds}ms\u0022);\n\nsw.Restart();\nvar listInt = new List\u003Cint\u003E();\nfor (int i = 0; i \u003C 100000; i\u002B\u002B)\n    listInt.Add(i);\nsw.Stop();\nConsole.WriteLine($\u0022List\u003Cint\u003E: {sw.ElapsedMilliseconds}ms\u0022);"
+        }
+      ],
+      "challenge": {
+        "id": 1,
+        "title": "Desafio Semana 1: Controle de Estoque",
+        "description": "Crie um sistema de controle de estoque completo usando structs para produtos e classes para o estoque.",
+        "gitHubUrl": "https://github.com/kyo1506/fundamentos-csharp/tree/main/Semana-01/desafios-semanais",
+        "requirements": [
+          "Criar struct ProdutoPerecivel com Nome, CodigoBarras, Preco, QuantidadeEstoque",
+          "Criar classe Estoque com lista de produtos e m\u00E9todos de entrada/sa\u00EDda",
+          "Implementar busca por c\u00F3digo de barras",
+          "Usar ref/out para atualiza\u00E7\u00E3o em lote",
+          "Criar testes unit\u00E1rios"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Programa\u00E7\u00E3o Orientada a Objetos",
+      "description": "Encapsulamento, Heran\u00E7a, Polimorfismo, Abstra\u00E7\u00E3o \u002B SOLID",
+      "icon": "\uD83E\uDDE9",
+      "lessons": [
+        {
+          "id": 1,
+          "title": "Os 4 Pilares da OO",
+          "content": "## Pilares da Orienta\u00E7\u00E3o a Objetos\n\n### 1. Encapsulamento\nEsconder estado interno, expor apenas o necess\u00E1rio.\n\n\u0060\u0060\u0060csharp\npublic class ContaBancaria\n{\n    private decimal _saldo;  // Campo privado\n    \n    public decimal Saldo =\u003E _saldo;  // Propriedade somente leitura\n    \n    public void Depositar(decimal valor)\n    {\n        if (valor \u003E 0) _saldo \u002B= valor;\n    }\n}\n\u0060\u0060\u0060\n\n### 2. Heran\u00E7a\nReaproveitar c\u00F3digo em hierarquias.\n\n\u0060\u0060\u0060csharp\npublic abstract class Animal\n{\n    public abstract void FazerSom();\n}\n\npublic class Cachorro : Animal\n{\n    public override void FazerSom() =\u003E Console.WriteLine(\u0022Au au!\u0022);\n}\n\u0060\u0060\u0060\n\n### 3. Polimorfismo\nTratar objetos diferentes de forma uniforme.\n\n\u0060\u0060\u0060csharp\nList\u003CAnimal\u003E animais = new()\n{\n    new Cachorro(),\n    new Gato()\n};\n\nforeach (var animal in animais)\n    animal.FazerSom();  // Cada um faz seu som!\n\u0060\u0060\u0060\n\n### 4. Abstra\u00E7\u00E3o\nFocar no essencial, ignorar detalhes.\n\n\u0060\u0060\u0060csharp\npublic interface IPagamento\n{\n    void Processar(decimal valor);\n}\n\npublic class Pix : IPagamento { /* ... */ }\npublic class Cartao : IPagamento { /* ... */ }\n\u0060\u0060\u0060",
+          "codeExample": "using System;\nusing System.Collections.Generic;\n\n// Abstra\u00E7\u00E3o\npublic interface IForma\n{\n    double CalcularArea();\n}\n\n// Implementa\u00E7\u00E3o\npublic class Circulo : IForma\n{\n    public double Raio { get; set; }\n    public double CalcularArea() =\u003E Math.PI * Raio * Raio;\n}\n\npublic class Retangulo : IForma\n{\n    public double Largura { get; set; }\n    public double Altura { get; set; }\n    public double CalcularArea() =\u003E Largura * Altura;\n}\n\npublic class Program\n{\n    public static void Main()\n    {\n        List\u003CIForma\u003E formas = new()\n        {\n            new Circulo { Raio = 5 },\n            new Retangulo { Largura = 4, Altura = 6 }\n        };\n        \n        foreach (var forma in formas)\n            Console.WriteLine($\u0022\u00C1rea: {forma.CalcularArea():F2}\u0022);\n    }\n}",
+          "codeLanguage": "csharp",
+          "order": 1
+        },
+        {
+          "id": 2,
+          "title": "Princ\u00EDpios SOLID",
+          "content": "## SOLID\n\n### S - Single Responsibility Principle\nUma classe deve ter apenas UMA raz\u00E3o para mudar.\n\n### O - Open/Closed Principle\nAberto para extens\u00E3o, fechado para modifica\u00E7\u00E3o.\n\n### L - Liskov Substitution Principle\nDerivadas devem poder substituir bases.\n\n### I - Interface Segregation Principle\nInterfaces pequenas \u003E uma interface grande.\n\n### D - Dependency Inversion Principle\nDependa de abstra\u00E7\u00F5es, n\u00E3o de implementa\u00E7\u00F5es.",
+          "codeExample": "using System;\n\n// SRP: Cada classe tem uma responsabilidade\npublic class ValidadorCpf\n{\n    public bool Validar(string cpf) =\u003E cpf.Length == 11;\n}\n\n// OCP: Extens\u00E3o sem modificar\npublic interface IDesconto\n{\n    decimal Calcular(decimal valor);\n}\n\npublic class DescontoEstudante : IDesconto\n{\n    public decimal Calcular(decimal valor) =\u003E valor * 0.5m;\n}\n\n// DIP: Depende de abstra\u00E7\u00E3o\npublic class ServicoInscricao\n{\n    private readonly IDesconto _desconto;\n    \n    public ServicoInscricao(IDesconto desconto)\n    {\n        _desconto = desconto;\n    }\n    \n    public decimal CalcularPreco(decimal precoBase)\n    {\n        return _desconto.Calcular(precoBase);\n    }\n}\n\npublic class Program\n{\n    public static void Main()\n    {\n        var servico = new ServicoInscricao(new DescontoEstudante());\n        Console.WriteLine($\u0022Pre\u00E7o com desconto: {servico.CalcularPreco(100m):C}\u0022);\n    }\n}",
+          "codeLanguage": "csharp",
+          "order": 2
+        }
+      ],
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Encapsulamento com valida\u00E7\u00E3o",
+          "description": "Crie uma classe Produto com propriedades validadas no setter.",
+          "initialCode": "using System;\n\n// Crie a classe Produto com valida\u00E7\u00E3o\n\n\npublic class Program\n{\n    public static void Main()\n    {\n        var p = new Produto { Nome = \u0022Arroz\u0022, Preco = 15.90m };\n        Console.WriteLine($\u0022{p.Nome}: {p.Preco:C}\u0022);\n        \n        // Deve lan\u00E7ar exce\u00E7\u00E3o\n        try { p.Preco = -10m; }\n        catch (ArgumentException ex) { Console.WriteLine(ex.Message); }\n    }\n}",
+          "expectedOutput": "Arroz: R$ 15,90\r\nPre\u00E7o deve ser maior que zero",
+          "difficulty": 0,
+          "hints": [
+            "Use backing field privado",
+            "Valide no setter antes de atribuir"
+          ],
+          "solution": "public class Produto\n{\n    private string _nome = \u0022\u0022;\n    private decimal _preco;\n    \n    public string Nome\n    {\n        get =\u003E _nome;\n        set =\u003E _nome = string.IsNullOrWhiteSpace(value)\n            ? throw new ArgumentException(\u0022Nome n\u00E3o pode ser vazio\u0022)\n            : value;\n    }\n    \n    public decimal Preco\n    {\n        get =\u003E _preco;\n        set =\u003E _preco = value \u003C= 0\n            ? throw new ArgumentException(\u0022Pre\u00E7o deve ser maior que zero\u0022)\n            : value;\n    }\n}"
+        },
+        {
+          "id": 2,
+          "title": "Heran\u00E7a e Polimorfismo",
+          "description": "Crie uma hierarquia de formas geom\u00E9tricas com polimorfismo.",
+          "initialCode": "using System;\nusing System.Collections.Generic;\n\n// Crie as classes aqui\n\n\npublic class Program\n{\n    public static void Main()\n    {\n        List\u003CForma\u003E formas = new()\n        {\n            new Circulo { Raio = 5 },\n            new Retangulo { Largura = 4, Altura = 6 }\n        };\n        \n        foreach (var f in formas)\n            Console.WriteLine($\u0022\u00C1rea: {f.CalcularArea():F2}\u0022);\n    }\n}",
+          "expectedOutput": "\u00C1rea: 78,54\r\n\u00C1rea: 24,00",
+          "difficulty": 1,
+          "hints": [
+            "Use classe abstrata ou interface",
+            "Cada forma calcula \u00E1rea diferente"
+          ],
+          "solution": "public abstract class Forma\n{\n    public abstract double CalcularArea();\n}\n\npublic class Circulo : Forma\n{\n    public double Raio { get; set; }\n    public override double CalcularArea() =\u003E Math.PI * Raio * Raio;\n}\n\npublic class Retangulo : Forma\n{\n    public double Largura { get; set; }\n    public double Altura { get; set; }\n    public override double CalcularArea() =\u003E Largura * Altura;\n}"
+        }
+      ],
+      "challenge": {
+        "id": 2,
+        "title": "Desafio Semana 2: Valida\u00E7\u00E3o de Formul\u00E1rios",
+        "description": "Crie um sistema de valida\u00E7\u00E3o de formul\u00E1rios usando interfaces e SOLID.",
+        "gitHubUrl": "https://github.com/kyo1506/fundamentos-csharp/tree/main/Semana-02/desafios-semanais",
+        "requirements": [
+          "Interface IValidador com m\u00E9todo Validar()",
+          "Validadores separados: CPF, Email, Telefone",
+          "Classe Formulario com lista de validadores",
+          "Aplicar SRP, OCP e DIP",
+          "Testes unit\u00E1rios"
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Cole\u00E7\u00F5es, LINQ e Manipula\u00E7\u00E3o de Dados",
+      "description": "List\u003CT\u003E, Dictionary, GroupBy, Where, OrderBy",
+      "icon": "\uD83D\uDCCA",
+      "lessons": [
+        {
+          "id": 1,
+          "title": "Cole\u00E7\u00F5es Gen\u00E9ricas",
+          "content": "## Cole\u00E7\u00F5es em C#\n\n### List\u003CT\u003E\nLista indexada, permite duplicatas.\n\n\u0060\u0060\u0060csharp\nList\u003Cstring\u003E nomes = new();\nnomes.Add(\u0022Maria\u0022);\nnomes.Add(\u0022Jo\u00E3o\u0022);\n\u0060\u0060\u0060\n\n### Dictionary\u003CTKey, TValue\u003E\nPares chave-valor, busca O(1).\n\n\u0060\u0060\u0060csharp\nDictionary\u003Cint, string\u003E catalogo = new();\ncatalogo[1] = \u0022Arroz\u0022;\n\u0060\u0060\u0060\n\n### HashSet\u003CT\u003E\nConjunto sem duplicatas.\n\n\u0060\u0060\u0060csharp\nHashSet\u003Cstring\u003E tags = new() { \u0022C#\u0022, \u0022.NET\u0022 };\n\u0060\u0060\u0060",
+          "codeExample": "using System;\nusing System.Collections.Generic;\n\npublic class Program\n{\n    public static void Main()\n    {\n        // List\u003CT\u003E\n        var produtos = new List\u003Cstring\u003E { \u0022Arroz\u0022, \u0022Feij\u00E3o\u0022, \u0022Arroz\u0022 };\n        Console.WriteLine($\u0022List: {produtos.Count} itens\u0022);  // 3\n        \n        // Dictionary\u003CK,V\u003E\n        var precos = new Dictionary\u003Cstring, decimal\u003E\n        {\n            [\u0022Arroz\u0022] = 15.90m,\n            [\u0022Feij\u00E3o\u0022] = 8.50m\n        };\n        Console.WriteLine($\u0022Arroz: {precos[\u0022Arroz\u0022]:C}\u0022);\n        \n        // HashSet\u003CT\u003E\n        var categorias = new HashSet\u003Cstring\u003E { \u0022Alimentos\u0022, \u0022Alimentos\u0022 };\n        Console.WriteLine($\u0022HashSet: {categorias.Count} itens\u0022);  // 1\n    }\n}",
+          "codeLanguage": "csharp",
+          "order": 1
+        },
+        {
+          "id": 2,
+          "title": "LINQ - Consultas Declarativas",
+          "content": "## LINQ\n\n### Filtrar com Where\n\u0060\u0060\u0060csharp\nvar baratos = produtos.Where(p =\u003E p.Preco \u003C 50);\n\u0060\u0060\u0060\n\n### Projetar com Select\n\u0060\u0060\u0060csharp\nvar nomes = produtos.Select(p =\u003E p.Nome);\n\u0060\u0060\u0060\n\n### Agrupar com GroupBy\n\u0060\u0060\u0060csharp\nvar porCategoria = produtos.GroupBy(p =\u003E p.Categoria);\n\u0060\u0060\u0060\n\n### Ordenar com OrderBy\n\u0060\u0060\u0060csharp\nvar ordenados = produtos.OrderBy(p =\u003E p.Preco);\n\u0060\u0060\u0060",
+          "codeExample": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{\n    public static void Main()\n    {\n        var produtos = new List\u003C(string Nome, string Cat, decimal Preco)\u003E\n        {\n            (\u0022Arroz\u0022, \u0022Alimentos\u0022, 15.90m),\n            (\u0022Notebook\u0022, \u0022Eletr\u00F4nicos\u0022, 3500m),\n            (\u0022Feij\u00E3o\u0022, \u0022Alimentos\u0022, 8.50m),\n            (\u0022Mouse\u0022, \u0022Eletr\u00F4nicos\u0022, 89.90m)\n        };\n        \n        // Where \u002B OrderBy\n        var baratos = produtos\n            .Where(p =\u003E p.Preco \u003C 100)\n            .OrderBy(p =\u003E p.Preco);\n        \n        foreach (var p in baratos)\n            Console.WriteLine($\u0022{p.Nome}: {p.Preco:C}\u0022);\n        \n        // GroupBy\n        var grupos = produtos.GroupBy(p =\u003E p.Cat);\n        foreach (var g in grupos)\n            Console.WriteLine($\u0022{g.Key}: {g.Count()} itens\u0022);\n    }\n}",
+          "codeLanguage": "csharp",
+          "order": 2
+        }
+      ],
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Filtrar e ordenar com LINQ",
+          "description": "Dada uma lista de produtos, filtre os que custam menos de 100 e ordene por pre\u00E7o.",
+          "initialCode": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{\n    public static void Main()\n    {\n        var produtos = new List\u003C(string Nome, decimal Preco)\u003E\n        {\n            (\u0022Arroz\u0022, 15.90m),\n            (\u0022Notebook\u0022, 3500m),\n            (\u0022Feij\u00E3o\u0022, 8.50m),\n            (\u0022Mouse\u0022, 89.90m)\n        };\n        \n        // Filtre e ordene aqui\n        \n    }\n}",
+          "expectedOutput": "Feij\u00E3o: R$ 8,50\r\nArroz: R$ 15,90\r\nMouse: R$ 89,90",
+          "difficulty": 0,
+          "hints": [
+            "Use Where para filtrar",
+            "Use OrderBy para ordenar"
+          ],
+          "solution": "var baratos = produtos\n    .Where(p =\u003E p.Preco \u003C 100)\n    .OrderBy(p =\u003E p.Preco);\n\nforeach (var p in baratos)\n    Console.WriteLine($\u0022{p.Nome}: {p.Preco:C}\u0022);"
+        },
+        {
+          "id": 2,
+          "title": "Agrupar com GroupBy",
+          "description": "Agrupe produtos por categoria e calcule o total por categoria.",
+          "initialCode": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{\n    public static void Main()\n    {\n        var produtos = new List\u003C(string Nome, string Categoria, decimal Preco)\u003E\n        {\n            (\u0022Arroz\u0022, \u0022Alimentos\u0022, 15.90m),\n            (\u0022Feij\u00E3o\u0022, \u0022Alimentos\u0022, 8.50m),\n            (\u0022Notebook\u0022, \u0022Eletr\u00F4nicos\u0022, 3500m),\n            (\u0022Mouse\u0022, \u0022Eletr\u00F4nicos\u0022, 89.90m)\n        };\n        \n        // Agrupe por categoria\n        \n    }\n}",
+          "expectedOutput": "Alimentos: R$ 24,40\r\nEletr\u00F4nicos: R$ 3.589,90",
+          "difficulty": 1,
+          "hints": [
+            "Use GroupBy(p =\u003E p.Categoria)",
+            "Use Sum para totalizar"
+          ],
+          "solution": "var grupos = produtos.GroupBy(p =\u003E p.Categoria);\n\nforeach (var g in grupos)\n{\n    decimal total = g.Sum(p =\u003E p.Preco);\n    Console.WriteLine($\u0022{g.Key}: {total:C}\u0022);\n}"
+        }
+      ],
+      "challenge": {
+        "id": 3,
+        "title": "Desafio Semana 3: An\u00E1lise de Vendas",
+        "description": "Crie um sistema de an\u00E1lise de vendas com LINQ.",
+        "gitHubUrl": "https://github.com/kyo1506/fundamentos-csharp/tree/main/Semana-03/desafios-semanais",
+        "requirements": [
+          "Gerar 50 vendas aleat\u00F3rias",
+          "Filtrar por categoria e per\u00EDodo",
+          "Agrupar por m\u00EAs e categoria",
+          "Calcular ticket m\u00E9dio",
+          "Top 5 produtos mais vendidos"
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "ASP.NET Core e Deploy",
+      "description": "Minimal APIs, Razor Pages, Deploy em nuvem",
+      "icon": "\uD83D\uDE80",
+      "lessons": [
+        {
+          "id": 1,
+          "title": "Criando uma Minimal API",
+          "content": "## Minimal APIs\n\nForma mais simples de criar APIs no .NET.\n\n\u0060\u0060\u0060csharp\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\n\napp.MapGet(\u0022/produtos\u0022, () =\u003E \u0022Lista de produtos\u0022);\napp.MapGet(\u0022/produtos/{id}\u0022, (int id) =\u003E $\u0022Produto {id}\u0022);\napp.MapPost(\u0022/produtos\u0022, () =\u003E \u0022Produto criado\u0022);\n\napp.Run();\n\u0060\u0060\u0060",
+          "codeExample": "using Microsoft.AspNetCore.Builder;\nusing Microsoft.AspNetCore.Http;\n\nvar builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddEndpointsApiExplorer();\nbuilder.Services.AddSwaggerGen();\n\nvar app = builder.Build();\napp.UseSwagger();\napp.UseSwaggerUI();\n\n// GET /produtos\napp.MapGet(\u0022/produtos\u0022, () =\u003E\n{\n    var produtos = new[]\n    {\n        new { Id = 1, Nome = \u0022Arroz\u0022 },\n        new { Id = 2, Nome = \u0022Feij\u00E3o\u0022 }\n    };\n    return Results.Ok(produtos);\n});\n\n// POST /produtos\napp.MapPost(\u0022/produtos\u0022, (ProdutoRequest req) =\u003E\n{\n    return Results.Created(\u0022/produtos/1\u0022, new { Id = 1, req.Nome });\n});\n\napp.Run();\n\npublic record ProdutoRequest(string Nome, decimal Preco);",
+          "codeLanguage": "csharp",
+          "order": 1
+        },
+        {
+          "id": 2,
+          "title": "Deploy em Nuvem",
+          "content": "## Deploy\n\n### Op\u00E7\u00F5es Gratuitas\n- **Azure Functions**: 1M req/m\u00EAs\n- **Railway**: $5 cr\u00E9ditos/m\u00EAs\n- **Render**: 750h/m\u00EAs\n\n### CI/CD com GitHub Actions\n\u0060\u0060\u0060yaml\nname: Deploy\non:\n  push:\n    branches: [main]\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-dotnet@v4\n      - run: dotnet build\n      - run: dotnet test\n      - run: dotnet publish -c Release\n\u0060\u0060\u0060",
+          "codeExample": "// Dockerfile para deploy\nFROM mcr.microsoft.com/dotnet/sdk:8.0 AS build\nWORKDIR /src\nCOPY . .\nRUN dotnet restore\nRUN dotnet publish -c Release -o /app/publish\n\nFROM mcr.microsoft.com/dotnet/aspnet:8.0\nWORKDIR /app\nCOPY --from=build /app/publish .\nEXPOSE 8080\nENTRYPOINT [\u0022dotnet\u0022, \u0022MinhaApi.dll\u0022]",
+          "codeLanguage": "dockerfile",
+          "order": 2
+        }
+      ],
+      "exercises": [
+        {
+          "id": 1,
+          "title": "Criar endpoint GET",
+          "description": "Crie uma Minimal API com um endpoint GET que retorna uma lista de produtos.",
+          "initialCode": "using Microsoft.AspNetCore.Builder;\nusing Microsoft.AspNetCore.Http;\n\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\n\n// Crie seu endpoint aqui\n\n\napp.Run();",
+          "expectedOutput": "GET /produtos -\u003E [{\u0022id\u0022:1,\u0022nome\u0022:\u0022Arroz\u0022}]",
+          "difficulty": 0,
+          "hints": [
+            "Use app.MapGet()",
+            "Retorne Results.Ok()"
+          ],
+          "solution": "app.MapGet(\u0022/produtos\u0022, () =\u003E\n{\n    var produtos = new[]\n    {\n        new { Id = 1, Nome = \u0022Arroz\u0022 },\n        new { Id = 2, Nome = \u0022Feij\u00E3o\u0022 }\n    };\n    return Results.Ok(produtos);\n});"
+        },
+        {
+          "id": 2,
+          "title": "Endpoint com valida\u00E7\u00E3o",
+          "description": "Crie um endpoint POST que valida os dados recebidos.",
+          "initialCode": "using Microsoft.AspNetCore.Builder;\nusing Microsoft.AspNetCore.Http;\n\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\n\n// Crie o endpoint POST com valida\u00E7\u00E3o\n\n\napp.Run();\n\npublic record ProdutoRequest(string Nome, decimal Preco);",
+          "expectedOutput": "POST /produtos (v\u00E1lido) -\u003E 201\r\nPOST /produtos (inv\u00E1lido) -\u003E 400",
+          "difficulty": 1,
+          "hints": [
+            "Use app.MapPost()",
+            "Valide e retorne BadRequest se inv\u00E1lido"
+          ],
+          "solution": "app.MapPost(\u0022/produtos\u0022, (ProdutoRequest req) =\u003E\n{\n    if (string.IsNullOrWhiteSpace(req.Nome))\n        return Results.BadRequest(\u0022Nome \u00E9 obrigat\u00F3rio\u0022);\n    \n    if (req.Preco \u003C= 0)\n        return Results.BadRequest(\u0022Pre\u00E7o deve ser maior que zero\u0022);\n    \n    return Results.Created(\u0022/produtos/1\u0022, new { Id = 1, req.Nome });\n});"
+        }
+      ],
+      "challenge": {
+        "id": 4,
+        "title": "Desafio Semana 4: API de Controle de Estoque",
+        "description": "Crie uma API RESTful completa com CRUD de produtos.",
+        "gitHubUrl": "https://github.com/kyo1506/fundamentos-csharp/tree/main/Semana-04/desafios-semanais",
+        "requirements": [
+          "Endpoints GET, POST, PUT, DELETE",
+          "Valida\u00E7\u00E3o de dados",
+          "Persist\u00EAncia em JSON ou mem\u00F3ria",
+          "Swagger/OpenAPI",
+          "Deploy em nuvem gratuita"
+        ]
+      }
+    }
+  ]
+}

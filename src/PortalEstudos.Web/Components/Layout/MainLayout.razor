@@ -1,0 +1,105 @@
+@inherits LayoutComponentBase
+@using MudBlazor
+@inject IJSRuntime JS
+
+<MudLayout>
+    <MudAppBar Elevation="3">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
+        <MudText Typo="Typo.h6" Class="ml-2">Portal de Estudos C#</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                       Color="Color.Inherit" OnClick="ToggleDarkMode" title="Alternar tema claro/escuro" />
+        <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small">
+            <MudIcon Icon="@Icons.Material.Filled.School" Class="mr-1" /> .NET 10
+        </MudChip>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="3" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Always">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">Menu</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Início</MudNavLink>
+            <MudNavLink Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+            <MudNavLink Href="weeks" Icon="@Icons.Material.Filled.DateRange">Semanas</MudNavLink>
+            <MudNavLink Href="https://github.com/kyo1506/fundamentos-csharp" Target="_blank" Icon="@Icons.Material.Filled.EmojiEvents">Desafios (GitHub)</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+<MudThemeProvider Theme="@EstudoTheme" IsDarkMode="@IsDarkMode" IsDarkModeChanged="OnDarkModeChanged" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@code {
+    private bool _drawerOpen = true;
+    private bool IsDarkMode = false;
+
+    private MudTheme EstudoTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#667eea",
+            Secondary = "#764ba2",
+            AppbarBackground = "#667eea",
+            Background = "#f5f6fa",
+            Surface = "#ffffff",
+        },
+        PaletteDark = new PaletteDark()
+        {
+            Primary = "#8b9cf7",
+            Secondary = "#9b6fc2",
+            AppbarBackground = "#1e1e2e",
+            Background = "#12121a",
+            Surface = "#1e1e2e",
+        }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var saved = await JS.InvokeAsync<string?>("localStorage.getItem", "theme-dark");
+            if (!string.IsNullOrEmpty(saved))
+            {
+                IsDarkMode = saved == "1";
+            }
+        }
+        catch
+        {
+            // localStorage indisponível (ex.: pré-render) — ignora
+        }
+    }
+
+    private async Task OnDarkModeChanged(bool value)
+    {
+        IsDarkMode = value;
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "theme-dark", value ? "1" : "0");
+        }
+        catch { }
+    }
+
+    private void ToggleDarkMode()
+    {
+        IsDarkMode = !IsDarkMode;
+        try
+        {
+            JS.InvokeVoidAsync("localStorage.setItem", "theme-dark", IsDarkMode ? "1" : "0");
+        }
+        catch { }
+    }
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}

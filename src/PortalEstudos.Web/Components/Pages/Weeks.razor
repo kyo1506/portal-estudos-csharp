@@ -1,0 +1,108 @@
+@page "/weeks"
+@using MudBlazor
+@inject ICatalogService CatalogService
+@inject IDashboardService DashboardService
+@inject IProgressService ProgressService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Semanas - Portal de Estudos C#</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">📅 Semanas do Curso</MudText>
+
+<!-- Barra de progresso geral -->
+<MudPaper Class="pa-4 mb-4" Elevation="2">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+        <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Progresso Geral</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">
+            @stats.CompletedLessons de @stats.TotalLessons lições • @stats.CompletedExercises de @stats.TotalExercises exercícios
+        </MudText>
+    </div>
+    <MudProgressLinear Color="Color.Primary" Value="@stats.ProgressPercentage" Rounded />
+</MudPaper>
+
+<MudGrid Spacing="4">
+    @foreach (var week in weeks)
+    {
+        var weekProgress = GetWeekProgress(week);
+        var completedLessons = week.Lessons.Count(l => userProgress.CompletedLessons.Contains(l.Id));
+        var completedExercises = week.Exercises.Count(e => userProgress.CompletedExercises.Contains(e.Id));
+        var weekChallengeDone = week.Challenge != null && userProgress.CompletedChallenges.Contains(week.Challenge.Id);
+        <MudItem xs="12" md="6" lg="4" Class="d-flex">
+            <MudCard Class="week-card-hover flex-fill" Style="cursor:pointer; width:100%;" onclick="@(() => NavigateToWeek(week.Id))">
+                <MudCardContent>
+                    <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+                        <MudPaper Width="56" Height="56" Class="d-flex align-center justify-center" Style="background: rgba(102,126,234,0.1); border-radius:14px;">
+                            <MudText Style="font-size:28px;">@week.Icon</MudText>
+                        </MudPaper>
+                        @if (IsWeekCompleted(week))
+                        {
+                            <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Size="Size.Small">
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Class="mr-1" /> Completa
+                            </MudChip>
+                        }
+                        else if (IsWeekInProgress(week))
+                        {
+                            <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled" Size="Size.Small">
+                                <MudIcon Icon="@Icons.Material.Filled.PlayCircle" Class="mr-1" /> Em progresso
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Color="Color.Default" Variant="Variant.Filled" Size="Size.Small">
+                                <MudIcon Icon="@Icons.Material.Filled.Circle" Class="mr-1" /> Não iniciada
+                            </MudChip>
+                        }
+                    </div>
+                    <MudText Typo="Typo.h6" Class="mt-3 font-weight-bold">Semana @week.Id</MudText>
+                    <MudText Typo="Typo.subtitle2" Class="primary-text">@week.Title</MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1" Style="min-height:3rem;">@week.Description</MudText>
+                    <MudProgressLinear Color="Color.Primary" Value="@((int)weekProgress)" Class="my-2" Rounded />
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                            <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Small" /> @completedLessons/@week.Lessons.Count lições
+                        </MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                            <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" /> @completedExercises/@week.Exercises.Count exercícios
+                        </MudText>
+                    </div>
+                    @if (week.Challenge != null)
+                    {
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2">
+                            <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Size="Size.Small" /> Desafio @(weekChallengeDone ? "concluído" : "disponível")
+                        </MudText>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+<style>
+    .week-card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .week-card-hover:hover { transform: translateY(-4px); box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.12); }
+    .primary-text { color: var(--mud-palette-primary); }
+</style>
+
+@code {
+    private List<Week> weeks = new();
+    private DashboardStats stats = new();
+    private UserProgress userProgress = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        userProgress = await ProgressService.LoadAsync();
+        weeks = CatalogService.GetAllWeeks().ToList();
+        stats = DashboardService.GetStats(userProgress);
+    }
+
+    private double GetWeekProgress(Week week) => DashboardService.GetWeekProgress(week, userProgress);
+
+    private bool IsWeekCompleted(Week week) => DashboardService.IsWeekCompleted(week, userProgress);
+
+    private bool IsWeekInProgress(Week week) => DashboardService.IsWeekInProgress(week, userProgress);
+
+    private void NavigateToWeek(int weekId)
+    {
+        NavigationManager.NavigateTo($"/week/{weekId}");
+    }
+}

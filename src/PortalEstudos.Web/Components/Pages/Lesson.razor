@@ -1,0 +1,210 @@
+@page "/week/{weekId}/lesson/{lessonId}"
+@using MudBlazor
+@inject ICatalogService CatalogService
+@inject IProgressService ProgressService
+@inject IMarkdownRenderer MarkdownRenderer
+@inject NavigationManager NavigationManager
+
+<PageTitle>@lesson?.Title - Portal de Estudos C#</PageTitle>
+
+@if (isLoading)
+{
+    <MudGrid Spacing="4">
+        <MudItem xs="12" lg="8">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudSkeleton SkeletonType="SkeletonType.Text" />
+                <MudSkeleton SkeletonType="SkeletonType.Text" />
+                <MudSkeleton SkeletonType="SkeletonType.Text" Width="60%" />
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" lg="4">
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+        </MudItem>
+    </MudGrid>
+}
+else if (week == null || lesson == null)
+{
+    <MudPaper Class="pa-8 text-center" Elevation="3">
+        <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
+        <MudText Typo="Typo.h5" Class="mb-2">Lição não encontrada</MudText>
+        <MudText Class="mud-text-secondary mb-4">A lição que você procura não existe.</MudText>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="/weeks" data-enhance-navigation="false">Voltar para Semanas</MudButton>
+    </MudPaper>
+}
+else
+{
+    <MudButton Color="Color.Default" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack" Href="@($"/week/{week?.Id}")" data-enhance-navigation="false" Class="mb-2">
+        Voltar para Semana @week?.Id
+    </MudButton>
+
+    <div class="breadcrumb-row mb-3">
+        <MudLink Href="/weeks" data-enhance-navigation="false">Semanas</MudLink>
+        <span class="breadcrumb-sep">/</span>
+        <MudLink Href="@($"/week/{week!.Id}")" data-enhance-navigation="false">Semana @week.Id</MudLink>
+        <span class="breadcrumb-sep">/</span>
+        <span class="mud-text-secondary">Lição @lesson!.Order</span>
+    </div>
+
+    <MudGrid Spacing="4">
+        <!-- Conteúdo da lição -->
+        <MudItem xs="12" lg="8">
+            <MudPaper Class="pa-4" Elevation="2">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+                    <MudText Typo="Typo.h4" Class="font-weight-bold">📖 @lesson.Title</MudText>
+                    @if (userProgress.CompletedLessons.Contains(lesson.Id))
+                    {
+                        <MudChip T="string" Color="Color.Success" Variant="Variant.Filled">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Class="mr-1" /> Concluída
+                        </MudChip>
+                    }
+                </div>
+                <MudDivider Class="mb-3" />
+                <div class="markdown-content">
+                    @((MarkupString)ConvertMarkdownToHtml(lesson.Content))
+                </div>
+            </MudPaper>
+
+            @if (!string.IsNullOrEmpty(lesson.CodeExample))
+            {
+                <MudExpansionPanel Class="mt-4">
+                    <TitleContent>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <MudIcon Icon="@Icons.Material.Filled.Code" Color="Color.Default" />
+                            <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Exemplo de Código (@(lesson!.CodeLanguage ?? "csharp"))</MudText>
+                        </div>
+                    </TitleContent>
+                    <ChildContent>
+                        <pre class="code-block">@lesson.CodeExample</pre>
+                    </ChildContent>
+                </MudExpansionPanel>
+            }
+        </MudItem>
+
+        <!-- Sidebar -->
+        <MudItem xs="12" lg="4">
+            <MudPaper Class="pa-3 mb-4" Elevation="2">
+                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2">
+                    <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-2" />Lições da Semana
+                </MudText>
+                <div class="lesson-list">
+                    @foreach (var l in week!.Lessons.OrderBy(l => l.Order))
+                    {
+                        var done = userProgress.CompletedLessons.Contains(l.Id);
+                        <a href="@($"/week/{week.Id}/lesson/{l.Id}")"
+                           class="lesson-list-item @(l.Id == lesson!.Id ? "active" : "")"
+                           data-enhance-navigation="false"
+                           style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.75rem; border-radius:0.5rem; text-decoration:none; color:inherit; @(l.Id == lesson.Id ? "background:rgba(102,126,234,0.12);" : "")">
+                            <MudIcon Icon="@(l.Id == lesson.Id ? Icons.Material.Filled.MenuBook : Icons.Material.Filled.BookmarkBorder)"
+                                     Color="@(l.Id == lesson.Id ? Color.Primary : Color.Default)" Size="Size.Small" />
+                            <MudText Typo="Typo.body2" Class="@(l.Id == lesson.Id ? "font-weight-bold" : "")">@l.Title</MudText>
+                            @if (done)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="ml-auto" Size="Size.Small" />
+                            }
+                        </a>
+                    }
+                </div>
+            </MudPaper>
+
+            <MudPaper Class="pa-3" Elevation="2">
+                @if (userProgress.CompletedLessons.Contains(lesson.Id))
+                {
+                    <MudButton Color="Color.Secondary" Variant="Variant.Outlined" FullWidth Class="mb-2" StartIcon="@Icons.Material.Filled.Refresh" OnClick="MarkAsIncomplete">
+                        Marcar como não concluída
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton Color="Color.Success" Variant="Variant.Filled" FullWidth Class="mb-2" StartIcon="@Icons.Material.Filled.CheckCircle" OnClick="MarkAsComplete">
+                        Marcar como concluída
+                    </MudButton>
+                }
+                <MudGrid Spacing="2">
+                    <MudItem xs="6">
+        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetPreviousLessonHref() == null)" StartIcon="@Icons.Material.Filled.ChevronLeft" Href="@GetPreviousLessonHref()" data-enhance-navigation="false" />
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetNextLessonHref() == null)" EndIcon="@Icons.Material.Filled.ChevronRight" Href="@GetNextLessonHref()" data-enhance-navigation="false" />
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+<style>
+    .markdown-content { line-height: 1.8; }
+    .markdown-content h2 { color: #764ba2; margin-top: 1.5rem; margin-bottom: 1rem; font-weight: 600; }
+    .markdown-content h3 { margin-top: 1.25rem; margin-bottom: 0.75rem; font-weight: 600; }
+    .markdown-content p { margin-bottom: 1rem; }
+    .markdown-content ul, .markdown-content ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    .breadcrumb-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; }
+    .breadcrumb-sep { color: var(--mud-palette-text-secondary, #6c757d); }
+</style>
+
+@code {
+    private bool isLoading = true;
+    private Week? week;
+    private LessonModel? lesson;
+    private UserProgress userProgress = new();
+
+    [Parameter]
+    public string? WeekId { get; set; }
+
+    [Parameter]
+    public string? LessonId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (int.TryParse(WeekId, out int weekId) && int.TryParse(LessonId, out int lessonId))
+        {
+            week = CatalogService.GetWeek(weekId);
+            lesson = CatalogService.GetLesson(weekId, lessonId);
+        }
+        userProgress = await ProgressService.LoadAsync();
+        isLoading = false;
+    }
+
+    private string ConvertMarkdownToHtml(string markdown) => MarkdownRenderer.ToHtml(markdown);
+
+    private string? GetPreviousLessonHref()
+    {
+        if (week == null || lesson == null) return null;
+        var orderedLessons = week.Lessons.OrderBy(l => l.Order).ToList();
+        var currentIndex = orderedLessons.FindIndex(l => l.Id == lesson.Id);
+        return currentIndex > 0 ? $"/week/{WeekId}/lesson/{orderedLessons[currentIndex - 1].Id}" : null;
+    }
+
+    private string? GetNextLessonHref()
+    {
+        if (week == null || lesson == null) return null;
+        var orderedLessons = week.Lessons.OrderBy(l => l.Order).ToList();
+        var currentIndex = orderedLessons.FindIndex(l => l.Id == lesson.Id);
+        return currentIndex < orderedLessons.Count - 1 ? $"/week/{WeekId}/lesson/{orderedLessons[currentIndex + 1].Id}" : null;
+    }
+
+    private async Task MarkAsComplete()
+    {
+        if (lesson != null)
+        {
+            await ProgressService.MarkLessonCompleteAsync(lesson.Id);
+            userProgress = await ProgressService.LoadAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task MarkAsIncomplete()
+    {
+        if (lesson != null)
+        {
+            await ProgressService.MarkLessonIncompleteAsync(lesson.Id);
+            userProgress = await ProgressService.LoadAsync();
+            StateHasChanged();
+        }
+    }
+
+    private void NavigateToWeek()
+    {
+        NavigationManager.NavigateTo($"/week/{WeekId}");
+    }
+}

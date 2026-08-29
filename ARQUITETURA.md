@@ -1,16 +1,48 @@
 # Arquitetura do Projeto de Estudos C#
 
-Este projeto está dividido em **dois repositórios** distintos:
+O projeto está dividido em **dois repositórios** distintos:
 
 ## 1. Portal de Estudos (este repositório)
 **URL:** https://github.com/kyo1506/portal-estudos-csharp
 
-Aplicação web Blazor Server que contém:
-- Teoria das 4 semanas
-- Exemplos práticos de código
-- Exercícios com editor integrado (verificação básica no navegador)
-- Dashboard de progresso
-- Links para os desafios
+Aplicação web Blazor Server organizada em **Clean Architecture** (solução `PortalEstudos.slnx`).
+
+### Estrutura em camadas
+
+```
+src/
+├── PortalEstudos.Domain/          # Entidades + enums (sem dependências externas)
+├── PortalEstudos.Application/     # Ports (interfaces) + casos de uso + DTOs
+├── PortalEstudos.Infrastructure/  # Adaptadores de infraestrutura
+└── PortalEstudos.Web/             # Blazor UI + composition root (Program.cs)
+tests/
+└── PortalEstudos.Tests/           # Testes unitários (xUnit)
+```
+
+Dependências (inversão de dependência): `Web → Application → Domain` e
+`Infrastructure → Application → Domain`. Nenhuma camada interna conhece as externas;
+o `Program.cs` da Web registra os adaptadores e serviços no contêiner de DI.
+
+### Camadas
+
+- **Domain** (`PortalEstudos.Domain`): entidades `Week`, `LessonModel`, `ExerciseModel`,
+  `Challenge`, `UserProgress` e o enum `ExerciseDifficulty`. Sem referências a outras camadas.
+- **Application** (`PortalEstudos.Application`): declara os *ports*
+  `IContentRepository`, `IProgressStore`, `IGitHubApi`, `IMarkdownRenderer` e implementa os
+  casos de uso `CatalogService` (consultas), `DashboardService` (estatísticas/progresso),
+  `ProgressService` (operações de progresso, com cache em memória), `ExerciseEvaluationService`
+  (verificação de código, lógica pura testável) e `ChallengeStatusService` (status de PR com cache).
+- **Infrastructure** (`PortalEstudos.Infrastructure`): adaptadores
+  `JsonContentRepository` (lê `Content/ContentSeed.json`, recurso embutido),
+  `LocalStorageProgressStore` (persistência via `localStorage`),
+  `GitHubApiClient` (API de PRs do GitHub) e `MarkdigMarkdownRenderer` (Markdown com cache).
+- **Web** (`PortalEstudos.Web`): páginas `.razor` finas (apresentação), layout, tema e o
+  composition root em `Program.cs` (DI, DataProtection, ResponseCompression, MudBlazor).
+
+### Conteúdo do curso
+O conteúdo das 4 semanas fica em `src/PortalEstudos.Infrastructure/Content/ContentSeed.json`
+(recurso embutido), carregado por `JsonContentRepository`. Separar dados de comportamento
+permite editar o conteúdo sem recompilar.
 
 ## 2. Repositório de Desafios (fundamentos-csharp)
 **URL:** https://github.com/kyo1506/fundamentos-csharp
@@ -28,23 +60,17 @@ Contém os desafios semanais que exigem **Pull Request para code review**:
 4. Mentor faz code review e aprova
 5. Merge confirma a conclusão do desafio
 
-## Convenções
-
-### Portal (Blazor)
-- Páginas em `Components/Pages/`
-- Modelos com sufixo `Model` para evitar conflito com nomes de arquivos `.razor`
-- Serviço `IContentService` fornece todo o conteúdo
-
-### Desafios (GitHub)
-- Branch protection em `main` (1 PR review obrigatório)
-- CI/CD via GitHub Actions
-- Código em C# console/.NET
-
 ## Como executar o Portal localmente
 
 ```bash
-cd PortalEstudos
-dotnet run
+dotnet restore PortalEstudos.slnx
+dotnet run --project src/PortalEstudos.Web/PortalEstudos.Web.csproj
 ```
 
-Acesse: http://localhost:5000
+Acesse: http://localhost:8080
+
+## Testes
+
+```bash
+dotnet test PortalEstudos.slnx
+```
