@@ -28,15 +28,15 @@ else if (exercise == null || week == null)
         <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
         <MudText Typo="Typo.h5" Class="mb-2">Exercício não encontrado</MudText>
         <MudText Class="mud-text-secondary mb-4">O exercício que você procura não existe.</MudText>
-        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="@($"/week/{week?.Id}")" data-enhance-navigation="false">Voltar para Semana</MudButton>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="@($"/week/{week?.Id}")">Voltar para Semana</MudButton>
     </MudPaper>
 }
 else
 {
     <div class="breadcrumb-row mb-3">
-        <MudLink Href="/weeks" data-enhance-navigation="false">Semanas</MudLink>
+        <MudLink Href="/weeks">Semanas</MudLink>
         <span class="breadcrumb-sep">/</span>
-        <MudLink Href="@($"/week/{week.Id}")" data-enhance-navigation="false">Semana @week.Id</MudLink>
+        <MudLink Href="@($"/week/{week.Id}")">Semana @week.Id</MudLink>
         <span class="breadcrumb-sep">/</span>
         <span class="mud-text-secondary">Exercício</span>
     </div>
@@ -219,6 +219,8 @@ else
     private int currentHintIndex = 0;
     private List<string> visibleHints = new();
     private bool showSolution = false;
+    private string? _loadedKey;
+    private int _loadToken;
 
     [Parameter]
     public string? WeekId { get; set; }
@@ -226,28 +228,59 @@ else
     [Parameter]
     public string? ExerciseId { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
+        var key = $"{WeekId}/{ExerciseId}";
+        var token = ++_loadToken;
+
+        // Navegação entre exercícios reutiliza a instância; o carregamento deve reagir
+        // à troca de parâmetros (OnParametersSetAsync), não apenas à inicialização.
+        if (_loadedKey == key)
+            return;
+
+        _loadedKey = key;
+        isLoading = true;
+        StateHasChanged();
+
+        week = null;
+        exercise = null;
         if (int.TryParse(WeekId, out int weekId) && int.TryParse(ExerciseId, out int exerciseId))
         {
             week = CatalogService.GetWeek(weekId);
             exercise = CatalogService.GetExercise(weekId, exerciseId);
             if (exercise != null)
             {
-                userCode = exercise.InitialCode;
+                ResetExerciseEditor(exercise);
             }
         }
         userProgress = await ProgressService.LoadAsync();
-        isLoading = false;
+
+        if (token == _loadToken)
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetExerciseEditor(ExerciseModel exercise)
+    {
+        userCode = exercise.InitialCode;
+        resultMessage = "";
+        userCodeOutput = "";
+        isCorrect = false;
+        isSubmitting = false;
+        submitStatus = "Executar e Verificar";
+        showHints = false;
+        currentHintIndex = 0;
+        visibleHints = new List<string>();
+        showSolution = false;
     }
 
     private void ResetCode()
     {
         if (exercise != null)
         {
-            userCode = exercise.InitialCode;
-            resultMessage = "";
-            userCodeOutput = "";
+            ResetExerciseEditor(exercise);
         }
     }
 

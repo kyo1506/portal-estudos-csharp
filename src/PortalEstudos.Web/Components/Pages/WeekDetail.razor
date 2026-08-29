@@ -28,7 +28,7 @@ else if (week == null)
         <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
         <MudText Typo="Typo.h5" Class="mb-2">Semana não encontrada</MudText>
         <MudText Class="mud-text-secondary mb-4">A semana que você procura não existe.</MudText>
-        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="/weeks" data-enhance-navigation="false">Voltar para Semanas</MudButton>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="/weeks">Voltar para Semanas</MudButton>
     </MudPaper>
 }
 else
@@ -60,7 +60,7 @@ else
         {
             var done = userProgress.CompletedLessons.Contains(lesson.Id);
             <MudItem xs="12" md="6" lg="4" Class="d-flex">
-                <a href="@($"/week/{week.Id}/lesson/{lesson.Id}")" class="week-card-link" data-enhance-navigation="false">
+                <a href="@($"/week/{week.Id}/lesson/{lesson.Id}")" class="week-card-link">
                     <MudCard Class="week-card-hover flex-fill" Style="width:100%;">
                         <MudCardContent>
                             <div style="display:flex; align-items:flex-start; justify-content:space-between;">
@@ -87,7 +87,7 @@ else
         {
             var done = userProgress.CompletedExercises.Contains(exercise.Id);
             <MudItem xs="12" md="6" lg="4" Class="d-flex">
-                <a href="@($"/week/{week.Id}/exercise/{exercise.Id}")" class="week-card-link" data-enhance-navigation="false">
+                <a href="@($"/week/{week.Id}/exercise/{exercise.Id}")" class="week-card-link">
                     <MudCard Class="week-card-hover flex-fill" Style="width:100%;">
                         <MudCardContent>
                             <div style="display:flex; align-items:flex-start; justify-content:space-between;">
@@ -177,12 +177,27 @@ else
     private int completedLessons = 0;
     private int completedExercises = 0;
     private IReadOnlyList<ChallengePrStatus> challengePrStatuses = new List<ChallengePrStatus>();
+    private string? _loadedKey;
+    private int _loadToken;
 
     [Parameter]
     public string? Id { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
+        var key = Id ?? "";
+        var token = ++_loadToken;
+
+        // Reage à troca do parâmetro de rota (OnParametersSetAsync), não apenas à inicialização.
+        if (_loadedKey == key)
+            return;
+
+        _loadedKey = key;
+        isLoading = true;
+        StateHasChanged();
+
+        week = null;
+        challengePrStatuses = new List<ChallengePrStatus>();
         if (int.TryParse(Id, out int weekId))
         {
             userProgress = await ProgressService.LoadAsync();
@@ -196,7 +211,12 @@ else
                 }
             }
         }
-        isLoading = false;
+
+        if (token == _loadToken)
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 
     private void CalculateProgress()

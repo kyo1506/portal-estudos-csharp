@@ -5,18 +5,21 @@
 <MudLayout>
     <MudAppBar Elevation="3">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
-        <MudText Typo="Typo.h6" Class="ml-2">Portal de Estudos C#</MudText>
+        <MudText Typo="Typo.h6" Class="ml-2">📚 Portal de Estudos C#</MudText>
         <MudSpacer />
         <MudIconButton Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                        Color="Color.Inherit" OnClick="ToggleDarkMode" title="Alternar tema claro/escuro" />
-        <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small">
+        <MudChip T="string" Color="Color.Inherit" Variant="Variant.Filled" Size="Size.Small" Class="appbar-chip">
             <MudIcon Icon="@Icons.Material.Filled.School" Class="mr-1" /> .NET 10
         </MudChip>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="3" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Always">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h6">Menu</MudText>
+            <div class="drawer-brand">
+                <MudText Typo="Typo.h6" Class="font-weight-bold">📚 Portal de Estudos</MudText>
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">C# e .NET · Jornada de 4 semanas</MudText>
+            </div>
         </MudDrawerHeader>
         <MudNavMenu>
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Início</MudNavLink>
@@ -31,6 +34,17 @@
             @Body
         </MudContainer>
     </MudMainContent>
+
+    <footer class="app-footer-wrap">
+        <div class="app-footer">
+            <span>📚 Portal de Estudos C# e .NET — aprenda na prática, no seu ritmo.</span>
+            <div class="app-footer-links">
+                <MudLink Href="weeks" Class="app-footer-link">Semanas</MudLink>
+                <MudLink Href="dashboard" Class="app-footer-link">Dashboard</MudLink>
+                <MudLink Href="https://github.com/kyo1506/fundamentos-csharp" Target="_blank" Class="app-footer-link">Desafios</MudLink>
+            </div>
+        </div>
+    </footer>
 </MudLayout>
 
 <MudThemeProvider Theme="@EstudoTheme" IsDarkMode="@IsDarkMode" IsDarkModeChanged="OnDarkModeChanged" />
