@@ -10,7 +10,18 @@
 
 <PageTitle>Semana @week?.Id - Portal de Estudos C#</PageTitle>
 
-@if (week == null)
+@if (isLoading)
+{
+    <MudGrid Spacing="4">
+        <MudItem xs="12">
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="120px" Class="mb-4" />
+        </MudItem>
+        <MudItem xs="12" md="6" lg="4"><MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="140px" /></MudItem>
+        <MudItem xs="12" md="6" lg="4"><MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="140px" /></MudItem>
+        <MudItem xs="12" md="6" lg="4"><MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="140px" /></MudItem>
+    </MudGrid>
+}
+else if (week == null)
 {
     <MudPaper Class="pa-8 text-center" Elevation="3">
         <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
@@ -42,7 +53,7 @@ else
     <MudText Typo="Typo.h5" Class="mb-3">
         <MudIcon Icon="@Icons.Material.Filled.MenuBook" Class="mr-2" /> Lições (@completedLessons/@week.Lessons.Count)
     </MudText>
-    <MudGrid Spacing="3" Class="mb-4">
+    <MudGrid Spacing="3" Class="mb-4" AlignItems="AlignItems.Stretch">
         @foreach (var lesson in week.Lessons.OrderBy(l => l.Order))
         {
             var done = userProgress.CompletedLessons.Contains(lesson.Id);
@@ -69,7 +80,7 @@ else
     <MudText Typo="Typo.h5" Class="mb-3">
         <MudIcon Icon="@Icons.Material.Filled.Code" Class="mr-2" /> Exercícios (@completedExercises/@week.Exercises.Count)
     </MudText>
-    <MudGrid Spacing="3" Class="mb-4">
+    <MudGrid Spacing="3" Class="mb-4" AlignItems="AlignItems.Stretch">
         @foreach (var exercise in week.Exercises)
         {
             var done = userProgress.CompletedExercises.Contains(exercise.Id);
@@ -154,6 +165,7 @@ else
 </style>
 
 @code {
+    private bool isLoading = true;
     private WeekModel? week;
     private UserProgress userProgress = new();
     private int weekProgress = 0;
@@ -179,6 +191,7 @@ else
                 }
             }
         }
+        isLoading = false;
     }
 
     private void CalculateProgress()

@@ -8,7 +8,20 @@
 
 <PageTitle>@exercise?.Title - Portal de Estudos C#</PageTitle>
 
-@if (exercise == null || week == null)
+@if (isLoading)
+{
+    <MudGrid Spacing="4">
+        <MudItem xs="12" lg="8">
+            <MudSkeleton SkeletonType="SkeletonType.Text" />
+            <MudSkeleton SkeletonType="SkeletonType.Text" Width="70%" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="260px" Class="mt-3" />
+        </MudItem>
+        <MudItem xs="12" lg="4">
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+        </MudItem>
+    </MudGrid>
+}
+else if (exercise == null || week == null)
 {
     <MudPaper Class="pa-8 text-center" Elevation="3">
         <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
@@ -54,7 +67,7 @@ else
                     <MudIconButton Icon="@Icons.Material.Filled.RestartAlt" Size="Size.Small" Color="Color.Default" OnClick="ResetCode" Title="Resetar código" />
                 </MudToolBar>
                 <div style="padding:0.75rem; background:#1e1e2e;">
-                    <MudTextField @bind-Value="@userCode" Lines="18" FullWidth Variant="Variant.Outlined"
+                    <MudTextField @bind-Value="@userCode" Lines="24" FullWidth Variant="Variant.Outlined"
                                   Style="font-family:'Cascadia Code','Fira Code',monospace; font-size:0.9rem; background:#1e1e2e; color:#d4d4d4;"
                                   Immediate="true" />
                 </div>
@@ -185,6 +198,7 @@ else
 }
 
 @code {
+    private bool isLoading = true;
     private WeekModel? week;
     private Models.ExerciseModel? exercise;
     private UserProgress userProgress = new();
@@ -217,6 +231,7 @@ else
             }
         }
         userProgress = await ProgressService.LoadAsync();
+        isLoading = false;
     }
 
     private Color GetDifficultyColor(ExerciseDifficulty difficulty) => difficulty switch
