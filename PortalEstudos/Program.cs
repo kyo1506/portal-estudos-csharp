@@ -3,6 +3,7 @@ using PortalEstudos.Services;
 using MudBlazor;
 using MudBlazor.Services;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,14 @@ builder.Services.AddResponseCompression(options =>
     options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
         new[] { "application/octet-stream", "text/css", "application/javascript" });
 });
+
+// Estabiliza o circuito SignalR no Railway: as chaves de DataProtection são efêmeras por padrão
+// e recriadas a cada novo container, o que invalida o token antiforgery da pré-renderização e
+// quebra toda a interatividade (OnClick). Persistir no /tmp mantém a chave alinhada ao cookie
+// durante a vida do container.
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/tmp/portal-estudos-keys"))
+    .SetApplicationName("portal-estudos-csharp");
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -45,3 +54,4 @@ app.MapRazorComponents<App>()
 // Bind to Railway's PORT (falls back to 8080 locally / other hosts).
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Run($"http://0.0.0.0:{port}");
+

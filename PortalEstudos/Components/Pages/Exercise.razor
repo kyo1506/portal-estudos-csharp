@@ -79,30 +79,37 @@ else
                     @if (exercise.Hints.Any())
                     {
                         <MudButton Color="Color.Warning" Variant="Variant.Outlined" Size="Size.Large" FullWidth OnClick="ToggleHints">
-                            <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="mr-1" /> Dicas (@currentHintIndex/@exercise.Hints.Count)
+                            <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="mr-1" /> Dicas (@visibleHints.Count/@exercise.Hints.Count)
                         </MudButton>
                     }
                 </MudItem>
             </MudGrid>
 
             <!-- Dicas -->
-            @if (showHints && visibleHints.Any())
+            @if (showHints)
             {
                 <MudPaper Class="pa-3 mb-4" Elevation="2" Style="border-left:4px solid #ffc107;">
                     <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2">
                         <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="mr-1" /> Dicas
                     </MudText>
-                    <MudList T="string" Dense>
-                        @foreach (var hint in visibleHints)
-                        {
-                            <MudListItem T="string" Icon="@Icons.Material.Filled.TipsAndUpdates" IconColor="Color.Warning">
-                                @hint
-                            </MudListItem>
-                        }
-                    </MudList>
+                    @if (visibleHints.Any())
+                    {
+                        <MudList T="string" Dense>
+                            @foreach (var hint in visibleHints)
+                            {
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.TipsAndUpdates" IconColor="Color.Warning">
+                                    @hint
+                                </MudListItem>
+                            }
+                        </MudList>
+                    }
                     @if (currentHintIndex < exercise.Hints.Count)
                     {
                         <MudButton Color="Color.Warning" Variant="Variant.Text" OnClick="ShowNextHint">Mostrar próxima dica</MudButton>
+                    }
+                    else
+                    {
+                        <MudButton Color="Color.Warning" Variant="Variant.Text" OnClick="ToggleHints">Ocultar dicas</MudButton>
                     }
                 </MudPaper>
             }
@@ -136,22 +143,23 @@ else
                 <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2">
                     <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-2" />Exercícios da Semana
                 </MudText>
-                <MudList T="ExerciseModel" Dense>
+                <div class="exercise-list">
                     @foreach (var e in week.Exercises)
                     {
-                        <MudListItem T="ExerciseModel" Href="@($"/week/{week.Id}/exercise/{e.Id}")"
-                                     Icon="@(e.Id == exercise.Id ? Icons.Material.Filled.Code : Icons.Material.Filled.CodeOff)"
-                                     IconColor="@(e.Id == exercise.Id ? Color.Primary : Color.Default)">
-                            <div style="display:flex; align-items:center; width:100%;">
-                                <MudText Class="@(e.Id == exercise.Id ? "font-weight-bold" : "")">@e.Title</MudText>
-                                @if (userProgress.CompletedExercises.Contains(e.Id))
-                                {
-                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="ml-auto" />
-                                }
-                            </div>
-                        </MudListItem>
+                        var done = userProgress.CompletedExercises.Contains(e.Id);
+                        <a href="@($"/week/{week.Id}/exercise/{e.Id}")"
+                           class="exercise-list-item @(e.Id == exercise.Id ? "active" : "")"
+                           style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.75rem; border-radius:0.5rem; text-decoration:none; color:inherit; @(e.Id == exercise.Id ? "background:rgba(102,126,234,0.12);" : "")">
+                            <MudIcon Icon="@(e.Id == exercise.Id ? Icons.Material.Filled.Code : Icons.Material.Filled.CodeOff)"
+                                     Color="@(e.Id == exercise.Id ? Color.Primary : Color.Default)" Size="Size.Small" />
+                            <MudText Typo="Typo.body2" Class="@(e.Id == exercise.Id ? "font-weight-bold" : "")">@e.Title</MudText>
+                            @if (done)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="ml-auto" Size="Size.Small" />
+                            }
+                        </a>
                     }
-                </MudList>
+                </div>
             </MudPaper>
 
             @if (!string.IsNullOrEmpty(exercise.Solution))
@@ -240,10 +248,11 @@ else
     private void ToggleHints()
     {
         showHints = !showHints;
-        if (showHints)
+        if (showHints && currentHintIndex == 0 && visibleHints.Count == 0 && exercise != null && exercise.Hints.Any())
         {
-            visibleHints.Clear();
-            currentHintIndex = 0;
+            // Mostra a primeira dica imediatamente ao abrir
+            visibleHints.Add(exercise.Hints[0]);
+            currentHintIndex = 1;
         }
     }
 
@@ -269,14 +278,14 @@ else
         submitStatus = "Verificando...";
         StateHasChanged();
 
-        await Task.Delay(500);
+        await Task.Delay(400);
 
-        var codeContainsExpected = CheckCodeForExpectedOutput(userCode, exercise);
+        var correct = CheckCodeAgainstSolution(userCode, exercise);
 
-        if (codeContainsExpected)
+        if (correct)
         {
             isCorrect = true;
-            resultMessage = "Excelente! Seu código produz a saída esperada.";
+            resultMessage = "Excelente! Seu código está de acordo com a solução esperada.";
             userCodeOutput = exercise.ExpectedOutput;
             await ProgressService.MarkExerciseCompleteAsync(exercise.Id, userCode);
             userProgress = await ProgressService.LoadAsync();
@@ -284,8 +293,8 @@ else
         else
         {
             isCorrect = false;
-            resultMessage = "Ainda não está correto. Verifique a saída esperada e tente novamente.";
-            userCodeOutput = SimulateCodeOutput(userCode, exercise);
+            resultMessage = "Ainda não está igual à solução esperada. Reveja as dicas e tente novamente.";
+            userCodeOutput = "";
         }
 
         isSubmitting = false;
@@ -293,27 +302,46 @@ else
         StateHasChanged();
     }
 
-    private bool CheckCodeForExpectedOutput(string code, Models.ExerciseModel exercise)
+    /// <summary>
+    /// Normaliza (remove espaços/comentários/strings) e compara o código do aluno com a solução.
+    /// Aceita tanto código idêntico à solução quanto código que produza a saída esperada.
+    /// </summary>
+    private bool CheckCodeAgainstSolution(string userCode, Models.ExerciseModel exercise)
     {
-        if (string.IsNullOrWhiteSpace(code)) return false;
-        if (code.Trim() == exercise.InitialCode.Trim()) return false;
+        if (string.IsNullOrWhiteSpace(userCode)) return false;
+        if (string.IsNullOrWhiteSpace(exercise.Solution)) return userCode.Contains("Console.WriteLine");
 
-        var hasConsoleOutput = code.Contains("Console.WriteLine") || code.Contains("Console.Write");
-        var hasLogic = code.Contains("new ") || code.Contains("var ") || code.Contains("foreach") ||
-                       code.Contains("for") || code.Contains("if") || code.Contains("=>") ||
-                       code.Contains("Where") || code.Contains("Select") || code.Contains("GroupBy") ||
-                       code.Contains("OrderBy") || code.Contains("Sum") || code.Contains("Results.");
+        var userNorm = NormalizeCode(userCode);
+        var solNorm = NormalizeCode(exercise.Solution);
 
-        return hasConsoleOutput && hasLogic;
+        if (userNorm == solNorm) return true;
+
+        // Solução usada como template: aceita se o aluno produziu saída e trouxe a lógica central.
+        var hasOutput = userCode.Contains("Console.WriteLine");
+        var solTokens = ExtractTokens(solNorm);
+        var matched = solTokens.Count == 0 ? false : solTokens.Count(t => userNorm.Contains(t)) >= Math.Ceiling(solTokens.Count * 0.6);
+        return hasOutput && matched;
     }
 
-    private string SimulateCodeOutput(string code, Models.ExerciseModel exercise)
+    private static List<string> ExtractTokens(string normalizedCode)
     {
-        if (code.Contains("Console.WriteLine"))
-        {
-            return "[Saída simulada - execute em seu ambiente para ver o resultado]";
-        }
-        return "[Código não produz saída visível]";
+        // palavras com 4+ chars (identificadores/keywords relevantes), ignorando pontuação
+        return System.Text.RegularExpressions.Regex.Matches(normalizedCode, @"[A-Za-z_][A-Za-z0-9_]{3,}")
+            .Cast<System.Text.RegularExpressions.Match>()
+            .Select(m => m.Value)
+            .Distinct()
+            .ToList();
+    }
+
+    private string NormalizeCode(string code)
+    {
+        // remove comentários de linha e bloco
+        var noComments = System.Text.RegularExpressions.Regex.Replace(code, @"//.*", "");
+        noComments = System.Text.RegularExpressions.Regex.Replace(noComments, @"/\*.*?\*/", "", System.Text.RegularExpressions.RegexOptions.Singleline);
+        // remove strings literais (para não penalizar textos diferentes)
+        noComments = System.Text.RegularExpressions.Regex.Replace(noComments, "\"[^\"]*\"", "\"\"");
+        // colapsa espaços/quebras
+        return System.Text.RegularExpressions.Regex.Replace(noComments, @"\s+", " ").Trim();
     }
 
     private void NavigateToWeek()

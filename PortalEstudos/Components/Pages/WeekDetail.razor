@@ -2,6 +2,7 @@
 @using PortalEstudos.Models
 @using PortalEstudos.Services
 @using MudBlazor
+@using Markdig
 @inject IContentService ContentService
 @inject IProgressService ProgressService
 @inject IGitHubService GitHubService
@@ -98,11 +99,11 @@ else
                 <div style="flex:1; min-width:280px;">
                     <MudText Typo="Typo.h6" Class="font-weight-bold mb-1">@week.Challenge.Title</MudText>
                     <MudText Class="mud-text-secondary mb-2">@week.Challenge.Description</MudText>
-                    <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Requisitos (clique para ver no GitHub):</MudText>
+                    <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Requisitos:</MudText>
                     <MudList T="string" Dense>
                         @foreach (var req in week.Challenge.Requirements)
                         {
-                            <MudListItem T="string" Href="@week.Challenge.GitHubUrl" Target="_blank" Icon="@Icons.Material.Filled.Check" IconColor="Color.Secondary">@req</MudListItem>
+                            <MudListItem T="string" Icon="@Icons.Material.Filled.Check" IconColor="Color.Secondary">@req</MudListItem>
                         }
                     </MudList>
                 </div>
@@ -191,8 +192,13 @@ else
     private string GetLessonPreview(LessonModel lesson)
     {
         if (string.IsNullOrEmpty(lesson.Content)) return string.Empty;
-        var preview = lesson.Content.Replace("\r\n", " ").Replace("\n", " ");
-        return preview.Length > 100 ? preview[..100] + "..." : preview;
+        // Extrai o primeiro parágrafo de texto real (sem headers/code) usando Markdig
+        var plain = Markdown.ToPlainText(lesson.Content).Replace("\r\n", " ").Replace("\n", " ").Trim();
+        // Remove sobras de headers digitados colados (ex.: "## X ### Y")
+        plain = System.Text.RegularExpressions.Regex.Replace(plain, @"#+\s*", "");
+        if (plain.Length > 110)
+            plain = plain[..110].Trim() + "...";
+        return plain;
     }
 
     private Color GetDifficultyColor(ExerciseDifficulty difficulty) => difficulty switch
