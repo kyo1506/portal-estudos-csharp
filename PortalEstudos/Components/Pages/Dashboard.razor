@@ -1,0 +1,212 @@
+@page "/dashboard"
+@using PortalEstudos.Models
+@using PortalEstudos.Services
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@inject IContentService ContentService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Dashboard - Portal de Estudos C#</PageTitle>
+
+<div class="container-fluid py-4">
+    <!-- Welcome Message -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="mb-1">👋 Bem-vindo de volta!</h2>
+                            <p class="mb-0 opacity-75">Continue sua jornada de aprendizado em C# e .NET. Você está indo muito bem!</p>
+                        </div>
+                        <div class="progress-ring d-none d-md-flex align-items-center justify-content-center">
+                            <svg width="120" height="120" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8" />
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="white" stroke-width="8"
+                                        stroke-dasharray="339.292" stroke-dashoffset="@(339.292 - (339.292 * stats.ProgressPercentage / 100))"
+                                        stroke-linecap="round" transform="rotate(-90 60 60)" />
+                                <text x="60" y="55" text-anchor="middle" fill="white" font-size="24" font-weight="bold">@stats.ProgressPercentage%</text>
+                                <text x="60" y="75" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11">completo</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 fw-semibold">Progresso Geral</h6>
+                        <span class="text-muted small">@stats.CompletedLessons de @stats.TotalLessons lições • @stats.CompletedExercises de @stats.TotalExercises exercícios</span>
+                    </div>
+                    <div class="progress" style="height: 12px; border-radius: 6px;">
+                        <div class="progress-bar" role="progressbar"
+                             style="width: @stats.ProgressPercentage%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 6px;"
+                             aria-valuenow="@stats.ProgressPercentage" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 stat-card">
+                <div class="card-body text-center p-3">
+                    <div class="stat-icon mb-2" style="width: 48px; height: 48px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                        <i class="bi bi-book-fill" style="font-size: 24px; color: #667eea;"></i>
+                    </div>
+                    <h3 class="mb-1 fw-bold">@stats.CompletedLessons</h3>
+                    <p class="text-muted mb-0 small">Lições Concluídas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 stat-card">
+                <div class="card-body text-center p-3">
+                    <div class="stat-icon mb-2" style="width: 48px; height: 48px; background: rgba(40, 167, 69, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                        <i class="bi bi-code-square" style="font-size: 24px; color: #28a745;"></i>
+                    </div>
+                    <h3 class="mb-1 fw-bold">@stats.CompletedExercises</h3>
+                    <p class="text-muted mb-0 small">Exercícios Feitos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 stat-card">
+                <div class="card-body text-center p-3">
+                    <div class="stat-icon mb-2" style="width: 48px; height: 48px; background: rgba(220, 53, 69, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                        <i class="bi bi-trophy-fill" style="font-size: 24px; color: #dc3545;"></i>
+                    </div>
+                    <h3 class="mb-1 fw-bold">@stats.CompletedChallenges</h3>
+                    <p class="text-muted mb-0 small">Desafios Completos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 stat-card">
+                <div class="card-body text-center p-3">
+                    <div class="stat-icon mb-2" style="width: 48px; height: 48px; background: rgba(255, 193, 7, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                        <i class="bi bi-fire" style="font-size: 24px; color: #ffc107;"></i>
+                    </div>
+                    <h3 class="mb-1 fw-bold">@stats.CurrentStreak</h3>
+                    <p class="text-muted mb-0 small">Dias Seguidos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WeekModel Cards Grid -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h5 class="fw-semibold mb-3">📅 Semanas do Curso</h5>
+        </div>
+    </div>
+    <div class="row">
+        @foreach (var week in weeks)
+        {
+            <div class="col-12 col-md-6 col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm week-card h-100" @onclick="() => NavigateToWeek(week.Id)">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div class="week-icon" style="width: 56px; height: 56px; background: rgba(102, 126, 234, 0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                                <span style="font-size: 28px;">@week.Icon</span>
+                            </div>
+                            @if (IsWeekCompleted(week))
+                            {
+                                <span class="badge bg-success rounded-pill">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Completa
+                                </span>
+                            }
+                            else if (IsWeekInProgress(week))
+                            {
+                                <span class="badge bg-warning text-dark rounded-pill">
+                                    <i class="bi bi-play-circle-fill me-1"></i>Em progresso
+                                </span>
+                            }
+                        </div>
+                        <h5 class="card-title fw-semibold mb-2">Semana @week.Id</h5>
+                        <h6 class="card-subtitle mb-2 text-primary">@week.Title</h6>
+                        <p class="card-text text-muted small mb-3">@week.Description</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="bi bi-book me-1"></i>@week.Lessons.Count lições
+                            </small>
+                            <small class="text-muted">
+                                <i class="bi bi-code-square me-1"></i>@week.Exercises.Count exercícios
+                            </small>
+                        </div>
+                        @if (week.Challenge != null)
+                        {
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-trophy me-1"></i>Desafio disponível
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+    }
+    .week-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+    }
+    .week-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12) !important;
+    }
+</style>
+
+@code {
+    private List<WeekModel> weeks = new();
+    private DashboardStats stats = new();
+    private UserProgress userProgress = new();
+
+    protected override void OnInitialized()
+    {
+        weeks = ContentService.GetAllWeeks();
+        stats = ContentService.GetDashboardStats(userProgress);
+    }
+
+    private bool IsWeekCompleted(WeekModel week)
+    {
+        var allLessonsCompleted = week.Lessons.All(l => userProgress.CompletedLessons.Contains(l.Id));
+        var allExercisesCompleted = week.Exercises.All(e => userProgress.CompletedExercises.Contains(e.Id));
+        var challengeCompleted = week.Challenge == null || userProgress.CompletedChallenges.Contains(week.Challenge.Id);
+
+        return allLessonsCompleted && allExercisesCompleted && challengeCompleted;
+    }
+
+    private bool IsWeekInProgress(WeekModel week)
+    {
+        var hasStartedLessonModel = week.Lessons.Any(l => userProgress.CompletedLessons.Contains(l.Id));
+        var hasStartedExerciseModel = week.Exercises.Any(e => userProgress.CompletedExercises.Contains(e.Id));
+        var hasStartedChallenge = week.Challenge != null && userProgress.CompletedChallenges.Contains(week.Challenge.Id);
+
+        return hasStartedLessonModel || hasStartedExerciseModel || hasStartedChallenge;
+    }
+
+    private void NavigateToWeek(int weekId)
+    {
+        NavigationManager.NavigateTo($"/week/{weekId}");
+    }
+}

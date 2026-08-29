@@ -1,0 +1,325 @@
+@page "/week/{weekId}/lesson/{lessonId}"
+@using PortalEstudos.Models
+@using PortalEstudos.Services
+@inject IContentService ContentService
+@inject NavigationManager NavigationManager
+
+<PageTitle>@lesson?.Title - Portal de Estudos C#</PageTitle>
+
+@if (lesson == null || week == null)
+{
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-5">
+                        <div style="font-size: 4rem;" class="mb-3">🔍</div>
+                        <h4>Lição não encontrada</h4>
+                        <p class="text-muted">A lição que você está procurando não existe.</p>
+                        <button class="btn btn-primary" @onclick="NavigateToWeek">
+                            <i class="bi bi-arrow-left me-1"></i>Voltar para Semana
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid py-4">
+        <!-- Breadcrumb & Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="card-body text-white p-4">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-2" style="--bs-breadcrumb-divider: '>';">
+                                <li class="breadcrumb-item">
+                                    <a href="/weeks" class="text-white opacity-75">Semanas</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <a href="/week/@week.Id" class="text-white opacity-75">Semana @week.Id</a>
+                                </li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">Lição @lesson.Order</li>
+                            </ol>
+                        </nav>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h2 class="mb-1">📖 @lesson.Title</h2>
+                                <p class="mb-0 opacity-75">@week.Title</p>
+                            </div>
+                            @if (userProgress.CompletedLessons.Contains(lesson.Id))
+                            {
+                                <span class="badge bg-success rounded-pill fs-6">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Concluída
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- LessonModel Content -->
+            <div class="col-12 col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="lesson-content">
+                            @((MarkupString)ConvertMarkdownToHtml(lesson.Content))
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Code Example Section -->
+                @if (!string.IsNullOrEmpty(lesson.CodeExample))
+                {
+                    <div class="card border-0 shadow-sm mt-4">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="bi bi-code-slash me-2"></i>Exemplo de Código
+                            </span>
+                            <span class="badge bg-secondary">@(lesson.CodeLanguage ?? "csharp")</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <pre class="m-0 p-3" style="background-color: #1e1e1e; color: #d4d4d4; border-radius: 0 0 6px 6px; overflow-x: auto;"><code>@lesson.CodeExample</code></pre>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-12 col-lg-4 mb-4">
+                <!-- LessonModel Navigation -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0 fw-semibold">
+                            <i class="bi bi-list-ol me-2"></i>Lições da Semana
+                        </h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        @foreach (var l in week.Lessons.OrderBy(l => l.Order))
+                        {
+                            <a href="/week/@week.Id/lesson/@l.Id"
+                               class="list-group-item list-group-item-action @(l.Id == lesson.Id ? "active" : "") d-flex align-items-center">
+                                <span class="badge @(l.Id == lesson.Id ? "bg-light text-primary" : "bg-primary") rounded-circle me-2" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">@l.Order</span>
+                                <span class="small">@l.Title</span>
+                                @if (userProgress.CompletedLessons.Contains(l.Id))
+                                {
+                                    <i class="bi bi-check-circle-fill text-success ms-auto"></i>
+                                }
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        @if (userProgress.CompletedLessons.Contains(lesson.Id))
+                        {
+                            <button class="btn btn-outline-secondary w-100 mb-2" @onclick="MarkAsIncomplete">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Marcar como não concluída
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-success w-100 mb-2" @onclick="MarkAsComplete">
+                                <i class="bi bi-check-circle me-1"></i>Marcar como concluída
+                            </button>
+                        }
+
+                        <div class="d-flex gap-2">
+                            @if (GetPreviousLessonId() != null)
+                            {
+                                <button class="btn btn-outline-primary flex-fill" @onclick="NavigateToPreviousLesson">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                            }
+                            @if (GetNextLessonId() != null)
+                            {
+                                <button class="btn btn-outline-primary flex-fill" @onclick="NavigateToNextLesson">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .lesson-content {
+        line-height: 1.8;
+        color: #333;
+    }
+    .lesson-content h2 {
+        color: #764ba2;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    .lesson-content h3 {
+        color: #333;
+        margin-top: 1.25rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+    .lesson-content p {
+        margin-bottom: 1rem;
+    }
+    .lesson-content ul, .lesson-content ol {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+    }
+    .lesson-content li {
+        margin-bottom: 0.25rem;
+    }
+    .lesson-content pre {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        border-radius: 6px;
+        padding: 1rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+    }
+    .lesson-content code {
+        font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+        font-size: 0.9rem;
+    }
+    .lesson-content p code {
+        background-color: #f0f0f0;
+        color: #d63384;
+        padding: 0.15rem 0.35rem;
+        border-radius: 3px;
+        font-size: 0.85em;
+    }
+    .lesson-content strong {
+        color: #333;
+    }
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255,255,255,0.5);
+    }
+</style>
+
+@code {
+    private WeekModel? week;
+    private Models.LessonModel? lesson;
+    private UserProgress userProgress = new();
+
+    [Parameter]
+    public string? WeekId { get; set; }
+
+    [Parameter]
+    public string? LessonId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (int.TryParse(WeekId, out int weekId) && int.TryParse(LessonId, out int lessonId))
+        {
+            week = ContentService.GetWeek(weekId);
+            lesson = ContentService.GetLesson(weekId, lessonId);
+        }
+    }
+
+    private string ConvertMarkdownToHtml(string markdown)
+    {
+        if (string.IsNullOrEmpty(markdown)) return string.Empty;
+
+        // Escape HTML first
+        var html = System.Net.WebUtility.HtmlEncode(markdown);
+
+        // Convert code blocks (```language ... ```)
+        html = System.Text.RegularExpressions.Regex.Replace(html,
+            @"```(\w*)\r?\n(.*?)```",
+            "<pre><code class=\"language-$1\">$2</code></pre>",
+            System.Text.RegularExpressions.RegexOptions.Singleline);
+
+        // Convert inline code (`...`)
+        html = System.Text.RegularExpressions.Regex.Replace(html,
+            @"`([^`]+)`",
+            "<code>$1</code>");
+
+        // Convert headers (## ...)
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"^## (.+)$", "<h2>$1</h2>", System.Text.RegularExpressions.RegexOptions.Multiline);
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"^### (.+)$", "<h3>$1</h3>", System.Text.RegularExpressions.RegexOptions.Multiline);
+
+        // Convert bold (**...**)
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+
+        // Convert line breaks
+        html = html.Replace("\r\n", "\n").Replace("\n\n", "</p><p>").Replace("\n", "<br/>");
+
+        // Wrap in paragraphs
+        html = $"<p>{html}</p>";
+
+        // Clean up empty paragraphs
+        html = html.Replace("<p></p>", "");
+        html = html.Replace("<p><h2>", "<h2>").Replace("</h2></p>", "</h2>");
+        html = html.Replace("<p><h3>", "<h3>").Replace("</h3></p>", "</h3>");
+        html = html.Replace("<p><pre>", "<pre>").Replace("</pre></p>", "</pre>");
+
+        return html;
+    }
+
+    private int? GetPreviousLessonId()
+    {
+        if (week == null || lesson == null) return null;
+        var orderedLessons = week.Lessons.OrderBy(l => l.Order).ToList();
+        var currentIndex = orderedLessons.FindIndex(l => l.Id == lesson.Id);
+        return currentIndex > 0 ? orderedLessons[currentIndex - 1].Id : null;
+    }
+
+    private int? GetNextLessonId()
+    {
+        if (week == null || lesson == null) return null;
+        var orderedLessons = week.Lessons.OrderBy(l => l.Order).ToList();
+        var currentIndex = orderedLessons.FindIndex(l => l.Id == lesson.Id);
+        return currentIndex < orderedLessons.Count - 1 ? orderedLessons[currentIndex + 1].Id : null;
+    }
+
+    private void MarkAsComplete()
+    {
+        if (lesson != null)
+        {
+            userProgress.CompletedLessons.Add(lesson.Id);
+            userProgress.LastActivity = DateTime.Now;
+            StateHasChanged();
+        }
+    }
+
+    private void MarkAsIncomplete()
+    {
+        if (lesson != null)
+        {
+            userProgress.CompletedLessons.Remove(lesson.Id);
+            StateHasChanged();
+        }
+    }
+
+    private void NavigateToWeek()
+    {
+        NavigationManager.NavigateTo($"/week/{WeekId}");
+    }
+
+    private void NavigateToPreviousLesson()
+    {
+        var prevId = GetPreviousLessonId();
+        if (prevId != null)
+        {
+            NavigationManager.NavigateTo($"/week/{WeekId}/lesson/{prevId}");
+        }
+    }
+
+    private void NavigateToNextLesson()
+    {
+        var nextId = GetNextLessonId();
+        if (nextId != null)
+        {
+            NavigationManager.NavigateTo($"/week/{WeekId}/lesson/{nextId}");
+        }
+    }
+}

@@ -1,0 +1,35 @@
+@page "/"
+@using Microsoft.AspNetCore.Components.Web
+@inject NavigationManager NavigationManager
+
+<PageTitle>Portal de Estudos - C# e .NET</PageTitle>
+
+<div class="container-fluid py-5">
+    <div class="row align-items-center min-vh-75">
+        <div class="col-12 col-lg-6 mb-4">
+            <div class="display-4 fw-bold mb-3" style="color: #764ba2;">
+                🚀 Aprenda C# de verdade
+            </div>
+            <p class="lead text-muted mb-4">
+                Um portal de estudos interativo com teoria, exemplos práticos e exercícios
+                para dominar os fundamentos do C# e .NET 10.
+            </p>
+            <div class="d-flex gap-3 flex-wrap">
+                <button class="btn btn-primary btn-lg" @onclick="NavigateToWeeks">
+                    <i class="bi bi-book me-2"></i>Começar a Estudar
+                </button>
+                <button class="btn btn-outline-secondary btn-lg" @onclick="NavigateToDashboard">
+                    <i class="bi bi-speedometer2 me-2"></i>Ver Progresso
+                </button>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6 text-center">
+            <div style="font-size: 8rem;">📚</div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void NavigateToWeeks() => NavigationManager.NavigateTo("/weeks");
+    private void NavigateToDashboard() => NavigationManager.NavigateTo("/dashboard");
+}

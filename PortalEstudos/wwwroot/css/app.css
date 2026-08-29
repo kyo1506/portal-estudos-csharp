@@ -1,0 +1,139 @@
+/* Portal Estudos - Additional Styles */
+
+/* Layout improvements */
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+.sidebar {
+    background-image: linear-gradient(180deg, #1b6ec2 0%, #0d4f8a 100%);
+}
+
+.top-row {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: flex-end;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.content-body {
+    padding: 1.5rem;
+}
+
+/* Navigation improvements */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.nav-item a {
+    transition: color 0.2s ease;
+}
+
+/* Card styles */
+.portal-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.portal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress indicators */
+.progress-bar-custom {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar-custom .progress-bar {
+    background: linear-gradient(90deg, #1b6ec2, #28a745);
+    transition: width 0.5s ease;
+}
+
+/* Dashboard stats */
+.dashboard-stat {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-stat .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1b6ec2;
+}
+
+.dashboard-stat .stat-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Lesson content */
+.lesson-content {
+    line-height: 1.7;
+    color: #333;
+}
+
+.lesson-content pre {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    border-radius: 6px;
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+.lesson-content code {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9rem;
+}
+
+/* Exercise styles */
+.exercise-difficulty-easy { color: #28a745; }
+.exercise-difficulty-medium { color: #ffc107; }
+.exercise-difficulty-hard { color: #dc3545; }
+
+.challenge-card {
+    border-left: 4px solid #1b6ec2;
+    background-color: #f8f9fa;
+}
+
+/* Week icon */
+.week-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Counter page */
+.counter-display {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #1b6ec2;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.counter-btn {
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
+}

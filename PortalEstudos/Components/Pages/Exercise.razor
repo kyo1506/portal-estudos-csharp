@@ -1,0 +1,408 @@
+@page "/week/{weekId}/exercise/{exerciseId}"
+@using PortalEstudos.Models
+@using PortalEstudos.Services
+@inject IContentService ContentService
+@inject NavigationManager NavigationManager
+
+<PageTitle>@exercise?.Title - Portal de Estudos C#</PageTitle>
+
+@if (exercise == null || week == null)
+{
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-5">
+                        <div style="font-size: 4rem;" class="mb-3">🔍</div>
+                        <h4>Exercício não encontrado</h4>
+                        <p class="text-muted">O exercício que você está procurando não existe.</p>
+                        <button class="btn btn-primary" @onclick="NavigateToWeek">
+                            <i class="bi bi-arrow-left me-1"></i>Voltar para Semana
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid py-4">
+        <!-- Breadcrumb & Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="card-body text-white p-4">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-2" style="--bs-breadcrumb-divider: '>';">
+                                <li class="breadcrumb-item">
+                                    <a href="/weeks" class="text-white opacity-75">Semanas</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <a href="/week/@week.Id" class="text-white opacity-75">Semana @week.Id</a>
+                                </li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">Exercício</li>
+                            </ol>
+                        </nav>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h2 class="mb-1">💻 @exercise.Title</h2>
+                                <p class="mb-0 opacity-75">@week.Title</p>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge @GetDifficultyBadgeClass(exercise.Difficulty) rounded-pill fs-6">
+                                    @GetDifficultyText(exercise.Difficulty)
+                                </span>
+                                @if (userProgress.CompletedExercises.Contains(exercise.Id))
+                                {
+                                    <span class="badge bg-success rounded-pill fs-6">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Concluído
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- ExerciseModel Description & Code Editor -->
+            <div class="col-12 col-lg-8 mb-4">
+                <!-- Description -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0 fw-semibold">
+                            <i class="bi bi-file-text me-2"></i>Descrição
+                        </h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="mb-0" style="line-height: 1.7;">@exercise.Description</p>
+                    </div>
+                </div>
+
+                <!-- Code Editor -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="bi bi-code-slash me-2"></i>Editor de Código
+                        </span>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-secondary">C#</span>
+                            <button class="btn btn-sm btn-outline-light" @onclick="ResetCode" title="Resetar código">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <textarea @bind="userCode"
+                                  @bind:event="oninput"
+                                  class="form-control border-0"
+                                  style="min-height: 350px; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 0.9rem; resize: vertical; background-color: #1e1e1e; color: #d4d4d4; padding: 1rem;"
+                                  placeholder="Escreva seu código aqui..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-flex gap-2 mb-4">
+                    <button class="btn btn-success btn-lg flex-fill" @onclick="SubmitExercise" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-play-fill me-2"></i>
+                        }
+                        @submitStatus
+                    </button>
+                    @if (showHints && exercise.Hints.Any())
+                    {
+                        <button class="btn btn-outline-warning btn-lg" @onclick="ToggleHints">
+                            <i class="bi bi-lightbulb me-1"></i>Dicas (@currentHintIndex/@exercise.Hints.Count)
+                        </button>
+                    }
+                </div>
+
+                <!-- Hints Section -->
+                @if (showHints && visibleHints.Any())
+                {
+                    <div class="card border-0 shadow-sm mb-4" style="border-left: 4px solid #ffc107;">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0 fw-semibold">
+                                <i class="bi bi-lightbulb me-2"></i>Dicas
+                            </h6>
+                        </div>
+                        <div class="card-body p-3">
+                            @foreach (var hint in visibleHints)
+                            {
+                                <div class="d-flex align-items-start mb-2">
+                                    <span class="badge bg-warning text-dark rounded-circle me-2" style="min-width: 24px;">@(visibleHints.IndexOf(hint) + 1)</span>
+                                    <span class="small">@hint</span>
+                                </div>
+                            }
+                            @if (currentHintIndex < exercise.Hints.Count)
+                            {
+                                <button class="btn btn-sm btn-outline-warning mt-2" @onclick="ShowNextHint">
+                                    Mostrar próxima dica
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Result Section -->
+                @if (!string.IsNullOrEmpty(resultMessage))
+                {
+                    <div class="card border-0 shadow-sm mb-4 @(isCorrect ? "border-start border-4 border-success" : "border-start border-4 border-danger")">
+                        <div class="card-header @(isCorrect ? "bg-success text-white" : "bg-danger text-white")">
+                            <h6 class="mb-0 fw-semibold">
+                                <i class="bi @(isCorrect ? "bi-check-circle" : "bi-x-circle") me-2"></i>
+                                @(isCorrect ? "Correto!" : "Resultado")
+                            </h6>
+                        </div>
+                        <div class="card-body p-3">
+                            <p class="mb-2">@resultMessage</p>
+                            @if (!isCorrect && !string.IsNullOrEmpty(userCodeOutput))
+                            {
+                                <div class="mt-2">
+                                    <strong>Sua saída:</strong>
+                                    <pre class="mb-0 mt-1 p-2" style="background-color: #f8f9fa; border-radius: 4px;"><code>@userCodeOutput</code></pre>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-12 col-lg-4 mb-4">
+                <!-- Expected Output -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0 fw-semibold">
+                            <i class="bi bi-bullseye me-2"></i>Saída Esperada
+                        </h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <pre class="mb-0 p-2" style="background-color: #f8f9fa; border-radius: 4px; font-size: 0.85rem;"><code>@exercise.ExpectedOutput</code></pre>
+                    </div>
+                </div>
+
+                <!-- ExerciseModel Navigation -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0 fw-semibold">
+                            <i class="bi bi-list-ol me-2"></i>Exercícios da Semana
+                        </h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        @foreach (var e in week.Exercises)
+                        {
+                            <a href="/week/@week.Id/exercise/@e.Id"
+                               class="list-group-item list-group-item-action @(e.Id == exercise.Id ? "active" : "") d-flex align-items-center justify-content-between">
+                                <span class="small">@e.Title</span>
+                                @if (userProgress.CompletedExercises.Contains(e.Id))
+                                {
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                }
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <!-- Solution Toggle -->
+                @if (showSolution && !string.IsNullOrEmpty(exercise.Solution))
+                {
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-semibold">
+                                <i class="bi bi-key me-2"></i>Solução
+                            </h6>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="ToggleSolution">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <pre class="m-0 p-3" style="background-color: #1e1e1e; color: #d4d4d4; border-radius: 0 0 6px 6px; overflow-x: auto; font-size: 0.85rem;"><code>@exercise.Solution</code></pre>
+                        </div>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(exercise.Solution))
+                {
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-3 text-center">
+                            <button class="btn btn-outline-secondary" @onclick="ToggleSolution">
+                                <i class="bi bi-eye me-1"></i>Mostrar Solução
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255,255,255,0.5);
+    }
+    textarea:focus {
+        outline: none;
+        box-shadow: none !important;
+    }
+</style>
+
+@code {
+    private WeekModel? week;
+    private Models.ExerciseModel? exercise;
+    private UserProgress userProgress = new();
+    private string userCode = "";
+    private bool isSubmitting = false;
+    private bool isCorrect = false;
+    private string resultMessage = "";
+    private string userCodeOutput = "";
+    private string submitStatus = "Executar e Verificar";
+    private bool showHints = false;
+    private int currentHintIndex = 0;
+    private List<string> visibleHints = new();
+    private bool showSolution = false;
+
+    [Parameter]
+    public string? WeekId { get; set; }
+
+    [Parameter]
+    public string? ExerciseId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (int.TryParse(WeekId, out int weekId) && int.TryParse(ExerciseId, out int exerciseId))
+        {
+            week = ContentService.GetWeek(weekId);
+            exercise = ContentService.GetExercise(weekId, exerciseId);
+            if (exercise != null)
+            {
+                userCode = exercise.InitialCode;
+            }
+        }
+    }
+
+    private string GetDifficultyBadgeClass(ExerciseDifficulty difficulty) => difficulty switch
+    {
+        ExerciseDifficulty.Easy => "bg-success",
+        ExerciseDifficulty.Medium => "bg-warning text-dark",
+        ExerciseDifficulty.Hard => "bg-danger",
+        _ => "bg-secondary"
+    };
+
+    private string GetDifficultyText(ExerciseDifficulty difficulty) => difficulty switch
+    {
+        ExerciseDifficulty.Easy => "Fácil",
+        ExerciseDifficulty.Medium => "Médio",
+        ExerciseDifficulty.Hard => "Difícil",
+        _ => "Desconhecido"
+    };
+
+    private void ResetCode()
+    {
+        if (exercise != null)
+        {
+            userCode = exercise.InitialCode;
+            resultMessage = "";
+            userCodeOutput = "";
+        }
+    }
+
+    private void ToggleHints()
+    {
+        showHints = !showHints;
+        if (showHints)
+        {
+            visibleHints.Clear();
+            currentHintIndex = 0;
+        }
+    }
+
+    private void ShowNextHint()
+    {
+        if (exercise != null && currentHintIndex < exercise.Hints.Count)
+        {
+            visibleHints.Add(exercise.Hints[currentHintIndex]);
+            currentHintIndex++;
+        }
+    }
+
+    private void ToggleSolution()
+    {
+        showSolution = !showSolution;
+    }
+
+    private async Task SubmitExercise()
+    {
+        if (exercise == null) return;
+
+        isSubmitting = true;
+        submitStatus = "Verificating...";
+        StateHasChanged();
+
+        // Simulate code execution and validation
+        await Task.Delay(800);
+
+        // Simple validation - check if user code contains expected output patterns
+        var codeContainsExpected = CheckCodeForExpectedOutput(userCode, exercise);
+
+        if (codeContainsExpected)
+        {
+            isCorrect = true;
+            resultMessage = "🎉 Excelente! Seu código produz a saída esperada.";
+            userCodeOutput = exercise.ExpectedOutput;
+            userProgress.CompletedExercises.Add(exercise.Id);
+            userProgress.ExerciseAnswers[exercise.Id] = userCode;
+            userProgress.LastActivity = DateTime.Now;
+        }
+        else
+        {
+            isCorrect = false;
+            resultMessage = "❌ Ainda não está correto. Verifique a saída esperada e tente novamente.";
+            userCodeOutput = SimulateCodeOutput(userCode, exercise);
+        }
+
+        isSubmitting = false;
+        submitStatus = "Executar e Verificar";
+        StateHasChanged();
+    }
+
+    private bool CheckCodeForExpectedOutput(string code, Models.ExerciseModel exercise)
+    {
+        // Simple heuristic: check if the code has meaningful content beyond the initial template
+        if (string.IsNullOrWhiteSpace(code)) return false;
+
+        // Check if user has written more than just the initial code
+        if (code.Trim() == exercise.InitialCode.Trim()) return false;
+
+        // Check for common patterns that indicate a solution
+        var hasConsoleOutput = code.Contains("Console.WriteLine") || code.Contains("Console.Write");
+        var hasLogic = code.Contains("new ") || code.Contains("var ") || code.Contains("foreach") ||
+                       code.Contains("for") || code.Contains("if") || code.Contains("=>") ||
+                       code.Contains("Where") || code.Contains("Select") || code.Contains("GroupBy") ||
+                       code.Contains("OrderBy") || code.Contains("Sum") || code.Contains("MapGet") ||
+                       code.Contains("MapPost") || code.Contains("Results.");
+
+        return hasConsoleOutput && hasLogic;
+    }
+
+    private string SimulateCodeOutput(string code, Models.ExerciseModel exercise)
+    {
+        // Simulate what the code would output
+        if (code.Contains("Console.WriteLine"))
+        {
+            return "[Saída simulada - execute em seu ambiente para ver o resultado]";
+        }
+        return "[Código não produz saída visível]";
+    }
+
+    private void NavigateToWeek()
+    {
+        NavigationManager.NavigateTo($"/week/{WeekId}");
+    }
+}
