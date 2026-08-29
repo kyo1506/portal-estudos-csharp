@@ -27,14 +27,14 @@ else if (exercise == null || week == null)
         <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
         <MudText Typo="Typo.h5" Class="mb-2">Exercício não encontrado</MudText>
         <MudText Class="mud-text-secondary mb-4">O exercício que você procura não existe.</MudText>
-        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="NavigateToWeek">Voltar para Semana</MudButton>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="@($"/week/{week?.Id}")" data-enhance-navigation="false">Voltar para Semana</MudButton>
     </MudPaper>
 }
 else
 {
     <MudBreadcrumbs Class="mb-3">
-        <MudLink Href="/weeks">Semanas</MudLink>
-        <MudLink Href="@($"/week/{week.Id}")">Semana @week.Id</MudLink>
+        <MudLink Href="/weeks" data-enhance-navigation="false">Semanas</MudLink>
+        <MudLink Href="@($"/week/{week.Id}")" data-enhance-navigation="false">Semana @week.Id</MudLink>
         <MudText>Exercício</MudText>
     </MudBreadcrumbs>
 

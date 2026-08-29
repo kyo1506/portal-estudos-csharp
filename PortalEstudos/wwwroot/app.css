@@ -29,6 +29,10 @@ html, body {
     height: 100%;
 }
 
+    .week-card-link .mud-card {
+        height: 100%;
+    }
+
 .lesson-list, .exercise-list {
     display: flex;
     flex-direction: column;

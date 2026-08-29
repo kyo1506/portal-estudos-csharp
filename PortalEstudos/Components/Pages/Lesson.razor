@@ -30,13 +30,13 @@ else if (week == null || lesson == null)
         <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
         <MudText Typo="Typo.h5" Class="mb-2">Lição não encontrada</MudText>
         <MudText Class="mud-text-secondary mb-4">A lição que você procura não existe.</MudText>
-        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="NavigateToWeek">Voltar para Semana</MudButton>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="/weeks" data-enhance-navigation="false">Voltar para Semanas</MudButton>
     </MudPaper>
 }
 else
 {
-    <MudButton Color="Color.Default" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="NavigateToWeek" Class="mb-2">
-        Voltar para Semana @week.Id
+    <MudButton Color="Color.Default" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack" Href="@($"/week/{week?.Id}")" data-enhance-navigation="false" Class="mb-2">
+        Voltar para Semana @week?.Id
     </MudButton>
 
     <MudBreadcrumbs Class="mb-3">
@@ -92,6 +92,7 @@ else
                         var done = userProgress.CompletedLessons.Contains(l.Id);
                         <a href="@($"/week/{week.Id}/lesson/{l.Id}")"
                            class="lesson-list-item @(l.Id == lesson.Id ? "active" : "")"
+                           data-enhance-navigation="false"
                            style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.75rem; border-radius:0.5rem; text-decoration:none; color:inherit; @(l.Id == lesson.Id ? "background:rgba(102,126,234,0.12);" : "")">
                             <MudIcon Icon="@(l.Id == lesson.Id ? Icons.Material.Filled.MenuBook : Icons.Material.Filled.BookmarkBorder)"
                                      Color="@(l.Id == lesson.Id ? Color.Primary : Color.Default)" Size="Size.Small" />
@@ -120,10 +121,10 @@ else
                 }
                 <MudGrid Spacing="2">
                     <MudItem xs="6">
-                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetPreviousLessonHref() == null)" StartIcon="@Icons.Material.Filled.ChevronLeft" Href="@GetPreviousLessonHref()" />
+        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetPreviousLessonHref() == null)" StartIcon="@Icons.Material.Filled.ChevronLeft" Href="@GetPreviousLessonHref()" data-enhance-navigation="false" />
                     </MudItem>
                     <MudItem xs="6">
-                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetNextLessonHref() == null)" EndIcon="@Icons.Material.Filled.ChevronRight" Href="@GetNextLessonHref()" />
+                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth Disabled="@(GetNextLessonHref() == null)" EndIcon="@Icons.Material.Filled.ChevronRight" Href="@GetNextLessonHref()" data-enhance-navigation="false" />
                     </MudItem>
                 </MudGrid>
             </MudPaper>
