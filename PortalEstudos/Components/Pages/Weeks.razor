@@ -2,6 +2,7 @@
 @using PortalEstudos.Models
 @using PortalEstudos.Services
 @inject IContentService ContentService
+@inject IProgressService ProgressService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Semanas - Portal de Estudos C#</PageTitle>
@@ -121,8 +122,9 @@
     private DashboardStats stats = new();
     private UserProgress userProgress = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        userProgress = await ProgressService.LoadAsync();
         weeks = ContentService.GetAllWeeks();
         stats = ContentService.GetDashboardStats(userProgress);
     }

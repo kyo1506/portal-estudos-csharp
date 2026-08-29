@@ -2,6 +2,8 @@
 @using PortalEstudos.Models
 @using PortalEstudos.Services
 @inject IContentService ContentService
+@inject IProgressService ProgressService
+@inject IGitHubService GitHubService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Semana @week?.Id - Portal de Estudos C#</PageTitle>
@@ -159,9 +161,32 @@ else
                                     <li class="text-muted small">@req</li>
                                 }
                             </ul>
-                            <a href="@week.Challenge.GitHubUrl" target="_blank" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-github me-1"></i>Ver no GitHub
-                            </a>
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                <a href="@week.Challenge.GitHubUrl" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-github me-1"></i>Ver no GitHub
+                                </a>
+                                @foreach (var pr in challengePrStatuses.Where(p => p.ChallengeId == week.Challenge.Id))
+                                {
+                                    @if (pr.State == "merged")
+                                    {
+                                        <span class="badge bg-success rounded-pill" title="@pr.Title">
+                                            <i class="bi bi-git-merge me-1"></i>PR Aprovado
+                                        </span>
+                                    }
+                                    else if (pr.State == "open")
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill" title="@pr.Title">
+                                            <i class="bi bi-git-pull-request me-1"></i>PR Aberto
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary rounded-pill" title="@pr.Title">
+                                            <i class="bi bi-x-circle me-1"></i>PR Fechado
+                                        </span>
+                                    }
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -189,18 +214,24 @@ else
     private int weekProgress = 0;
     private int completedLessons = 0;
     private int completedExercises = 0;
+    private List<ChallengePrStatus> challengePrStatuses = new();
 
     [Parameter]
     public string? Id { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (int.TryParse(Id, out int weekId))
         {
+            userProgress = await ProgressService.LoadAsync();
             week = ContentService.GetWeek(weekId);
             if (week != null)
             {
                 CalculateProgress();
+                if (week.Challenge != null)
+                {
+                    challengePrStatuses = await GitHubService.GetChallengePrStatusAsync();
+                }
             }
         }
     }

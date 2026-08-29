@@ -2,6 +2,7 @@
 @using PortalEstudos.Models
 @using PortalEstudos.Services
 @inject IContentService ContentService
+@inject IProgressService ProgressService
 @inject NavigationManager NavigationManager
 
 <PageTitle>@lesson?.Title - Portal de Estudos C#</PageTitle>
@@ -216,13 +217,14 @@ else
     [Parameter]
     public string? LessonId { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (int.TryParse(WeekId, out int weekId) && int.TryParse(LessonId, out int lessonId))
         {
             week = ContentService.GetWeek(weekId);
             lesson = ContentService.GetLesson(weekId, lessonId);
         }
+        userProgress = await ProgressService.LoadAsync();
     }
 
     private string ConvertMarkdownToHtml(string markdown)
@@ -281,21 +283,22 @@ else
         return currentIndex < orderedLessons.Count - 1 ? orderedLessons[currentIndex + 1].Id : null;
     }
 
-    private void MarkAsComplete()
+    private async Task MarkAsComplete()
     {
         if (lesson != null)
         {
-            userProgress.CompletedLessons.Add(lesson.Id);
-            userProgress.LastActivity = DateTime.Now;
+            await ProgressService.MarkLessonCompleteAsync(lesson.Id);
+            userProgress = await ProgressService.LoadAsync();
             StateHasChanged();
         }
     }
 
-    private void MarkAsIncomplete()
+    private async Task MarkAsIncomplete()
     {
         if (lesson != null)
         {
-            userProgress.CompletedLessons.Remove(lesson.Id);
+            await ProgressService.MarkLessonIncompleteAsync(lesson.Id);
+            userProgress = await ProgressService.LoadAsync();
             StateHasChanged();
         }
     }

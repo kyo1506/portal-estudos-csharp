@@ -2,6 +2,7 @@
 @using PortalEstudos.Models
 @using PortalEstudos.Services
 @inject IContentService ContentService
+@inject IProgressService ProgressService
 @inject NavigationManager NavigationManager
 
 <PageTitle>@exercise?.Title - Portal de Estudos C#</PageTitle>
@@ -274,7 +275,7 @@ else
     [Parameter]
     public string? ExerciseId { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (int.TryParse(WeekId, out int weekId) && int.TryParse(ExerciseId, out int exerciseId))
         {
@@ -285,6 +286,7 @@ else
                 userCode = exercise.InitialCode;
             }
         }
+        userProgress = await ProgressService.LoadAsync();
     }
 
     private string GetDifficultyBadgeClass(ExerciseDifficulty difficulty) => difficulty switch
@@ -356,9 +358,8 @@ else
             isCorrect = true;
             resultMessage = "🎉 Excelente! Seu código produz a saída esperada.";
             userCodeOutput = exercise.ExpectedOutput;
-            userProgress.CompletedExercises.Add(exercise.Id);
-            userProgress.ExerciseAnswers[exercise.Id] = userCode;
-            userProgress.LastActivity = DateTime.Now;
+            await ProgressService.MarkExerciseCompleteAsync(exercise.Id, userCode);
+            userProgress = await ProgressService.LoadAsync();
         }
         else
         {

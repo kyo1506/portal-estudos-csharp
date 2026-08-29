@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
 @inject IContentService ContentService
+@inject IProgressService ProgressService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Dashboard - Portal de Estudos C#</PageTitle>
@@ -181,8 +182,9 @@
     private DashboardStats stats = new();
     private UserProgress userProgress = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        userProgress = await ProgressService.LoadAsync();
         weeks = ContentService.GetAllWeeks();
         stats = ContentService.GetDashboardStats(userProgress);
     }

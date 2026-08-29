@@ -11,6 +11,8 @@ builder.Services.AddRazorComponents()
 
 // Register application services
 builder.Services.AddSingleton<IContentService, ContentService>();
+builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddHttpClient<IGitHubService, GitHubService>();
 
 var app = builder.Build();
 
