@@ -4,6 +4,7 @@ using MudBlazor;
 using MudBlazor.Services;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,13 +20,32 @@ builder.Services.AddResponseCompression(options =>
 // As chaves de DataProtection PRECISAM sobreviver a redeploys; caso contrário cada novo
 // container gera chave nova e o cookie antiforgery do navegador não é descriptografado
 // -> "antiforgery token could not be decrypted" -> circuito não sobe -> nada navega.
-// Prioridade: (1) volume persistente apontado por DATAPROTECTION_KEYS_PATH; (2) fallback /tmp (vida do container).
-var keysPath = Environment.GetEnvironmentVariable("DATAPROTECTION_KEYS_PATH") ?? "/tmp/portal-estudos-keys";
+// Resolução em ordem de prioridade:
+//   1. DATAPROTECTION_KEYS_PATH (configurado manualmente)
+//   2. primeiro volume Railway montado em /var/lib/containers/railwayapp/bind-mounts/*/vol_* (auto-detectado)
+//   3. /tmp/portal-estudos-keys (vida do container, só para dev local)
+var keysPath = Environment.GetEnvironmentVariable("DATAPROTECTION_KEYS_PATH");
+if (string.IsNullOrWhiteSpace(keysPath))
+{
+    var bindRoot = new DirectoryInfo("/var/lib/containers/railwayapp/bind-mounts");
+    if (bindRoot.Exists)
+    {
+        var vol = bindRoot.EnumerateDirectories("vol_*", SearchOption.AllDirectories)
+                           .OrderBy(d => d.FullName)
+                           .FirstOrDefault();
+        if (vol != null)
+        {
+            keysPath = Path.Combine(vol.FullName, "portal-estudos-keys");
+        }
+    }
+}
+keysPath ??= "/tmp/portal-estudos-keys";
 var keysDir = new DirectoryInfo(keysPath);
 keysDir.Create();
+Console.WriteLine($"[DataProtection] Persistindo chaves em: {keysDir.FullName}");
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(keysDir)
-    .SetApplicationName("portal-estudos-csharp");
+    .SetApplicationName("portal-estudos-keys");
 
 // Add services to the container.
 builder.Services.AddRazorPages();
