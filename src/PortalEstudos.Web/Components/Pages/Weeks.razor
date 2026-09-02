@@ -67,7 +67,7 @@ else
                          onclick="@(() => NavigateToWeek(week.Id))"
                          onkeydown="@((Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e) => OnCardKeyDown(e, week.Id))"
                          role="button" tabindex="0"
-                         aria-label="@($"Semana {week.Id}: {week.Title} — {(int)GetWeekProgress(week)}% concluída")">[truncated]
+                         aria-label="@($"Semana {week.Id}: {week.Title} — {(int)GetWeekProgress(week)}% concluída")">
                     <MudCardContent>
                         <div style="display:flex; align-items:flex-start; justify-content:space-between;">
                             <MudPaper Width="56" Height="56" Class="d-flex align-center justify-center" Style="background: rgba(102,126,234,0.1); border-radius:14px;">
