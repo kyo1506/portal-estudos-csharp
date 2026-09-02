@@ -16,9 +16,12 @@ COPY src/PortalEstudos.Domain/PortalEstudos.Domain.csproj src/PortalEstudos.Doma
 COPY src/PortalEstudos.Infrastructure/PortalEstudos.Infrastructure.csproj src/PortalEstudos.Infrastructure/
 RUN dotnet restore src/PortalEstudos.Web/PortalEstudos.Web.csproj
 
-# 2) Agora copia todo o código-fonte e publica SEM re-restaurar (--no-restore).
+# 2) Agora copia todo o código-fonte e publica. O restore incremental roda de novo
+#    (cache NuGet quente, ~1s) porque o obj gerado no passo 1 é "seco" — sem wwwroot/
+#    código ele não descobre os static web assets do shared framework (blazor.web.js),
+#    e publish com --no-restore os deixaria de fora (404 em produção).
 COPY src/ ./src/
-RUN dotnet publish src/PortalEstudos.Web/PortalEstudos.Web.csproj -c Release --no-restore -o /app/publish
+RUN dotnet publish src/PortalEstudos.Web/PortalEstudos.Web.csproj -c Release -o /app/publish
 
 # ---- Estágio runtime ----
 # aspnet:10.0 (Ubuntu, com shell): inclui ca-certificates (HTTPS p/ api.github.com)
