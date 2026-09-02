@@ -8,6 +8,9 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>@exercise?.Title - Portal de Estudos C#</PageTitle>
+<HeadContent>
+    <meta name="description" content="Exercício de C# e .NET: @exercise?.Title — pratique e confira o resultado esperado." />
+</HeadContent>
 
 @if (isLoading)
 {

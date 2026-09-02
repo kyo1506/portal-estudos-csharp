@@ -4,11 +4,13 @@
 
 <MudLayout>
     <MudAppBar Elevation="3">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle"
+                       aria-label="Abrir menu de navegação" title="Menu" />
         <MudText Typo="Typo.h6" Class="ml-2">📚 Portal de Estudos C#</MudText>
         <MudSpacer />
         <MudIconButton Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                       Color="Color.Inherit" OnClick="ToggleDarkMode" title="Alternar tema claro/escuro" />
+                       Color="Color.Inherit" OnClick="ToggleDarkMode" title="Alternar tema claro/escuro"
+                       aria-label="Alternar tema claro/escuro" />
         <MudChip T="string" Color="Color.Inherit" Variant="Variant.Filled" Size="Size.Small" Class="appbar-chip">
             <MudIcon Icon="@Icons.Material.Filled.School" Class="mr-1" /> .NET 10
         </MudChip>

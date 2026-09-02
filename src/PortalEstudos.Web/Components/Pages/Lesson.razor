@@ -6,6 +6,9 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>@lesson?.Title - Portal de Estudos C#</PageTitle>
+<HeadContent>
+    <meta name="description" content="Aula de C# e .NET: @lesson?.Title — teoria e exemplos práticos." />
+</HeadContent>
 
 @if (isLoading)
 {

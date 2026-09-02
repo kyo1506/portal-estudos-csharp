@@ -46,3 +46,4 @@ logs/
 # User-specific
 appsettings.Production.json
 appsettings.Development.json
+.hermes/

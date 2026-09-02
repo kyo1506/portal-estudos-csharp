@@ -1,0 +1,14 @@
+<Project>
+
+  <!-- Propriedades comuns a todos os projetos da solução (src/ e tests/).
+       Cada csproj mantém apenas o que lhe é específico (RootNamespace, SDK, refs). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+</Project>
