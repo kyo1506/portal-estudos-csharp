@@ -5,12 +5,30 @@ html, body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-/* Garante que o layout ocupe pelo menos a altura da viewport e seja flex-column,
-   para o rodapé ficar preso à base da tela (o MudLayout é display:block por padrão). */
+/* O MudLayout é position:relative por padrão; tornamo-lo flex-column com
+   altura mínima da viewport para permitir um rodapé "sticky bottom":
+   - o <MudMainContent> tem flex:1 1 auto (default do MudBlazor) e cresce
+     quando há pouco conteúdo;
+   - o <footer> abaixo fica naturalmente na base da viewport quando o
+     conteúdo é curto, e flui logo após o conteúdo quando é longo. */
 .mud-layout {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+}
+/* Garante que o @Body dentro do MudMainContent ocupe o espaço vertical
+   disponível para empurrar o footer ao fim do viewport. */
+.mud-main-content { display: flex; flex-direction: column; flex: 1 1 auto; }
+.mud-main-content > .flex-grow-1 { flex: 1 1 auto; }
+
+/* Footer (irmão do drawer no .mud-layout) recebe margin-left quando o
+   drawer persistente está aberto no desktop. No mobile (< Md) o drawer
+   vira overlay e essa regra não se aplica (comportamento correto). */
+.mud-layout:has(> aside.mud-drawer.mud-drawer--open.mud-drawer-persistent,
+                > aside.mud-drawer.mud-drawer--open.mud-drawer-fixed)
+    > .app-footer-wrap {
+    padding-left: var(--mud-drawer-width-left, 240px);
+    transition: padding-left 225ms cubic-bezier(0, 0, 0.2, 1);
 }
 .app-footer-wrap { flex-shrink: 0; }
 
