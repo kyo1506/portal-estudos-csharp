@@ -13,9 +13,12 @@ using Microsoft.AspNetCore.DataProtection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Compressão de resposta: reduz o payload do Blazor Server (SignalR) e assets no Railway free tier.
+// Brotli primeiro (mais eficiente que gzip em texto/JS/CSS); o browser negocia via Accept-Encoding.
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
     options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
         new[] { "application/octet-stream", "text/css", "application/javascript" });
 });
@@ -80,6 +83,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // HSTS kept off behind Railway's TLS-terminating edge proxy to avoid redirect loops.
 }
+
+// URLs desconhecidas (HTTP direto) caem aqui: re-executa para a rota /not-found,
+// que renderiza a página 404 customizada mantendo o status HTTP 404.
+app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
 app.UseResponseCompression();
 app.UseStaticFiles();

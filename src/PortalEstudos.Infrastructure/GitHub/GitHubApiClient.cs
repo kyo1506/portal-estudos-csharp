@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Configuration;
 using PortalEstudos.Application.Abstractions;
 using PortalEstudos.Application.Dtos;
 
@@ -13,11 +14,20 @@ public sealed class GitHubApiClient : IGitHubApi
 
     private readonly HttpClient _http;
 
-    public GitHubApiClient(HttpClient http)
+    public GitHubApiClient(HttpClient http, IConfiguration configuration)
     {
         _http = http;
         _http.DefaultRequestHeaders.Add("User-Agent", "PortalEstudos");
         _http.DefaultRequestHeaders.Add("Accept", "application/vnd.github+json");
+
+        // Token opcional (GitHub:Token): eleva o rate limit de 60 para 5000 req/h na API pública.
+        // Sem token o portal funciona normalmente (limite anônimo é suficiente p/ uso leve).
+        var token = configuration["GitHub:Token"];
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            _http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        }
     }
 
     public async Task<IReadOnlyList<ChallengePrStatus>> GetChallengePrStatusAsync()

@@ -1,14 +1,29 @@
 # syntax=docker/dockerfile:1
 
+# ---- Estágio de build ----
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY src/ ./src/
-RUN dotnet restore src/PortalEstudos.Web/PortalEstudos.Web.csproj
-RUN dotnet publish src/PortalEstudos.Web/PortalEstudos.Web.csproj -c Release -o /app/publish
 
+# 1) Copia APENAS os arquivos .csproj/.slnx primeiro: qualquer mudança em código
+#    não invalida o layer do `dotnet restore` (cache do Docker/Railway aproveitado).
+COPY *.slnx ./
+COPY src/PortalEstudos.Web/PortalEstudos.Web.csproj src/PortalEstudos.Web/
+COPY src/PortalEstudos.Application/PortalEstudos.Application.csproj src/PortalEstudos.Application/
+COPY src/PortalEstudos.Domain/PortalEstudos.Domain.csproj src/PortalEstudos.Domain/
+COPY src/PortalEstudos.Infrastructure/PortalEstudos.Infrastructure.csproj src/PortalEstudos.Infrastructure/
+RUN dotnet restore src/PortalEstudos.Web/PortalEstudos.Web.csproj
+
+# 2) Agora copia todo o código-fonte e publica SEM re-restaurar (--no-restore).
+COPY src/ ./src/
+RUN dotnet publish src/PortalEstudos.Web/PortalEstudos.Web.csproj -c Release --no-restore -o /app/publish
+
+# ---- Estágio runtime ----
+# aspnet:10.0 (Ubuntu, com shell): inclui ca-certificates (HTTPS p/ api.github.com)
+# e ICU (cultura pt-BR). Variantes chiseled cortam ~150MB mas exigem -extra p/ certs — não vale o risco sem teste local.
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish ./
-ENV ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080}
+# A porta é lida do env PORT pelo Program.cs (app.Run http://0.0.0.0:{port});
+# este ENV é redundante e gerava warning de variável indefinida no docker build.
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "PortalEstudos.Web.dll"]

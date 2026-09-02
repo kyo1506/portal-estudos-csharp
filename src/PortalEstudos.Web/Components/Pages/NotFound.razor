@@ -1,0 +1,20 @@
+@page "/not-found"
+@using MudBlazor
+
+@* Página 404 — rota real /not-found (usada pelo UseStatusCodePagesWithReExecute
+   para URLs HTTP desconhecidas) e alvo do Router (NotFoundPage) para navegação SPA. *@
+<PageTitle>Página não encontrada</PageTitle>
+
+<div class="notfound-wrap">
+    <MudPaper Elevation="0" Class="notfound-card mud-theme-surface pa-8">
+        <MudIcon Icon="@Icons.Material.Filled.SentimentDissatisfied" Size="Size.Large" Class="notfound-icon" />
+        <MudText Typo="Typo.h1" Align="Align.Center" Class="notfound-code">404</MudText>
+        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-2">Página não encontrada</MudText>
+        <MudText Typo="Typo.body1" Align="Align.Center" Class="mud-text-secondary mb-6">
+            O endereço que você tentou acessar não existe ou foi movido.
+        </MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/" StartIcon="@Icons.Material.Filled.Home">
+            Voltar para o início
+        </MudButton>
+    </MudPaper>
+</div>

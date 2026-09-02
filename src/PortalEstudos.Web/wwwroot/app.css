@@ -219,4 +219,34 @@ html, body {
 .app-footer-link { font-weight: 500; }
 .app-footer-credit { opacity: 0.9; }
 
+/* ===== Página 404 ===== */
+.notfound-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 2rem 1rem;
+}
+
+.notfound-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+}
+
+.notfound-icon { color: var(--mud-palette-primary); margin-bottom: 0.5rem; }
+
+.notfound-code {
+    font-size: 4.5rem;
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 
