@@ -21,6 +21,9 @@ public sealed class LocalStorageProgressStore : IProgressStore
     {
         try
         {
+            // JSRuntime não está disponível durante a pré-renderização (SSR).
+            // Devolvemos progresso vazio nesse momento; o componente será reexecutado
+            // após a hidratação interativa e fará a leitura de verdade.
             var json = await _js.InvokeAsync<string?>("localStorage.getItem", StorageKey);
             if (!string.IsNullOrEmpty(json))
             {
@@ -28,9 +31,21 @@ public sealed class LocalStorageProgressStore : IProgressStore
                 if (progress != null) return progress;
             }
         }
+        catch (InvalidOperationException)
+        {
+            // Pré-renderização: JSRuntime indisponível.
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuito caiu entre o await e a continuação — irrelevante para carregar estado.
+        }
+        catch (JSException)
+        {
+            // Erro no JS (localStorage bloqueado, etc.) — devolvemos vazio.
+        }
         catch
         {
-            // Ignora erros de desserialização e retorna progresso vazio.
+            // Falha genérica de desserialização ou runtime: devolvemos progresso vazio.
         }
 
         return new UserProgress();
@@ -39,11 +54,23 @@ public sealed class LocalStorageProgressStore : IProgressStore
     public async Task SaveAsync(UserProgress progress)
     {
         var json = JsonSerializer.Serialize(progress);
-        await _js.InvokeVoidAsync("localStorage.setItem", StorageKey, json);
+        try
+        {
+            await _js.InvokeVoidAsync("localStorage.setItem", StorageKey, json);
+        }
+        catch (InvalidOperationException) { /* SSR */ }
+        catch (JSDisconnectedException) { /* circuito caiu */ }
+        catch (JSException) { /* erro JS */ }
     }
 
     public async Task ResetAsync()
     {
-        await _js.InvokeVoidAsync("localStorage.removeItem", StorageKey);
+        try
+        {
+            await _js.InvokeVoidAsync("localStorage.removeItem", StorageKey);
+        }
+        catch (InvalidOperationException) { /* SSR */ }
+        catch (JSDisconnectedException) { /* circuito caiu */ }
+        catch (JSException) { /* erro JS */ }
     }
 }

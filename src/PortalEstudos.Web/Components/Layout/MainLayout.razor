@@ -30,23 +30,28 @@
     </MudDrawer>
 
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
-            @Body
-        </MudContainer>
-    </MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+                @Body
+            </MudContainer>
 
-    <footer class="app-footer-wrap">
-        <div class="app-footer">
-            <span>📚 Portal de Estudos C# e .NET — aprenda na prática, no seu ritmo.</span>
-            <span class="app-footer-credit">Desenvolvido por <strong>kyo1506</strong> · Com muito amor para <strong>Beatriz</strong> ❤️</span>
-            <div class="app-footer-links">
-                <MudLink Href="weeks" Class="app-footer-link">Semanas</MudLink>
-                <MudLink Href="dashboard" Class="app-footer-link">Dashboard</MudLink>
-                <MudLink Href="https://github.com/kyo1506/fundamentos-csharp" Target="_blank" Class="app-footer-link">Desafios</MudLink>
-            </div>
-        </div>
-    </footer>
-</MudLayout>
+            @* Rodapé mora DENTRO do MudMainContent para herdar o margin-left
+               aplicado pelo MudBlazor quando o drawer persistente está aberto
+               (>= breakpoint Md). No mobile (< Md) o drawer vira overlay e o
+               MainContent permanece full-width — mesmo comportamento do conteúdo.
+               Resultado: o footer acompanha o MainContent em qualquer layout. *@
+            <footer class="app-footer-wrap">
+                <div class="app-footer">
+                    <span>📚 Portal de Estudos C# e .NET — aprenda na prática, no seu ritmo.</span>
+                    <span class="app-footer-credit">Desenvolvido por <strong>kyo1506</strong> · Com muito amor para <strong>Beatriz</strong> ❤️</span>
+                    <div class="app-footer-links">
+                        <MudLink Href="weeks" Class="app-footer-link">Semanas</MudLink>
+                        <MudLink Href="dashboard" Class="app-footer-link">Dashboard</MudLink>
+                        <MudLink Href="https://github.com/kyo1506/fundamentos-csharp" Target="_blank" Class="app-footer-link">Desafios</MudLink>
+                    </div>
+                </div>
+            </footer>
+        </MudMainContent>
+    </MudLayout>
 
 <MudThemeProvider Theme="@EstudoTheme" IsDarkMode="@IsDarkMode" IsDarkModeChanged="OnDarkModeChanged" />
 <MudPopoverProvider />

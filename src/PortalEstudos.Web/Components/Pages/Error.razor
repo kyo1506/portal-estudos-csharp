@@ -1,10 +1,12 @@
 ﻿@page "/Error"
 @using System.Diagnostics
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
 
 <PageTitle>Error</PageTitle>
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<h1 class="text-danger">Ocorreu um erro.</h1>
+<h2 class="text-danger">Algo deu errado ao processar sua requisição.</h2>
 
 @if (ShowRequestId)
 {
@@ -13,24 +15,24 @@
     </p>
 }
 
-<h3>Development Mode</h3>
+<h3>Modo de Desenvolvimento</h3>
 <p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
+    Trocar para o ambiente <strong>Development</strong> exibe informações mais detalhadas
+    sobre o erro ocorrido.
 </p>
 <p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
+    <strong>O ambiente Development não deve estar habilitado em aplicações implantadas.</strong>
+    Isso pode expor informações sensíveis das exceções aos usuários finais.
 </p>
 
-@code{
-    [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
-
+@code {
     private string? RequestId { get; set; }
     private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
-    protected override void OnInitialized() =>
-        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+    protected override void OnInitialized()
+    {
+        // Não dependemos mais de [CascadingParameter] HttpContext: ele é null em pré-renderização
+        // e mesmo quando presente, não precisamos dele para identificar a requisição.
+        RequestId = Activity.Current?.Id;
+    }
 }
