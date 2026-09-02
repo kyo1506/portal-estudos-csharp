@@ -4,9 +4,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# 1) Copia APENAS os arquivos .csproj/.slnx primeiro: qualquer mudança em código
+# 1) Copia APENAS os arquivos .csproj/.slnx/.props primeiro: qualquer mudança em código
 #    não invalida o layer do `dotnet restore` (cache do Docker/Railway aproveitado).
+#    Directory.Build.props é obrigatório: contém TargetFramework/Nullable/ImplicitUsings
+#    compartilhados (sem ele o restore falha com NETSDK1013).
 COPY *.slnx ./
+COPY Directory.Build.props ./
 COPY src/PortalEstudos.Web/PortalEstudos.Web.csproj src/PortalEstudos.Web/
 COPY src/PortalEstudos.Application/PortalEstudos.Application.csproj src/PortalEstudos.Application/
 COPY src/PortalEstudos.Domain/PortalEstudos.Domain.csproj src/PortalEstudos.Domain/
