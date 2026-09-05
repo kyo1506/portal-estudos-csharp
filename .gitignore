@@ -47,3 +47,16 @@ logs/
 appsettings.Production.json
 appsettings.Development.json
 .hermes/
+
+# Artefatos temporários de diagnóstico/validação local
+.runcheck/
+.chromeprof*/
+.cq/
+.cr/
+.dx/
+.dy/
+.dz/
+.dw/
+.dq/
+.shot-*.png
+diag.*
