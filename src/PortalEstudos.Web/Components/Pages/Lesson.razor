@@ -1,4 +1,4 @@
-@page "/week/{weekId}/lesson/{lessonId}"
+@page "/fase/{faseId}/lesson/{lessonId}"
 @using MudBlazor
 @inject ICatalogService CatalogService
 @inject IProgressService ProgressService
@@ -25,25 +25,25 @@
         </MudItem>
     </MudGrid>
 }
-else if (week == null || lesson == null)
+else if (fase == null || lesson == null)
 {
     <MudPaper Class="pa-8 text-center" Elevation="3">
         <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
         <MudText Typo="Typo.h5" Class="mb-2">Lição não encontrada</MudText>
         <MudText Class="mud-text-secondary mb-4">A lição que você procura não existe.</MudText>
-        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="/weeks">Voltar para Semanas</MudButton>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="/fases">Voltar para Fases</MudButton>
     </MudPaper>
 }
 else
 {
-    <MudButton Color="Color.Default" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack" Href="@($"/week/{week?.Id}")" Class="mb-2">
-        Voltar para Semana @week?.Id
+    <MudButton Color="Color.Default" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack" Href="@($"/fase/{fase?.Id}")" Class="mb-2">
+        Voltar para Fase @fase?.Id
     </MudButton>
 
     <div class="breadcrumb-row mb-3">
-        <MudLink Href="/weeks">Semanas</MudLink>
+        <MudLink Href="/fases">Fases</MudLink>
         <span class="breadcrumb-sep">/</span>
-        <MudLink Href="@($"/week/{week!.Id}")">Semana @week.Id</MudLink>
+        <MudLink Href="@($"/fase/{fase!.Id}")">Fase @fase.Id</MudLink>
         <span class="breadcrumb-sep">/</span>
         <span class="mud-text-secondary">Lição @lesson!.Order</span>
     </div>
@@ -87,13 +87,13 @@ else
         <MudItem xs="12" lg="4">
             <MudPaper Class="pa-3 mb-4" Elevation="2">
                 <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2">
-                    <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-2" />Lições da Semana
+                    <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-2" />Lições da Fase
                 </MudText>
                 <div class="lesson-list">
-                    @foreach (var l in week!.Lessons.OrderBy(l => l.Order))
+                    @foreach (var l in fase!.Lessons.OrderBy(l => l.Order))
                     {
                         var done = userProgress.CompletedLessons.Contains(l.Id);
-                        <a href="@($"/week/{week.Id}/lesson/{l.Id}")"
+                        <a href="@($"/fase/{fase.Id}/lesson/{l.Id}")"
                            class="lesson-list-item @(l.Id == lesson!.Id ? "active" : "")"
                           
                            style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.75rem; border-radius:0.5rem; text-decoration:none; color:inherit; @(l.Id == lesson.Id ? "background:rgba(102,126,234,0.12);" : "")">
@@ -147,21 +147,21 @@ else
 
 @code {
     private bool isLoading = true;
-    private Week? week;
+    private Fase? fase;
     private LessonModel? lesson;
     private UserProgress userProgress = new();
     private string? _loadedKey;
     private int _loadToken;
 
     [Parameter]
-    public string? WeekId { get; set; }
+    public string? FaseId { get; set; }
 
     [Parameter]
     public string? LessonId { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
-        var key = $"{WeekId}/{LessonId}";
+        var key = $"{FaseId}/{LessonId}";
         var token = ++_loadToken;
 
         // A navegação entre lições reutiliza a instância e só troca os parâmetros;
@@ -173,12 +173,12 @@ else
         isLoading = true;
         StateHasChanged();
 
-        week = null;
+        fase = null;
         lesson = null;
-        if (int.TryParse(WeekId, out int weekId) && int.TryParse(LessonId, out int lessonId))
+        if (int.TryParse(FaseId, out int faseId) && int.TryParse(LessonId, out int lessonId))
         {
-            week = CatalogService.GetWeek(weekId);
-            lesson = CatalogService.GetLesson(weekId, lessonId);
+            fase = CatalogService.GetFase(faseId);
+            lesson = CatalogService.GetLesson(faseId, lessonId);
         }
         userProgress = await ProgressService.LoadAsync();
 
@@ -193,18 +193,18 @@ else
 
     private string? GetPreviousLessonHref()
     {
-        if (week == null || lesson == null) return null;
-        var orderedLessons = week.Lessons.OrderBy(l => l.Order).ToList();
+        if (fase == null || lesson == null) return null;
+        var orderedLessons = fase.Lessons.OrderBy(l => l.Order).ToList();
         var currentIndex = orderedLessons.FindIndex(l => l.Id == lesson.Id);
-        return currentIndex > 0 ? $"/week/{WeekId}/lesson/{orderedLessons[currentIndex - 1].Id}" : null;
+        return currentIndex > 0 ? $"/fase/{FaseId}/lesson/{orderedLessons[currentIndex - 1].Id}" : null;
     }
 
     private string? GetNextLessonHref()
     {
-        if (week == null || lesson == null) return null;
-        var orderedLessons = week.Lessons.OrderBy(l => l.Order).ToList();
+        if (fase == null || lesson == null) return null;
+        var orderedLessons = fase.Lessons.OrderBy(l => l.Order).ToList();
         var currentIndex = orderedLessons.FindIndex(l => l.Id == lesson.Id);
-        return currentIndex < orderedLessons.Count - 1 ? $"/week/{WeekId}/lesson/{orderedLessons[currentIndex + 1].Id}" : null;
+        return currentIndex < orderedLessons.Count - 1 ? $"/fase/{FaseId}/lesson/{orderedLessons[currentIndex + 1].Id}" : null;
     }
 
     private async Task MarkAsComplete()
@@ -227,8 +227,8 @@ else
         }
     }
 
-    private void NavigateToWeek()
+    private void NavigateToFase()
     {
-        NavigationManager.NavigateTo($"/week/{WeekId}");
+        NavigationManager.NavigateTo($"/fase/{FaseId}");
     }
 }

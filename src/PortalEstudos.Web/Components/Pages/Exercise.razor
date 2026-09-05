@@ -1,4 +1,4 @@
-@page "/week/{weekId}/exercise/{exerciseId}"
+@page "/fase/{faseId}/exercise/{exerciseId}"
 @using MudBlazor
 @using PortalEstudos.Domain.Enums
 @using PortalEstudos.Web.Presentation
@@ -25,21 +25,21 @@
         </MudItem>
     </MudGrid>
 }
-else if (exercise == null || week == null)
+else if (exercise == null || fase == null)
 {
     <MudPaper Class="pa-8 text-center" Elevation="3">
         <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-3" />
         <MudText Typo="Typo.h5" Class="mb-2">Exercício não encontrado</MudText>
         <MudText Class="mud-text-secondary mb-4">O exercício que você procura não existe.</MudText>
-        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="@($"/week/{week?.Id}")">Voltar para Semana</MudButton>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="@($"/fase/{fase?.Id}")">Voltar para Fase</MudButton>
     </MudPaper>
 }
 else
 {
     <div class="breadcrumb-row mb-3">
-        <MudLink Href="/weeks">Semanas</MudLink>
+        <MudLink Href="/fases">Fases</MudLink>
         <span class="breadcrumb-sep">/</span>
-        <MudLink Href="@($"/week/{week.Id}")">Semana @week.Id</MudLink>
+        <MudLink Href="@($"/fase/{fase.Id}")">Fase @fase.Id</MudLink>
         <span class="breadcrumb-sep">/</span>
         <span class="mud-text-secondary">Exercício</span>
     </div>
@@ -159,13 +159,13 @@ else
 
             <MudPaper Class="pa-3 mb-4" Elevation="2">
                 <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2">
-                    <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-2" />Exercícios da Semana
+                    <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-2" />Exercícios da Fase
                 </MudText>
                 <div class="exercise-list">
-                    @foreach (var e in week.Exercises)
+                    @foreach (var e in fase.Exercises)
                     {
                         var done = userProgress.CompletedExercises.Contains(e.Id);
-                        <a href="@PortalRoutes.Exercise(week.Id, e.Id)"
+                        <a href="@PortalRoutes.Exercise(fase.Id, e.Id)"
                            class="exercise-list-item @(e.Id == exercise.Id ? "active" : "")"
                            style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.75rem; border-radius:0.5rem; text-decoration:none; color:inherit; @(e.Id == exercise.Id ? "background:rgba(102,126,234,0.12);" : "")">
                             <MudIcon Icon="@(e.Id == exercise.Id ? Icons.Material.Filled.Code : Icons.Material.Filled.CodeOff)"
@@ -209,7 +209,7 @@ else
 
 @code {
     private bool isLoading = true;
-    private Week? week;
+    private Fase? fase;
     private ExerciseModel? exercise;
     private UserProgress userProgress = new();
     private string userCode = "";
@@ -226,14 +226,14 @@ else
     private int _loadToken;
 
     [Parameter]
-    public string? WeekId { get; set; }
+    public string? FaseId { get; set; }
 
     [Parameter]
     public string? ExerciseId { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
-        var key = $"{WeekId}/{ExerciseId}";
+        var key = $"{FaseId}/{ExerciseId}";
         var token = ++_loadToken;
 
         // Navegação entre exercícios reutiliza a instância; o carregamento deve reagir
@@ -245,12 +245,12 @@ else
         isLoading = true;
         StateHasChanged();
 
-        week = null;
+        fase = null;
         exercise = null;
-        if (int.TryParse(WeekId, out int weekId) && int.TryParse(ExerciseId, out int exerciseId))
+        if (int.TryParse(FaseId, out int faseId) && int.TryParse(ExerciseId, out int exerciseId))
         {
-            week = CatalogService.GetWeek(weekId);
-            exercise = CatalogService.GetExercise(weekId, exerciseId);
+            fase = CatalogService.GetFase(faseId);
+            exercise = CatalogService.GetExercise(faseId, exerciseId);
             if (exercise != null)
             {
                 ResetExerciseEditor(exercise);
@@ -344,8 +344,8 @@ else
         StateHasChanged();
     }
 
-    private void NavigateToWeek()
+    private void NavigateToFase()
     {
-        NavigationManager.NavigateTo($"/week/{WeekId}");
+        NavigationManager.NavigateTo($"/fase/{FaseId}");
     }
 }

@@ -2,7 +2,7 @@ namespace PortalEstudos.Application.Dtos;
 
 public class DashboardStats
 {
-    public int TotalWeeks { get; set; }
+    public int TotalFases { get; set; }
     public int CompletedLessons { get; set; }
     public int TotalLessons { get; set; }
     public int CompletedExercises { get; set; }

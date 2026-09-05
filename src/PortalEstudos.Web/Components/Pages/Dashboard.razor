@@ -9,7 +9,7 @@
 
 <PageTitle>Dashboard - Portal de Estudos C#</PageTitle>
 <HeadContent>
-    <meta name="description" content="Acompanhe seu progresso no curso de C# e .NET: lições, exercícios e desafios concluídos por semana." />
+    <meta name="description" content="Acompanhe seu progresso no curso de C# e .NET: lições, exercícios e desafios concluídos por fase." />
 </HeadContent>
 
 <MudText Typo="Typo.h4" Class="mb-4">👋 Bem-vindo de volta!</MudText>
@@ -78,48 +78,48 @@
     </MudItem>
 </MudGrid>
 
-<!-- Grade de semanas -->
-<MudText Typo="Typo.h5" Class="mb-3">📅 Semanas do Curso</MudText>
+<!-- Grade de fases -->
+<MudText Typo="Typo.h5" Class="mb-3">📅 Fases do Curso</MudText>
 <MudGrid Spacing="4">
-    @foreach (var week in weeks)
+    @foreach (var fase in fases)
     {
         <MudItem xs="12" md="6" lg="4">
-            <MudCard Class="week-card-hover" Style="cursor:pointer;"
-                     onclick="@(() => NavigateToWeek(week.Id))"
-                     onkeydown="@((Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e) => OnCardKeyDown(e, week.Id))"
+            <MudCard Class="fase-card-hover" Style="cursor:pointer;"
+                     onclick="@(() => NavigateToFase(fase.Id))"
+                     onkeydown="@((Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e) => OnCardKeyDown(e, fase.Id))"
                      role="button" tabindex="0"
-                     aria-label="@($"Semana {week.Id}: {week.Title}")">
+                     aria-label="@($"Fase {fase.Id}: {fase.Title}")">
                 <MudCardContent>
                     <div style="display:flex; align-items:flex-start; justify-content:space-between;">
                         <MudPaper Width="56" Height="56" Class="d-flex align-center justify-center" Style="background: rgba(102,126,234,0.1); border-radius:14px;">
-                            <MudText Style="font-size:28px;">@week.Icon</MudText>
+                            <MudText Style="font-size:28px;">@fase.Icon</MudText>
                         </MudPaper>
-                        @if (IsWeekCompleted(week))
+                        @if (IsFaseCompleted(fase))
                         {
                             <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Size="Size.Small">
                                 <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Class="mr-1" /> Completa
                             </MudChip>
                         }
-                        else if (IsWeekInProgress(week))
+                        else if (IsFaseInProgress(fase))
                         {
                             <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled" Size="Size.Small">
                                 <MudIcon Icon="@Icons.Material.Filled.PlayCircle" Class="mr-1" /> Em progresso
                             </MudChip>
                         }
                     </div>
-                    <MudText Typo="Typo.h6" Class="mt-3 font-weight-bold">Semana @week.Id</MudText>
-                    <MudText Typo="Typo.subtitle2" Class="primary-text">@week.Title</MudText>
-                    <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1" Style="min-height:3rem;">@week.Description</MudText>
+                    <MudText Typo="Typo.h6" Class="mt-3 font-weight-bold">Fase @fase.Id</MudText>
+                    <MudText Typo="Typo.subtitle2" Class="primary-text">@fase.Title</MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1" Style="min-height:3rem;">@fase.Description</MudText>
                     <MudDivider Class="my-2" />
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                            <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Small" /> @week.Lessons.Count lições
+                            <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Small" /> @fase.Lessons.Count lições
                         </MudText>
                         <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                            <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" /> @week.Exercises.Count exercícios
+                            <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" /> @fase.Exercises.Count exercícios
                         </MudText>
                     </div>
-                    @if (week.Challenge != null)
+                    @if (fase.Challenge != null)
                     {
                         <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2">
                             <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Size="Size.Small" /> Desafio disponível
@@ -132,8 +132,8 @@
 </MudGrid>
 
 <style>
-    .week-card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .week-card-hover:hover { transform: translateY(-4px); box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.12); }
+    .fase-card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .fase-card-hover:hover { transform: translateY(-4px); box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.12); }
     .primary-text { color: var(--mud-palette-primary); }
     .dashboard-stat { text-align: center; border-radius: 1rem; }
     .dashboard-stat-icon {
@@ -148,31 +148,31 @@
 </style>
 
 @code {
-    private List<Week> weeks = new();
+    private List<Fase> fases = new();
     private DashboardStats stats = new();
     private UserProgress userProgress = new();
 
     protected override async Task OnInitializedAsync()
     {
         userProgress = await ProgressService.LoadAsync();
-        weeks = CatalogService.GetAllWeeks().ToList();
+        fases = CatalogService.GetAllFases().ToList();
         stats = DashboardService.GetStats(userProgress);
     }
 
-    private bool IsWeekCompleted(Week week) => DashboardService.IsWeekCompleted(week, userProgress);
+    private bool IsFaseCompleted(Fase fase) => DashboardService.IsFaseCompleted(fase, userProgress);
 
-    private bool IsWeekInProgress(Week week) => DashboardService.IsWeekInProgress(week, userProgress);
+    private bool IsFaseInProgress(Fase fase) => DashboardService.IsFaseInProgress(fase, userProgress);
 
-    private void NavigateToWeek(int weekId)
+    private void NavigateToFase(int faseId)
     {
-        NavigationManager.NavigateTo($"/week/{weekId}");
+        NavigationManager.NavigateTo($"/fase/{faseId}");
     }
 
-    private async Task OnCardKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e, int weekId)
+    private async Task OnCardKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e, int faseId)
     {
         if (e.Key is "Enter" or " ")
         {
-            NavigateToWeek(weekId);
+            NavigateToFase(faseId);
             await Task.CompletedTask;
         }
     }

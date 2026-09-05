@@ -5,10 +5,10 @@ namespace PortalEstudos.Application.Services;
 
 public interface ICatalogService
 {
-    IReadOnlyList<Week> GetAllWeeks();
-    Week? GetWeek(int id);
-    LessonModel? GetLesson(int weekId, int lessonId);
-    ExerciseModel? GetExercise(int weekId, int exerciseId);
+    IReadOnlyList<Fase> GetAllFases();
+    Fase? GetFase(int id);
+    LessonModel? GetLesson(int faseId, int lessonId);
+    ExerciseModel? GetExercise(int faseId, int exerciseId);
 }
 
 /// <summary>Consultas de leitura sobre o catálogo do curso.</summary>
@@ -21,11 +21,11 @@ public sealed class CatalogService : ICatalogService
         _content = content;
     }
 
-    public IReadOnlyList<Week> GetAllWeeks() => _content.GetAllWeeks();
+    public IReadOnlyList<Fase> GetAllFases() => _content.GetAllFases();
 
-    public Week? GetWeek(int id) => _content.GetWeek(id);
+    public Fase? GetFase(int id) => _content.GetFase(id);
 
-    public LessonModel? GetLesson(int weekId, int lessonId) => _content.GetLesson(weekId, lessonId);
+    public LessonModel? GetLesson(int faseId, int lessonId) => _content.GetLesson(faseId, lessonId);
 
-    public ExerciseModel? GetExercise(int weekId, int exerciseId) => _content.GetExercise(weekId, exerciseId);
+    public ExerciseModel? GetExercise(int faseId, int exerciseId) => _content.GetExercise(faseId, exerciseId);
 }

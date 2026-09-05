@@ -7,19 +7,19 @@ namespace PortalEstudos.Tests;
 /// <summary>Repositório de conteúdo em memória para testes determinísticos.</summary>
 internal sealed class FakeContentRepository : IContentRepository
 {
-    private readonly List<Week> _weeks;
+    private readonly List<Fase> _fases;
 
-    public FakeContentRepository(params Week[] weeks) => _weeks = weeks.ToList();
+    public FakeContentRepository(params Fase[] fases) => _fases = fases.ToList();
 
-    public IReadOnlyList<Week> GetAllWeeks() => _weeks;
+    public IReadOnlyList<Fase> GetAllFases() => _fases;
 
-    public Week? GetWeek(int id) => _weeks.FirstOrDefault(w => w.Id == id);
+    public Fase? GetFase(int id) => _fases.FirstOrDefault(w => w.Id == id);
 
-    public LessonModel? GetLesson(int weekId, int lessonId)
-        => GetWeek(weekId)?.Lessons.FirstOrDefault(l => l.Id == lessonId);
+    public LessonModel? GetLesson(int faseId, int lessonId)
+        => GetFase(faseId)?.Lessons.FirstOrDefault(l => l.Id == lessonId);
 
-    public ExerciseModel? GetExercise(int weekId, int exerciseId)
-        => GetWeek(weekId)?.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+    public ExerciseModel? GetExercise(int faseId, int exerciseId)
+        => GetFase(faseId)?.Exercises.FirstOrDefault(e => e.Id == exerciseId);
 }
 
 /// <summary>Armazena o progresso em memória (sem interop JS).</summary>
@@ -46,7 +46,7 @@ internal sealed class InMemoryProgressStore : IProgressStore
 
 internal static class TestData
 {
-    public static Week BuildWeek(int id = 1, int lessonCount = 2, int exerciseCount = 2, bool hasChallenge = true) => new()
+    public static Fase BuildWeek(int id = 1, int lessonCount = 2, int exerciseCount = 2, bool hasChallenge = true) => new()
     {
         Id = id,
         Title = $"Semana {id}",

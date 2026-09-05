@@ -65,7 +65,7 @@ public sealed class GitHubApiClient : IGitHubApi
 
     private static int? ExtractChallengeId(string title, string body)
     {
-        // Procura "Desafio Semana N" ou "Semana-N" no título/corpo.
+        // Procura "Desafio N" ou o número da fase no título/corpo.
         var match = System.Text.RegularExpressions.Regex.Match(
             $"{title} {body}", @"[Ss]emana[-\s]?(\d+)");
         return match.Success && int.TryParse(match.Groups[1].Value, out int id) ? id : null;

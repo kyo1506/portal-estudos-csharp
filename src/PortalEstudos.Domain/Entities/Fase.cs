@@ -1,7 +1,7 @@
 namespace PortalEstudos.Domain.Entities;
 
-/// <summary>Uma semana de estudo do curso.</summary>
-public class Week
+/// <summary>Uma fase (módulo) do curso.</summary>
+public class Fase
 {
     public int Id { get; init; }
     public string Title { get; init; } = string.Empty;

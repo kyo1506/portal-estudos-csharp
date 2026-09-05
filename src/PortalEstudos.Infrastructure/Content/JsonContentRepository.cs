@@ -9,24 +9,24 @@ namespace PortalEstudos.Infrastructure.Content;
 /// (<c>Content/ContentSeed.json</c>), separando dados de comportamento.</summary>
 public sealed class JsonContentRepository : IContentRepository
 {
-    private readonly List<Week> _weeks;
+    private readonly List<Fase> _fases;
 
     public JsonContentRepository()
     {
-        _weeks = LoadSeed();
+        _fases = LoadSeed();
     }
 
-    public IReadOnlyList<Week> GetAllWeeks() => _weeks;
+    public IReadOnlyList<Fase> GetAllFases() => _fases;
 
-    public Week? GetWeek(int id) => _weeks.FirstOrDefault(w => w.Id == id);
+    public Fase? GetFase(int id) => _fases.FirstOrDefault(w => w.Id == id);
 
-    public LessonModel? GetLesson(int weekId, int lessonId)
-        => GetWeek(weekId)?.Lessons.FirstOrDefault(l => l.Id == lessonId);
+    public LessonModel? GetLesson(int faseId, int lessonId)
+        => GetFase(faseId)?.Lessons.FirstOrDefault(l => l.Id == lessonId);
 
-    public ExerciseModel? GetExercise(int weekId, int exerciseId)
-        => GetWeek(weekId)?.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+    public ExerciseModel? GetExercise(int faseId, int exerciseId)
+        => GetFase(faseId)?.Exercises.FirstOrDefault(e => e.Id == exerciseId);
 
-    private static List<Week> LoadSeed()
+    private static List<Fase> LoadSeed()
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = assembly.GetManifestResourceNames()
@@ -40,11 +40,11 @@ public sealed class JsonContentRepository : IContentRepository
         var file = JsonSerializer.Deserialize<ContentFile>(stream, options)
             ?? throw new InvalidOperationException("Falha ao desserializar o conteúdo do curso.");
 
-        return file.Weeks;
+        return file.Fases;
     }
 
     private sealed class ContentFile
     {
-        public List<Week> Weeks { get; init; } = new();
+        public List<Fase> Fases { get; init; } = new();
     }
 }

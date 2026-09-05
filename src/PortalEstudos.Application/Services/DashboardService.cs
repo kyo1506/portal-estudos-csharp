@@ -7,9 +7,9 @@ namespace PortalEstudos.Application.Services;
 public interface IDashboardService
 {
     DashboardStats GetStats(UserProgress progress);
-    double GetWeekProgress(Week week, UserProgress progress);
-    bool IsWeekCompleted(Week week, UserProgress progress);
-    bool IsWeekInProgress(Week week, UserProgress progress);
+    double GetFaseProgress(Fase fase, UserProgress progress);
+    bool IsFaseCompleted(Fase fase, UserProgress progress);
+    bool IsFaseInProgress(Fase fase, UserProgress progress);
 }
 
 /// <summary>Cálculo de progresso e estatísticas do painel.</summary>
@@ -24,18 +24,18 @@ public sealed class DashboardService : IDashboardService
 
     public DashboardStats GetStats(UserProgress progress)
     {
-        var weeks = _content.GetAllWeeks();
+        var fases = _content.GetAllFases();
 
-        var totalLessons = weeks.Sum(w => w.Lessons.Count);
-        var totalExercises = weeks.Sum(w => w.Exercises.Count);
-        var totalChallenges = weeks.Count(w => w.Challenge != null);
+        var totalLessons = fases.Sum(w => w.Lessons.Count);
+        var totalExercises = fases.Sum(w => w.Exercises.Count);
+        var totalChallenges = fases.Count(w => w.Challenge != null);
 
         var done = progress.CompletedLessons.Count + progress.CompletedExercises.Count;
         var total = totalLessons + totalExercises;
 
         return new DashboardStats
         {
-            TotalWeeks = weeks.Count,
+            TotalFases = fases.Count,
             CompletedLessons = progress.CompletedLessons.Count,
             TotalLessons = totalLessons,
             CompletedExercises = progress.CompletedExercises.Count,
@@ -49,31 +49,31 @@ public sealed class DashboardService : IDashboardService
         };
     }
 
-    public double GetWeekProgress(Week week, UserProgress progress)
+    public double GetFaseProgress(Fase fase, UserProgress progress)
     {
-        var totalItems = week.Lessons.Count + week.Exercises.Count + (week.Challenge != null ? 1 : 0);
+        var totalItems = fase.Lessons.Count + fase.Exercises.Count + (fase.Challenge != null ? 1 : 0);
         if (totalItems == 0) return 0;
 
-        var completed = week.Lessons.Count(l => progress.CompletedLessons.Contains(l.Id))
-                      + week.Exercises.Count(e => progress.CompletedExercises.Contains(e.Id))
-                      + (week.Challenge != null && progress.CompletedChallenges.Contains(week.Challenge.Id) ? 1 : 0);
+        var completed = fase.Lessons.Count(l => progress.CompletedLessons.Contains(l.Id))
+                      + fase.Exercises.Count(e => progress.CompletedExercises.Contains(e.Id))
+                      + (fase.Challenge != null && progress.CompletedChallenges.Contains(fase.Challenge.Id) ? 1 : 0);
 
         return Math.Round((double)completed / totalItems * 100, 1);
     }
 
-    public bool IsWeekCompleted(Week week, UserProgress progress)
+    public bool IsFaseCompleted(Fase fase, UserProgress progress)
     {
-        var lessonsDone = week.Lessons.All(l => progress.CompletedLessons.Contains(l.Id));
-        var exercisesDone = week.Exercises.All(e => progress.CompletedExercises.Contains(e.Id));
-        var challengeDone = week.Challenge == null || progress.CompletedChallenges.Contains(week.Challenge.Id);
+        var lessonsDone = fase.Lessons.All(l => progress.CompletedLessons.Contains(l.Id));
+        var exercisesDone = fase.Exercises.All(e => progress.CompletedExercises.Contains(e.Id));
+        var challengeDone = fase.Challenge == null || progress.CompletedChallenges.Contains(fase.Challenge.Id);
         return lessonsDone && exercisesDone && challengeDone;
     }
 
-    public bool IsWeekInProgress(Week week, UserProgress progress)
+    public bool IsFaseInProgress(Fase fase, UserProgress progress)
     {
-        var anyLesson = week.Lessons.Any(l => progress.CompletedLessons.Contains(l.Id));
-        var anyExercise = week.Exercises.Any(e => progress.CompletedExercises.Contains(e.Id));
-        var anyChallenge = week.Challenge != null && progress.CompletedChallenges.Contains(week.Challenge.Id);
+        var anyLesson = fase.Lessons.Any(l => progress.CompletedLessons.Contains(l.Id));
+        var anyExercise = fase.Exercises.Any(e => progress.CompletedExercises.Contains(e.Id));
+        var anyChallenge = fase.Challenge != null && progress.CompletedChallenges.Contains(fase.Challenge.Id);
         return anyLesson || anyExercise || anyChallenge;
     }
 }

@@ -6,7 +6,7 @@
 
 <PageTitle>Portal de Estudos - C# e .NET</PageTitle>
 <HeadContent>
-    <meta name="description" content="Jornada guiada de 4 semanas para aprender C# e .NET 10 na prática: teoria, exercícios e desafios com progresso acompanhado." />
+    <meta name="description" content="Jornada guiada de 4 fases para aprender C# e .NET 10 na prática: teoria, exercícios e desafios com progresso acompanhado." />
 </HeadContent>
 
 @if (stats == null)
@@ -21,11 +21,11 @@ else
             <div class="home-hero-overline">Portal de Estudos · C# e .NET 10</div>
             <h1 class="home-hero-title">🚀 Aprenda C# de verdade</h1>
             <p class="home-hero-subtitle">
-                Uma jornada guiada por 4 semanas — teoria, exemplos práticos, exercícios e
+                Uma jornada guiada por 4 fases — teoria, exemplos práticos, exercícios e
                 desafios — no seu ritmo, com progresso acompanhado.
             </p>
             <div class="home-hero-ctas">
-                <MudButton Color="Color.Surface" Variant="Variant.Filled" Size="Size.Large" StartIcon="@Icons.Material.Filled.School" OnClick="NavigateToWeeks">
+                <MudButton Color="Color.Surface" Variant="Variant.Filled" Size="Size.Large" StartIcon="@Icons.Material.Filled.School" OnClick="NavigateToFases">
                     Começar a Estudar
                 </MudButton>
                 <MudButton Color="Color.Default" Variant="Variant.Outlined" Size="Size.Large" StartIcon="@Icons.Material.Filled.Insights" OnClick="NavigateToDashboard" Class="home-hero-ghost">
@@ -45,8 +45,8 @@ else
                         <MudText Typo="Typo.caption" Class="mud-text-secondary">geral</MudText>
                     </div>
                     <div class="home-hero-stat">
-                        <MudText Typo="Typo.h6" Class="font-weight-bold">@stats.TotalWeeks</MudText>
-                        <MudText Typo="Typo.caption" Class="mud-text-secondary">semanas</MudText>
+                        <MudText Typo="Typo.h6" Class="font-weight-bold">@stats.TotalFases</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">fases</MudText>
                     </div>
                     <div class="home-hero-stat">
                         <MudText Typo="Typo.h6" Class="font-weight-bold">@stats.TotalLessons</MudText>
@@ -90,7 +90,7 @@ else
             <MudPaper Class="home-journey-card flex-fill" Elevation="2">
                 <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Color="Color.Error" Size="Size.Large" Class="mb-2" />
                 <MudText Typo="Typo.subtitle1" Class="font-weight-bold">4. Desafios</MudText>
-                <MudText Typo="Typo.body2" Class="mud-text-secondary">Projetos semanais enviados via Pull Request no GitHub para code review.</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Projetos por fase enviados via Pull Request no GitHub para code review.</MudText>
             </MudPaper>
         </MudItem>
     </MudGrid>
@@ -99,10 +99,10 @@ else
     <MudPaper Class="home-cta pa-6" Elevation="3">
         <div>
             <MudText Typo="Typo.h6" Class="font-weight-bold">Pronta para começar?</MudText>
-            <MudText Typo="Typo.body2" Class="home-cta-sub">Explore as semanas do curso e avance no seu ritmo.</MudText>
+            <MudText Typo="Typo.body2" Class="home-cta-sub">Explore as fases do curso e avance no seu ritmo.</MudText>
         </div>
-        <MudButton Color="Color.Surface" Variant="Variant.Filled" Size="Size.Large" OnClick="NavigateToWeeks" StartIcon="@Icons.Material.Filled.ArrowForward">
-            Ver Semanas
+        <MudButton Color="Color.Surface" Variant="Variant.Filled" Size="Size.Large" OnClick="NavigateToFases" StartIcon="@Icons.Material.Filled.ArrowForward">
+            Ver Fases
         </MudButton>
     </MudPaper>
 }
@@ -116,6 +116,6 @@ else
         stats = DashboardService.GetStats(progress);
     }
 
-    private void NavigateToWeeks() => NavigationManager.NavigateTo("/weeks");
+    private void NavigateToFases() => NavigationManager.NavigateTo("/fases");
     private void NavigateToDashboard() => NavigationManager.NavigateTo("/dashboard");
 }
