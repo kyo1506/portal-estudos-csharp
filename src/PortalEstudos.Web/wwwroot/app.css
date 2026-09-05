@@ -63,7 +63,7 @@ html, body {
 }
 
 /* Links que envolvem cards (navegação sem depender do circuito SignalR) */
-.week-card-link {
+.fase-card-link {
     text-decoration: none;
     color: inherit;
     display: flex;
@@ -72,8 +72,9 @@ html, body {
     height: 100%;
 }
 
-    .week-card-link .mud-card {
+    .fase-card-link .mud-card {
         height: 100%;
+        width: 100%;
     }
 
 .lesson-list, .exercise-list {
