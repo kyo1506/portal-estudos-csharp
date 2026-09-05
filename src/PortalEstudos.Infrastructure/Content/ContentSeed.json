@@ -1,285 +1,181 @@
 {
   "fases": [
     {
-      "id": 1,
-      "title": "Memória, Tipos e a Base de Tudo",
-      "description": "Stack vs Heap, Tipos por Valor vs Referência, Boxing/Unboxing",
-      "icon": "🧠",
+      "id": 0,
+      "title": "Fundamentos da Programação (lógica com C#)",
+      "description": "Do zero: variáveis e tipos, operadores, decisões, laços, arrays, strings, funções e lógica.",
+      "icon": "🐣",
+      "challenge": null,
       "lessons": [
         {
           "id": 1,
-          "title": "Tipos por Valor vs Tipos por Referência",
-          "content": "## Tipos por Valor vs Tipos por Referência\n\nEm C#, todo dado tem um **tipo** que define:\n- Quanta memória ocupa\n- Quais valores pode assumir\n- Quais operações podem ser feitas\n\n### Tipos por Valor (Value Types)\nGuardam o valor diretamente na memória (stack):\n- `int`, `double`, `bool`, `char`, `decimal`\n- `struct`, `enum`\n- `DateTime`\n\n### Tipos por Referência (Reference Types)\nGuardam o endereço do valor (heap):\n- `class`, `string`, `array`\n- `interface`, `delegate`\n\n### Exemplo Prático\n\n```csharp\n// Struct = tipo por valor\npublic struct Dinheiro\n{\n    public decimal Valor;\n    public string Moeda;\n}\n\n// Class = tipo por referência\npublic class Estoque\n{\n    public string Nome;\n    public List<Produto> Produtos;\n}\n```",
-          "codeExample": "using System;\n\npublic struct Dinheiro\n{\n    public decimal Valor;\n    public string Moeda;\n    \n    public Dinheiro(decimal valor, string moeda = \"BRL\")\n    {\n        Valor = valor;\n        Moeda = moeda;\n    }\n    \n    public override string ToString() => $\"{Moeda} {Valor:N2}\";\n}\n\npublic class Program\n{\n    public static void Main()\n    {\n        // Tipo por valor: cópia independente\n        var d1 = new Dinheiro(15.90m);\n        var d2 = d1;  // COPIA o valor\n        d2.Valor = 20.00m;\n        \n        Console.WriteLine($\"d1: {d1}\");  // BRL 15,90\n        Console.WriteLine($\"d2: {d2}\");  // BRL 20,00\n    }\n}",
-          "codeLanguage": "csharp",
+          "title": "00.1 — O que é Programar?",
+          "content": "> **Fase 00 — Fundamentos da Programação** · Aula 1\n> Objetivo: entender o que é programar, o que é um algoritmo e como o C# chega do código ao executável.\n\n## 1. O computador é \"burro\" — mas muito rápido\n\nUm computador não \"entende\" nada: ele apenas executa, **na ordem**, um conjunto\nlimitadíssimo de instruções aritméticas e de movimentação de memória. A inteligência\naparente vem de nós: **organizar essas instruções para resolver um problema**.\n\nProgramar é **traduzir um problema do mundo real em uma sequência precisa de passos\nque o computador consiga executar**.\n\n### Analogia: a receita de bolo\nUma receita é um **algoritmo**:\n1. Pegue os ingredientes (entrada).\n2. Misture os secos.\n3. Adicione os líquidos.\n4. Asse a 180 °C por 40 min.\n5. Sirva (saída).\n\nUm algoritmo tem três propriedades essenciais:\n- **Determinístico**: dado o mesmo início, o resultado é o mesmo.\n- **Finito**: termina após um número de passos.\n- **Bem definido**: cada passo não deixa dúvida.\n\n## 2. Linguagem de programação ≠ máquina\n\nO processador fala *linguagem de máquina* (bits). Escrever bits é inviável para humanos.\nEntão escrevemos em **linguagens de alto nível** (C#, Python, Java...) e um **compilador**\ntraduz para o que a máquina entende.\n\n### O caminho do C#\n```\nCódigo-fonte (.cs)            →  compilador (Roslyn)       →  IL (linguagem intermediária)\n     ↓\nCommon Language Runtime (CLR / dotnet)  →  executa a IL   →  instruções da CPU\n```\n\n- O **C#** é a linguagem (sintaxe que você escreve).\n- O **.NET** é a plataforma/ecossistema (runtime, bibliotecas, ferramentas).\n- O **CLR** é o \"motor\" que executa o programa e cuida de memória, threads etc.\n\n### Compilação AOT vs JIT\n- **JIT** (Just-In-Time): o .NET compila a IL para código de máquina **na hora em que roda**.\n  É o padrão — permite otimizações em tempo de execução.\n- **AOT** (Ahead-Of-Time, `NativeAOT`): compila **antes** de rodar, gerando executável nativo\n  (menor, inicia rápido). Use quando precisar de deploy mínimo.\n- (Você não precisa decorar isso agora; só saiba que *existe*.)\n\n## 3. Sintaxe, semântica e lógica\n\nTrês níveis de erro/atenção ao programar:\n1. **Sintaxe**: a \"gramática\" da linguagem. `int x = 10;` certo; `int x = ;` erra na compilação.\n2. **Semântica**: o significado. `int x = \"abc\";` é sintaticamente estranho e não compila (tipo errado).\n3. **Lógica**: seu programa compila e roda, mas faz o resultado errado (bug).\n\n> Regra de ouro: **o computador faz exatamente o que você mandou — não o que você queria.**\n\n## 4. Pensar em passos (decomposição)\n\nTodo problema grande deve ser **decomposto** em problemas menores (funções), cada um\nfazendo **uma coisa só**. Veremos isso em Aula 00.10 (funções) e com força em OO/SOLID.\n\n**Anti-exemplo:** tentar resolver tudo num único bloco gigante de código.\n**Bom exemplo:** separar em *entrada → processamento → saída*, e cada processamento em função.\n\n## 5. Exercícios de fixação\n\n**Fácil — 1.** Escreva, em português (pseudocódigo), o algoritmo para:\n(a) decidir se um número é par ou ímpar;\n(b) calcular a média de três provas e dizer se o aluno passou (média ≥ 6).\n\n**Médio — 2.** Desenhe um **fluxograma** (ou lista numerada) do algoritmo de uma\nmáquina de café com opções: \"café preto\" ou \"café com leite\", e pagamento válido/não.\n\n**Desafiador — 3.** Um problema \"fácil para humano, difícil para máquina\"? Cite um\nexemplo de tarefa que seja **trivial** para uma pessoa e exija passos longos numa\nmáquina (dica: reconhecer rostos, entender sarcasmo, amarrar cadarço).\n\n> A resposta certa de programação costuma ser: **dividir, nomear bem e testar cada parte.**",
+          "codeExample": null,
+          "codeLanguage": null,
           "order": 1
         },
         {
           "id": 2,
-          "title": "Stack vs Heap",
-          "content": "## Stack vs Heap\n\n### Stack (Pilha)\n- Memória rápida e organizada\n- Tamanho fixo por variável\n- Alocação/desalocação automática\n- Tipos por valor vivem aqui\n\n### Heap (Monte)\n- Memória dinâmica\n- Objetos de classe vivem aqui\n- Coletada pelo Garbage Collector\n- Mais lenta que a stack\n\n### Visualização\n\n```\nSTACK                          HEAP\n┌─────────────────┐           ┌──────────────────────┐\n│ int x = 42      │           │ Dinheiro object      │\n│ Dinheiro d1 ────│──────────→│ Valor: 15.90         │\n│ (valor direto)  │           │ Moeda: BRL           │\n└─────────────────┘           └──────────────────────┘\n```",
-          "codeExample": "// Demonstração de Stack vs Heap\npublic struct Point { public int X, Y; }\n\npublic class Program\n{\n    public static void Main()\n    {\n        // Stack: valor direto\n        int numero = 42;\n        Point p1 = new Point { X = 1, Y = 2 };\n        \n        // Heap: referência\n        var texto = new string(\"Hello\");\n        var lista = new List<int> { 1, 2, 3 };\n        \n        Console.WriteLine($\"int é valor: {numero}\");\n        Console.WriteLine($\"string é referência: {texto}\");\n    }\n}",
-          "codeLanguage": "csharp",
+          "title": "00.2 — Preparando o ambiente .NET",
+          "content": "> **Fase 00** · Aula 2\n> Objetivo: instalar o .NET, conhecer a CLI e criar/rodar seu primeiro programa.\n\n## 1. O que você precisa\n\n| Ferramenta | Para quê |\n|------------|----------|\n| **.NET SDK** | compilar, rodar e testar (`dotnet`) |\n| **Editor** | escrever código (VS Code + extensão C#, ou JetBrains Rider) |\n| **Git** | versionar e entregar via PR |\n\n### Instalar o SDK\nBaixe o **.NET SDK** (LTS/atual) em https://dotnet.microsoft.com/download.\nNo terminal, confirme:\n\n```bash\ndotnet --version          # ex.: 10.0.x\ndotnet --list-sdks        # SDKs instalados\n```\n\n> ⚠️ **SDK ≠ Runtime.** Você precisa do **SDK** para compilar. O runtime vem junto no SDK.\n\n## 2. A interface de linha de comando (CLI do .NET)\n\nA CLI é a porta de entrada para tudo no .NET. Comandos que você usará sempre:\n\n```bash\ndotnet new console -n MeuApp        # cria um projeto console\ndotnet new sln -n Curso             # cria uma solução\ndotnet sln add MeuApp               # adiciona projeto à solução\ndotnet build                        # compila (mostra erros/avisos)\ndotnet run                          # compila e executa\ndotnet test                         # roda os testes\ndotnet publish -c Release           # gera a versão de publicação\n```\n\n### Solução vs Projeto\n- **Projeto** (`*.csproj`): uma unidade compilável (um app, uma biblioteca, um projeto de testes).\n- **Solução** (`*.sln`/`*.slnx`): um \"guarda-chuva\" que agrupa vários projetos relacionados.\n- Organizar por solução facilita compilar/testar tudo de uma vez.\n\n## 3. Seu primeiro programa\n\n```bash\nmkdir Primeiro && cd Primeiro\ndotnet new console\n```\n\nO template gera um `Program.cs`:\n\n```csharp\nConsole.WriteLine(\"Hello, World!\");\n```\n\nPara executar:\n```bash\ndotnet run\n# Hello, World!\n```\n\n### Estrutura de um projeto console\n```\nPrimeiro/\n├── Primeiro.csproj     # metadados: SDK, alvo (.NET), opções\n├── Program.cs          # ponto de entrada\n├── obj/                # temporários de compilação (não versionar)\n└── bin/                # binários gerados (não versionar)\n```\n\n> `bin/` e `obj/` **não** devem ir para o Git (estão no `.gitignore`).\n\n## 4. Conhecendo o `.csproj`\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net10.0</TargetFramework>\n    <Nullable>enable</Nullable>\n    <ImplicitUsings>enable</ImplicitUsings>\n  </PropertyGroup>\n</Project>\n```\n\n- `OutputType=Exe` → aplicação executável (console). `Library` → biblioteca.\n- `TargetFramework` → qual versão do .NET (ex.: `net10.0`).\n- `Nullable=enable` → avisos de possibilidade de nulo (ajuda a evitar bugs; usaremos sempre).\n- `ImplicitUsings=enable` → vários `using` comuns já inclusos automaticamente.\n\n## 5. Armadilhas comuns do começo\n\n- ❌ Rodar `dotnet run` de outra pasta: o .NET procura o `.csproj` no diretório atual (ou subpastas).\n  Use `dotnet run --project Caminho/Para/MeuApp.csproj`.\n- ❌ Editar e não recompilar: **sempre** `dotnet run` ou `dotnet build` para ver as mudanças.\n- ❌ Commit de `bin/obj` — nunca versione artefatos de build.\n- ❌ Confundir \"erro de compilação\" com \"bug de lógica\": o compilador aponta linha/coluna;\n  leia a mensagem inteira (o final costuma ter a causa).\n\n## 6. Exercícios\n\n**Fácil — 1.** Crie um projeto `Primeiro`, altere o texto para `Olá, meu nome é X` e rode.\nConfirme que `dotnet build` termina com `Build succeeded`.\n\n**Médio — 2.** Crie uma solução `Curso`, adicione dois projetos console nela e rode o primeiro.\nUse `dotnet sln list` para conferir.\n\n**Desafiador — 3.** Rode `dotnet publish -c Release` e descubra **onde** o executável é gerado\ne **quantos arquivos** há na pasta publicada. Pesquise: o que a pasta `bin/Release/.../publish`\ncontém de diferente de `bin/Debug/...`?",
+          "codeExample": null,
+          "codeLanguage": null,
           "order": 2
         },
         {
           "id": 3,
-          "title": "Boxing e Unboxing",
-          "content": "## Boxing e Unboxing\n\n### Boxing\nÉ quando um tipo por valor é \"embalado\" para a heap (object).\n\n```csharp\nint numero = 42;\nobject obj = numero;  // Boxing! int → object\n```\n\n### Unboxing\nÉ quando o valor é desembalado de volta.\n\n```csharp\nint deVolta = (int)obj;  // Unboxing\n```\n\n### Performance\nBoxing/unboxing tem custo! Evite em loops.\n\n```csharp\n// ❌ Lento: boxing em cada iteração\nArrayList lista = new ArrayList();\nfor (int i = 0; i < 100000; i++)\n    lista.Add(i);  // Boxing!\n\n// ✅ Rápido: sem boxing\nList<int> listaOtimizada = new List<int>();\nfor (int i = 0; i < 100000; i++)\n    listaOtimizada.Add(i);  // Sem boxing\n```",
-          "codeExample": "using System;\nusing System.Collections;\nusing System.Collections.Generic;\nusing System.Diagnostics;\n\npublic class Program\n{\n    public static void Main()\n    {\n        var sw = Stopwatch.StartNew();\n        \n        // Com boxing\n        var listaLenta = new ArrayList();\n        for (int i = 0; i < 100000; i++)\n            listaLenta.Add(i);\n        sw.Stop();\n        Console.WriteLine($\"ArrayList (boxing): {sw.ElapsedMilliseconds}ms\");\n        \n        // Sem boxing\n        sw.Restart();\n        var listaRapida = new List<int>();\n        for (int i = 0; i < 100000; i++)\n            listaRapida.Add(i);\n        sw.Stop();\n        Console.WriteLine($\"List<int>: {sw.ElapsedMilliseconds}ms\");\n    }\n}",
-          "codeLanguage": "csharp",
+          "title": "00.3 — Estrutura de um programa C# e variáveis",
+          "content": "> **Fase 00** · Aula 3\n> Objetivo: ler um programa C# e guardar dados em memória com variáveis e tipos básicos.\n\n## 1. Anatomia de um programa\n\nCada instrução termina com `;`. O C# executa **de cima para baixo**, instrução por instrução.\n\n```csharp\n// Comentário de linha\nint idade = 25;                 // declara uma variável 'idade' e guarda 25\nConsole.WriteLine(idade);       // imprime 25\nidade = 26;                     // sobrescreve o valor\nConsole.WriteLine(idade);       // imprime 26\n```\n\n### Comentários\n```csharp\n// comentário de linha\n/* comentário de\n   várias linhas */\n/// <summary>Comentário de documentação (aparece em tooltips)</summary>\n```\n\n## 2. Variáveis: caixinhas com nome e tipo\n\nUma variável é um **espaço nomeado na memória** que guarda um valor de **um tipo fixo**.\n\n```csharp\n<tipo> <nome> = <valor>;\nint    idade  = 25;\n```\n\nO **tipo** diz *o que* cabe (número inteiro? texto? verdadeiro/falso?) e o **tamanho** em memória.\n\n### Tipos básicos mais usados\n| Tipo | Guarda | Exemplo |\n|------|--------|---------|\n| `int` | inteiro (32 bits) | `-2147483648..2147483647` |\n| `long` | inteiro grande (64 bits) | `9_000_000_000L` |\n| `double` | número com casas (64 bits) | `3.14159` |\n| `decimal` | dinheiro/preciso (128 bits) | `15.90m` |\n| `bool` | verdadeiro/falso | `true` |\n| `char` | um caractere | `'A'` |\n| `string` | texto (sequência de `char`) | `\"Olá\"` |\n\n```csharp\nint ano = 2026;\nlong populacao = 8_000_000_000L;   // underline melhora a leitura\ndouble pi = 3.14159;\ndecimal preco = 19.99m;            // sufixo 'm' = decimal\nbool aprovado = true;\nchar letra = 'A';\nstring nome = \"Beatriz\";\n```\n\n> ⚠️ `decimal` tem sufixo `m`; `long` tem `L`. **Sempre** use `decimal` (não `double`)\n> para dinheiro/valores que precisam de exatidão — `double` tem erro de arredondamento.\n\n## 3. Inferência de tipo com `var`\n\nVocê pode deixar o compilador descobrir o tipo:\n\n```csharp\nvar idade = 25;        // o compilador entende: é int\nvar nome = \"Ana\";      // é string\n```\n\n`var` **não** é \"sem tipo\" nem dinâmico: o tipo é fixado na hora. Só funciona quando o\ncompilador consegue inferir na mesma linha (com inicialização).\n\n**Bom uso:** nomes longos de tipo. **Mau uso:** quando esconde a intenção.\n```csharp\nvar d = 3.14;                       // ok, mas...\ndouble d = 3.14;                    // mais claro aqui\nDictionary<string, List<int>> mapa = new();   // 'var' ajuda muito aqui\nvar mapa = new Dictionary<string, List<int>>();\n```\n\n## 4. Constantes\n\nUma constante **não muda** após definida:\n\n```csharp\nconst double PI = 3.14159;\nconst int DIAS_SEMANA = 7;\n// PI = 3; // ❌ ERRO: constante não pode mudar\n```\n\nUse constantes para valores que têm significado e não devem variar (evita \"números mágicos\").\n\n## 5. Nomenclatura (convenções C#)\n\n| Contexto | Convenção | Exemplo |\n|----------|-----------|---------|\n| variáveis locais / parâmetros | `camelCase` | `totalCompra` |\n| campos privados | `_camelCase` | `_saldo` |\n| constantes | `PascalCase` ou `UPPER_SNAKE` | `LimiteMaximo` |\n| classes / métodos / propriedades públicas | `PascalCase` | `Cliente`, `CalcularTotal` |\n\n## 6. Anti-exemplos\n\n```csharp\n// ❌ nome sem sentido / magia numérica\nint x = 60;                       // o que é 60?\n\n// ✅ nome intencional\nconst int MINUTOS_EM_UMA_HORA = 60;\nint minutosRestantes = 60;\n\n// ❌ tipo errado para dinheiro\ndouble salario = 2500.10;\n\n// ✅ decimal para dinheiro\ndecimal salario = 2500.10m;\n```\n\n## 7. Exercícios\n\n**Fácil — 1.** Declare variáveis para: seu nome (string), idade (int), altura (double),\npeso (decimal). Imprima uma frase com todas.\n\n**Médio — 2.** Crie constantes `PrecoProduto` (decimal) e `Quantidade` (int) e imprima o total.\n**Pegadinha:** escreva `var` onde couber e explique qual tipo cada `var` inferiu.\n\n**Desafiador — 3.** Pesquise/descubra: qual o valor máximo de um `int`? O que acontece se você\nsomar 1 ao valor máximo de um `int`? Teste e explique o resultado (`int.MaxValue`).",
+          "codeExample": null,
+          "codeLanguage": null,
           "order": 3
+        },
+        {
+          "id": 4,
+          "title": "00.4 — Entrada, saída e formatação",
+          "content": "> **Fase 00** · Aula 4\n> Objetivo: ler do usuário, escrever na tela e formatar texto/números corretamente.\n\n## 1. Saída: `Console.WriteLine` e `Console.Write`\n\n```csharp\nConsole.WriteLine(\"Oi\");   // imprime e pula linha\nConsole.Write(\"Oi\");       // imprime SEM pular linha\n```\n\n## 2. Interpolação de strings `$\"...\"`\n\nA forma moderna e preferida de montar texto com valores:\n\n```csharp\nstring nome = \"Beatriz\";\nint idade = 25;\nConsole.WriteLine($\"Olá, {nome}! Você tem {idade} anos.\");\n```\n\n> ✅ Sempre prefira **interpolação** (`$\"...\"`) a concatenar com `+`. É mais legível e segura.\n> ```csharp\n> Console.WriteLine(\"Olá, \" + nome + \"! Você tem \" + idade + \" anos.\"); // ❌ legível, mas pior\n> ```\n\n## 3. Entrada: `Console.ReadLine()`\n\n```csharp\nConsole.Write(\"Digite seu nome: \");\nstring? nome = Console.ReadLine();   // retorna string? (pode ser nulo)\nConsole.WriteLine($\"Prazer, {nome}!\");\n```\n\n### Converter texto digitado em número\nTudo que entra pelo teclado é `string`. Para usar como número, **converta**:\n\n```csharp\nConsole.Write(\"Digite a idade: \");\nstring entrada = Console.ReadLine() ?? \"\";\nbool converteu = int.TryParse(entrada, out int idade);\n\nif (converteu)\n    Console.WriteLine($\"Idade: {idade}\");\nelse\n    Console.WriteLine(\"Valor inválido para idade.\");\n```\n\n> Prefira **`int.TryParse`** (retorna `bool` e não lança erro) a `int.Parse`\n> (que **lança exceção** se falhar). O mesmo vale para `double.TryParse`, `decimal.TryParse`.\n\n## 4. Formatação de números e datas\n\n### Formatação inline (na interpolação)\n```csharp\ndecimal preco = 1234.5m;\nConsole.WriteLine($\"{preco:C}\");   // moeda: R$ 1.234,50 (segue a cultura)\nConsole.WriteLine($\"{preco:N2}\");  // número com 2 casas: 1.234,50\nConsole.WriteLine($\"{preco:0.00}\");// 1234,50\nConsole.WriteLine($\"{0.5:P0}\");    // percentual: 50%\n```\n\n### Cultura (importante no Brasil)\nA formatação de moeda/vírgula depende da **cultura** do sistema. Para forçar padrão brasileiro:\n\n```csharp\nusing System.Globalization;\nConsole.WriteLine(preco.ToString(\"C\", new CultureInfo(\"pt-BR\"))); // R$ 1.234,50\n```\n\n> ⚠️ Em apps que usam ponto ou vírgula decimal, defina a cultura no início do processo:\n> `CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(\"pt-BR\");`\n\n### Alinhamento / casas\n```csharp\nConsole.WriteLine($\"|{\"Item\",-10}|{\"Qtd\",5}|\");   // -10 alinha à esquerda, 5 à direita\n```\n\n## 5. Programa completo de exemplo\n\n```csharp\nConsole.Write(\"Produto: \");\nstring produto = Console.ReadLine() ?? \"?\";\nConsole.Write(\"Preço: \");\nbool ok = decimal.TryParse(Console.ReadLine(), out decimal preco);\n\nif (!ok)\n{\n    Console.WriteLine(\"Preço inválido.\");\n    return;          // encerra o programa aqui (veremos fluxo em breve)\n}\n\nConsole.WriteLine($\"Você comprou {produto} por {preco:C}.\");\n```\n\n## 6. Anti-exemplos\n\n```csharp\n// ❌ int.Parse sem garantia de que é número (quebra se o usuário digitar letra)\nint idade = int.Parse(Console.ReadLine()!);\n\n// ✅ TryParse tratando erro\nif (int.TryParse(Console.ReadLine(), out int idade))\n    Console.WriteLine($\"Idade: {idade}\");\nelse\n    Console.WriteLine(\"Número inválido.\");\n```\n\n## 7. Exercícios\n\n**Fácil — 1.** Peça nome, idade e cidade; imprima em uma frase interpolarizada.\n\n**Médio — 2.** Peça dois números (`decimal`), some-os e mostre o total formatado como moeda\nbrasileira (`pt-BR`) e também como número com duas casas.\n\n**Desafiador — 3.** Crie um \"caixa registradora\" que lê o valor de 3 produtos, calcula o total,\naplica 10% de desconto e mostra: subtotal, desconto e total — cada linha alinhada à direita em\numa coluna de 15 caracteres. Trate entrada inválida com `TryParse`.",
+          "codeExample": null,
+          "codeLanguage": null,
+          "order": 4
+        },
+        {
+          "id": 5,
+          "title": "00.5 — Operadores",
+          "content": "> **Fase 00** · Aula 5\n> Objetivo: dominar os operadores do C# (aritmética, comparação, lógica) e a precedência.\n\n## 1. Operadores aritméticos\n\n| Operador | Operação | Exemplo | Resultado |\n|----------|----------|---------|-----------|\n| `+` | soma | `7 + 3` | `10` |\n| `-` | subtração | `7 - 3` | `4` |\n| `*` | multiplicação | `7 * 3` | `21` |\n| `/` | divisão | `7 / 3` | `2` *(ver nota)* |\n| `%` | resto (módulo) | `7 % 3` | `1` |\n| `++` | incrementa | `n++` | n+1 |\n| `--` | decrementa | `n--` | n-1 |\n\n### ⚠️ Divisão de inteiros vs decimais\n```csharp\nConsole.WriteLine(7 / 2);      // 3   (divisão inteira — descarta a casa!)\nConsole.WriteLine(7.0 / 2);    // 3.5 (pelo menos um é decimal/double)\nConsole.WriteLine(7m / 2m);    // 3.5 (decimal)\n```\nSe **ambos** os operandos são `int`, a divisão é **inteira** (trunca). Para obter casas,\nuse `double`/`decimal` ou converta: `(double)a / b`.\n\n### `%` (resto) — muito útil\n```csharp\nConsole.WriteLine(10 % 3);   // 1\nConsole.WriteLine(10 % 2);   // 0  → par\nConsole.WriteLine(9 % 2);    // 1  → ímpar\n```\n\n## 2. Operadores de atribuição\n\n```csharp\nint x = 10;\nx += 5;    // x = 15   (equivale a x = x + 5)\nx -= 3;    // x = 12\nx *= 2;    // x = 24\nx /= 4;    // x = 6\nx %= 5;    // x = 1\n```\n\n## 3. Operadores de comparação (retornam `bool`)\n\n| Operador | Significado | Exemplo |\n|----------|-------------|---------|\n| `==` | igual | `a == b` |\n| `!=` | diferente | `a != b` |\n| `>` | maior | `a > b` |\n| `<` | menor | `a < b` |\n| `>=` | maior ou igual | `a >= b` |\n| `<=` | menor ou igual | `a <= b` |\n\n> ⚠️ Compare **valor** com `==`/`!=`. Em C#, para números/bool funcionam; para **strings**\n> `==` compara o conteúdo (ok), mas para objetos comparados por referência o comportamento\n> muda — veremos isso em profundidade na Fase 01/02. Aqui: para números, use normalmente.\n\n## 4. Operadores lógicos\n\n| Operador | Significado | Exemplo |\n|----------|-------------|---------|\n| `&&` | E (AND) | `a > 0 && b > 0` |\n| `\\|\\|` | OU (OR) | `a > 0 \\|\\| b > 0` |\n| `!` | NÃO (NOT) | `!ativo` |\n\n```csharp\nint idade = 25;\nbool temIngresso = true;\n\nbool podeEntrar = idade >= 18 && temIngresso;   // true\nbool ehAdultoOuIdoso = idade >= 18 || idade >= 65;\nbool naoMenor = !(idade < 18);\n```\n\n### Curto-circuito\n`&&` e `||` avaliam **só o necessário**. Em `a && b`, se `a` é `false`, `b` nem é avaliado.\nIsso permite escrever com segurança:\n```csharp\nstring? nome = null;\nbool temNomeLongo = nome != null && nome.Length > 3;   // não quebra se nome for nulo\n```\n\n## 5. Precedência e parênteses\n\nAssim como na matemática, há ordem de avaliação. **Use parênteses para clareza** sempre que\nhouver mistura de operadores.\n\n```csharp\n// Sem parênteses, a precedência pode surpreender:\nint r1 = 2 + 3 * 4;      // 14 (multiplicação antes)\nint r2 = (2 + 3) * 4;    // 20\n\nbool ok = idade >= 18 && temIngresso || ehVip;   // ambíguo p/ leitura humana\nbool claro = (idade >= 18 && temIngresso) || ehVip;  // ✅\n```\n\nPrecedência resumida (do maior para o menor): parênteses → `!` → `* / %` → `+ -` →\ncomparações (`< <= > >=`) → igualdade (`== !=`) → `&&` → `||` → atribuição.\n\n## 6. Anti-exemplos / pegadinhas\n\n```csharp\n// ❌ usar = em vez de == na comparação\nif (idade = 18) ...          // não compila (ou pior, em algumas linguagens atribui!)\n\n// ❌ divisão inteira inesperada\ndouble media = (7 + 8 + 9) / 3;   // 8.0? Não! (7+8+9)/3 = 24/3 = 8 int → 8.0 por acaso\ndouble media = (7 + 8 + 9) / 3.0; // melhor: 3.0\n\n// ❌ esquecer de somar casas decimais corretas (usar int onde deveria haver decimal)\n```\n\n## 7. Exercícios\n\n**Fácil — 1.** Dados `a = 15` e `b = 4`, calcule e imprima: soma, subtração, multiplicação,\ndivisão inteira, divisão real e resto. Preveja cada resultado antes de rodar.\n\n**Médio — 2.** Leia um número e diga se ele é **par**, **múltiplo de 5**, ou ambos.\n\n**Desafiador — 3.** Sem usar funções de `Math`, escreva o código que verifica se um ano é\nbissexto: divisível por 4, mas não por 100, exceto se também for divisível por 400.\nTeste com 2000 (sim), 1900 (não), 2024 (sim), 2023 (não).",
+          "codeExample": null,
+          "codeLanguage": null,
+          "order": 5
+        },
+        {
+          "id": 6,
+          "title": "00.6 — Decisões: `if`, `else`, `switch`",
+          "content": "> **Fase 00** · Aula 6\n> Objetivo: fazer o programa tomar rumos diferentes conforme condições.\n\n## 1. `if / else if / else`\n\n```csharp\nint nota = 78;\n\nif (nota >= 90)\n    Console.WriteLine(\"Excelente\");\nelse if (nota >= 70)\n    Console.WriteLine(\"Bom\");\nelse if (nota >= 50)\n    Console.WriteLine(\"Regular\");\nelse\n    Console.WriteLine(\"Reprovado\");\n```\n\n### Regras\n- A condição entre `( )` precisa ser um `bool`.\n- **`else if`** permite encadear. A ordem **importa** (a primeira que for verdadeira vence).\n- `else` é opcional.\n- **Bloco com chaves** `{ }` é obrigatório quando há mais de uma instrução; use sempre para evitar bugs.\n\n```csharp\n// PEGADINHA clássica: sem chaves, apenas a PRIMEIRA linha pertence ao if\nif (saldo < 0)\n    Console.WriteLine(\"Negativo\");\n    Console.WriteLine(\"Sempre imprime\");   // NÃO faz parte do if!\n```\n\n## 2. Expressão condicional (ternário) `? :`\n\nPara atribuir um de dois valores de forma concisa:\n\n```csharp\nstring status = nota >= 60 ? \"Aprovado\" : \"Reprovado\";\n// equivalente a:\nstring status;\nif (nota >= 60) status = \"Aprovado\"; else status = \"Reprovado\";\n```\n\nUse ternário **apenas** para escolhas simples de 2 vias; para lógica maior, prefira `if`.\n\n## 3. `switch` (forma clássica)\n\n```csharp\nstring dia = \"seg\";\n\nswitch (dia)\n{\n    case \"sab\":\n    case \"dom\":\n        Console.WriteLine(\"Fim de semana\");\n        break;\n    case \"seg\":\n        Console.WriteLine(\"Começa a semana\");\n        break;\n    default:\n        Console.WriteLine(\"Dia de semana\");\n        break;\n}\n```\n\n> Não esqueça o `break` (ou `return`). Em C#, cada `case` precisa \"terminar\".\n\n## 4. `switch` como expressão (moderna) — preferida\n\nDesde o C# 8 é possível usar `switch` **retornando valor**:\n\n```csharp\nstring rotulo = nota switch\n{\n    >= 90 => \"Excelente\",\n    >= 70 => \"Bom\",\n    >= 50 => \"Regular\",\n    _     => \"Reprovado\"     // '_' = caso padrão (default)\n};\n```\n\nVantagens: mais curto, sem `break`, sem chance de \"cair\" de um caso para outro.\n\n### Outra forma com `when`\n```csharp\nstring faixa = idade switch\n{\n    < 13 => \"Criança\",\n    < 18 => \"Adolescente\",\n    < 60 => \"Adulto\",\n    _    => \"Idoso\"\n};\n```\n\n## 5. Comparar com pattern matching (avançando)\n\nNa Fase 01 veremos *pattern matching* a fundo. Já aqui, perceba que em vez de comparar só\nvalores, o `switch` de expressão entende intervalos (`>= 90`, `< 18`).\n\n## 6. Decisão + lógica combinadas\n\n```csharp\nstatic string AvaliarAcesso(int idade, bool temIngresso, bool ehVip) =>\n    (idade >= 18 && temIngresso) || ehVip\n        ? \"Pode entrar\"\n        : \"Não pode entrar\";\n```\n\n## 7. Exercícios\n\n**Fácil — 1.** Leia uma nota (0–10) e imprima: A (>=9), B (>=7), C (>=5), D (>=3), E (senão).\n\n**Médio — 2.** Leia 3 números e imprima o **maior** e o **menor** usando apenas `if` (sem `Math.Max`).\n\n**Desafiador — 3.** Reimplemente um \"classificador de IMC\": leia peso e altura, calcule\n`imc = peso / (altura*altura)` e imprima a faixa usando **switch de expressão**:\n`< 18.5` Baixo · `< 25` Normal · `< 30` Sobrepeso · `_` Obesidade. Trate altura `<= 0`.",
+          "codeExample": null,
+          "codeLanguage": null,
+          "order": 6
+        },
+        {
+          "id": 7,
+          "title": "00.7 — Laços de repetição: `for`, `while`, `do-while`, `foreach`",
+          "content": "> **Fase 00** · Aula 7\n> Objetivo: repetir blocos de código com controle — a base de quase toda lógica.\n\n## 1. `while` — repete enquanto a condição for verdadeira\n\n```csharp\nint contador = 1;\nwhile (contador <= 5)\n{\n    Console.WriteLine(contador);\n    contador++;\n}\n```\n- A condição é testada **antes** de cada volta. Se começar falsa, o bloco **não roda**.\n- Você é responsável por fazer a condição um dia virar falsa (senão = **loop infinito**).\n\n## 2. `do-while` — roda pelo menos uma vez\n\n```csharp\nstring? entrada;\ndo\n{\n    Console.Write(\"Digite 'sair' para encerrar: \");\n    entrada = Console.ReadLine();\n} while (entrada != \"sair\");\n```\nA condição é testada **depois** da primeira execução. Ideal para menus e validação de entrada.\n\n## 3. `for` — contagem com controle\n\n```csharp\nfor (inicialização; condição; incremento)\nfor (int i = 0; i < 5; i++)\n{\n    Console.WriteLine(i);   // 0 1 2 3 4\n}\n```\nÉ o laço para quando você sabe **quantas vezes** repetir, especialmente com índice.\n\n```csharp\n// de trás para frente\nfor (int i = 10; i >= 0; i -= 2)\n    Console.WriteLine(i);   // 10 8 6 4 2 0\n```\n\n## 4. `foreach` — percorrer uma coleção/sequência\n\n```csharp\nstring[] nomes = { \"Ana\", \"Bia\", \"Caio\" };\nforeach (var nome in nomes)\n    Console.WriteLine(nome);\n```\n- **Não** precisa de índice; percorre todos os elementos.\n- É a forma mais segura/legível para percorrer listas. (Não dá para modificar a coleção durante o `foreach`.)\n\n## 5. `break`, `continue` e `return`\n\n```csharp\nfor (int i = 0; i < 100; i++)\n{\n    if (i == 3) continue;      // pula esta volta (não imprime 3)\n    if (i == 6) break;         // encerra o laço de vez\n    Console.WriteLine(i);      // 0 1 2 4 5\n}\n```\n- `continue` → vai para a próxima volta.\n- `break` → sai do laço.\n- `return` (dentro de função) → sai da função inteira (encerra também o laço).\n\n## 6. Loop infinito e como escapar\n\n```csharp\nwhile (true)          // comum em menus/processos que ficam ouvindo\n{\n    string? op = Console.ReadLine();\n    if (op == \"sair\") break;\n}\n```\nUse `while (true)` **com** uma saída (`break`/`return`). Evite em lógica de cálculo puro.\n\n## 7. Quando usar qual?\n\n| Situação | Laço |\n|----------|------|\n| Sei quantas vezes / preciso de índice | `for` |\n| Não sei quantas, condição no início | `while` |\n| Não sei quantas, mas roda ao menos 1x (menu) | `do-while` |\n| Percorrer todos os itens de uma coleção | `foreach` |\n\n## 8. Exemplos e pegadinhas\n\n```csharp\n// Somar de 1 a 100\nint soma = 0;\nfor (int i = 1; i <= 100; i++) soma += i;\n\n// Pegadinha: esquecer o incremento\n// while (x < 10) { }  // sem x++ → loop infinito!\n\n// Pegadinha: off-by-one no for\nfor (int i = 0; i <= nomes.Length; i++) // ❌ estoura (vai até índice = length)\nfor (int i = 0; i < nomes.Length; i++)  // ✅\n```\n\n## 9. Exercícios\n\n**Fácil — 1.** Imprima todos os números de 1 a 100 que são **múltiplos de 3** (use `%` e `for`).\n\n**Médio — 2.** Leia números do usuário até que ele digite `0`; imprima ao final: soma, maior,\nmenor e média dos números digitados (ignorando o `0`).\n\n**Desafiador — 3.** Escreva a **tabuada** de 1 a 10 com laço aninhado, formatando cada linha\nex.: `3 x 4 = 12`. Use `for` aninhado e alinhamento com `$\"{...},\"`.",
+          "codeExample": null,
+          "codeLanguage": null,
+          "order": 7
+        },
+        {
+          "id": 8,
+          "title": "00.8 — Vetores (arrays) e `string`",
+          "content": "> **Fase 00** · Aula 8\n> Objetivo: guardar sequências de valores e trabalhar com texto.\n\n## 1. O que é um array (vetor)\n\nUm `array` é uma sequência **fixa** de elementos **do mesmo tipo**, indexada a partir de **0**.\n\n```csharp\nint[] numeros = new int[5];          // 5 inteiros (todos 0 por padrão)\nstring[] nomes = { \"Ana\", \"Bia\", \"Caio\" };   // inicialização direta\nint[] pares = new int[] { 2, 4, 6, 8 };\n```\n\n### Acessar por índice\n```csharp\nstring[] nomes = { \"Ana\", \"Bia\", \"Caio\" };\nConsole.WriteLine(nomes[0]);   // Ana\nConsole.WriteLine(nomes[2]);   // Caio\nnomes[1] = \"Beatriz\";          // muda o elemento 1\nConsole.WriteLine(nomes.Length); // 3\n```\n\n> ⚠️ O último índice é `Length - 1`. Acessar `nomes[3]` lança `IndexOutOfRangeException`.\n\n### Percorrer\n```csharp\nfor (int i = 0; i < nomes.Length; i++)   // com índice (para saber a posição)\n    Console.WriteLine($\"{i}: {nomes[i]}\");\n\nforeach (var nome in nomes)              // sem índice (só para ler)\n    Console.WriteLine(nome);\n```\n\n### Arrays 2D (matrizes)\n```csharp\nint[,] matriz = { { 1, 2, 3 }, { 4, 5, 6 } };\nConsole.WriteLine(matriz[1, 2]); // 6 (linha 1, coluna 2)\nConsole.WriteLine(matriz.GetLength(0)); // 2 linhas\n```\n\n## 2. `string` — o tipo texto\n\nUma `string` é, por baixo, uma **sequência imutável de caracteres** (`char`). Imutável =\numa vez criada, não muda; operações que \"modificam\" criam uma **nova** string.\n\n```csharp\nstring s = \"Olá, mundo!\";\nConsole.WriteLine(s.Length);       // 11\nConsole.WriteLine(s.ToUpper());    // OLÁ, MUNDO!  (nova string)\nConsole.WriteLine(s.Contains(\"mundo\")); // True\nConsole.WriteLine(s.StartsWith(\"Olá\")); // True\nConsole.WriteLine(s.Replace(\"mundo\", \"C#\"));\n```\n\n### Acessar caracteres\n```csharp\nstring nome = \"Beatriz\";\nConsole.WriteLine(nome[0]);   // 'B'  (cuidado: string é indexada por char, não substring)\nConsole.WriteLine(nome[^1]);  // 'z'  (último, com operador de índice do fim)\n```\n\n### Substrings e partes\n```csharp\nstring frase = \"Aprender C# é ótimo\";\nConsole.WriteLine(frase.Substring(9));    // \"C# é ótimo\"\nConsole.WriteLine(frase.Substring(9, 2)); // \"C#\"\nConsole.WriteLine(frase.Split(' '));      // [\"Aprender\",\"C#\",\"é\",\"ótimo\"]\n```\n\n### Verificar vazio / nulo\n```csharp\nstring? s = null;\nbool a = string.IsNullOrEmpty(s);    // true (null OU \"\")\nbool b = string.IsNullOrWhiteSpace(s); // true (também conta espaços)\n```\n> Prefira `string.IsNullOrWhiteSpace` para validar entradas digitadas.\n\n## 3. Comparação de strings\n\n```csharp\nstring a = \"casa\";\nstring b = \"CASA\";\nbool igual1 = a == b;                       // false (diferencia maiúsculas)\nbool igual2 = a.Equals(b, StringComparison.OrdinalIgnoreCase); // true\nbool comeca = a.StartsWith(\"ca\");           // true\n```\n\n## 4. `StringBuilder` — quando montar muito texto\n\nCada `+` de string cria uma nova string. Para **muitas** concatenações em laço, use `StringBuilder`\n(a Fase 01 detalha). Regra prática: laço curto → `+`/interpolação; laço grande → `StringBuilder`.\n\n## 5. Anti-exemplos\n\n```csharp\n// ❌ confundir Length de array com último índice\nfor (int i = 0; i <= arr.Length; i++)   // estoura\n\n// ❌ comparar string com == ignorando acento/caixa quando não quer\n// ✅ usar OrdinalIgnoreCase quando quiser ignorar caixa\n\n// ❌ tentar mudar string no lugar (não dá — é imutável)\ns[0] = 'x';  // não compila\n```\n\n## 6. Exercícios\n\n**Fácil — 1.** Dado `int[] v = { 4, 7, 1, 9, 3 }`, imprima: soma, maior, menor e média (use laço).\n\n**Médio — 2.** Leia uma frase e imprima: número de palavras (use `Split`), e a frase com todas\nas palavras começando com maiúscula.\n\n**Desafiador — 3.** Escreva uma função que recebe uma `string` e retorna `true` se ela é um\n**palíndromo** (ex.: \"arara\", \"socorram me subi no onibus em marrocos\") ignorando espaços,\npontuação e maiúsculas. Não use o método pronto de inverter — use índices `i`/`j` comparando\ndas pontas para dentro.",
+          "codeExample": null,
+          "codeLanguage": null,
+          "order": 8
+        },
+        {
+          "id": 9,
+          "title": "00.9 — Funções (métodos): reutilizar e organizar código",
+          "content": "> **Fase 00** · Aula 9\n> Objetivo: escrever blocos reutilizáveis que recebem entradas e devolvem um resultado.\n\n## 1. Por que usar funções?\n1. **Reutilização** — escreva uma vez, chame muitas vezes.\n2. **Legibilidade** — código curto e nomeado que \"conta uma história\".\n3. **Testabilidade** — função pura (mesma entrada → mesma saída) é fácil de testar.\n4. **Manutenção** — corrige num lugar só.\n\n## 2. Sintaxe\n\n```csharp\n// <tipo-de-retorno> Nome(<parâmetros>) { corpo }\nstatic int Soma(int a, int b)\n{\n    return a + b;\n}\n\n// Uso:\nint resultado = Soma(3, 4);   // 7\n```\n\n- **Retorno**: o tipo após `static`. Se não devolve nada, use `void`.\n- **`return`** devolve um valor **e encerra a função**.\n- Cada função deve fazer **uma coisa só**.\n\n```csharp\nstatic void ImprimirBoasVindas(string nome)\n{\n    Console.WriteLine($\"Olá, {nome}!\");\n}\n\nstatic bool EhAdulto(int idade) => idade >= 18;   // arrow para funções curtas\n```\n\n## 3. Parâmetros: opcionais e nomeados\n\n```csharp\nstatic void Saudar(string nome, string saudacao = \"Olá\")  // 'saudacao' opcional\n{\n    Console.WriteLine($\"{saudacao}, {nome}!\");\n}\n\nSaudar(\"Ana\");                 // usa padrão \"Olá\"\nSaudar(\"Ana\", \"Bom dia\");      // sobrescreve\nSaudar(saudacao: \"Oi\", nome: \"Bia\");  // argumentos nomeados (ordem livre)\n```\n\n## 4. Parâmetro `params` e `out`\n\n```csharp\nstatic int SomarTodos(params int[] numeros)  // aceita vários argumentos\n{\n    int soma = 0;\n    foreach (var n in numeros) soma += n;\n    return soma;\n}\nSomarTodos(1, 2, 3, 4);   // 10\n\n// 'out' permite \"devolver\" mais de um valor\nstatic bool EhParOuImpar(int n, out string rotulo)\n{\n    rotulo = n % 2 == 0 ? \"par\" : \"ímpar\";\n    return n % 2 == 0;\n}\n```\n\n> ⚠️ Prefira retornar uma **tupla** (`(bool Sucesso, string Msg)`) ou um tipo próprio a\n> usar muitos `out`. `out` fica reservado para casos como `TryParse`.\n\n## 5. Escopo e variáveis locais\n\n```csharp\nstatic int Calcular(double preco)\n{\n    double imposto = preco * 0.1;   // 'imposto' existe só dentro da função\n    return (int)(preco + imposto);\n}\n// aqui fora, 'imposto' NÃO existe\n```\n\nRegra: variáveis declaradas dentro de um bloco `{ }` só são visíveis dentro dele.\n\n## 6. \"Função pura\" — conceito que vale ouro\n\nUma função **pura**:\n- dado o mesmo argumento, sempre retorna o mesmo valor;\n- não lê teclado, não imprime, não muda estado externo.\n\n```csharp\n// Puras (fáceis de testar)\nstatic double Media(double a, double b) => (a + b) / 2;\nstatic bool EhPar(int n) => n % 2 == 0;\n\n// Com efeito colateral (mais difícil de testar isolado)\nstatic void MostrarMediaNoConsole(double a, double b) => Console.WriteLine(Media(a, b));\n```\n\n> Boa arquitetura: mantenha a **regra** em função pura e deixe o **Console/entrada**\n> no chamador. É isso que permite testes automáticos (xUnit) — como fizemos no `Logica.cs`.\n\n## 7. Programas se tornam \"orquestração de funções\"\n\n```csharp\nstatic void Main()\n{\n    string nome = LerNome();\n    double nota = LerNota();\n    string situacao = ClassificarMedia(nota);\n    ImprimirResultado(nome, nota, situacao);\n}\n```\nCada passo é uma função pequena e clara.\n\n## 8. Anti-exemplos\n\n```csharp\n// ❌ função fazendo muitas coisas\nstatic void ProcessarConta() { /* lê, valida, calcula, imprime, salva... */ }\n\n// ✅ separar responsabilidades\nstatic decimal CalcularTotal(...);\nstatic bool ValidarConta(...);\nstatic void Salvar(...);\n```\n\n## 9. Exercícios\n\n**Fácil — 1.** Crie `static bool EhPar(int)` e `static bool EhPositivo(int)` e use em um pequeno\nmenu para classificar números digitados.\n\n**Médio — 2.** Crie `static double CalcularImc(double peso, double altura)` e\n`static string FaixaImc(double imc)` (funções puras) e um `Main` que lê os dados e exibe.\n\n**Desafiador — 3.** Crie uma função pura `static int ContarPalavras(string frase)` que\nconta palavras separando por espaços. Depois crie um teste mental (ou no projeto integrador)\nverificando casos: vazio, espaços múltiplos, pontuação.",
+          "codeExample": null,
+          "codeLanguage": null,
+          "order": 9
+        },
+        {
+          "id": 10,
+          "title": "00.10 — Depuração, erros comuns e testes de mesa",
+          "content": "> **Fase 00** · Aula 10\n> Objetivo: encontrar e corrigir bugs com método (debugger, leitura de erro, teste de mesa).\n\n## 1. Os três tipos de problema\n1. **Erro de compilação** — o código não compila. O compilador aponta arquivo/linha. Corrija a sintaxe/tipos.\n2. **Erro de execução** (exceção) — compila, mas quebra ao rodar (ex.: dividir por zero, índice fora do array).\n3. **Erro de lógica** — compila e roda, mas faz a coisa errada (o mais perigoso).\n\n## 2. Ler um erro (stack trace) é uma habilidade\n\n```\nUnhandled exception. System.IndexOutOfRangeException: Index was outside the bounds of the array.\n   at Program.<Main>$(String[] args) in /app/Program.cs:line 8\n```\n- **Tipo**: `IndexOutOfRangeException` → acessou índice inválido.\n- **Mensagem**: descreve o problema.\n- **Localização**: `Program.cs:line 8` → é lá que começou.\n\n> Leia a mensagem inteira e procure a linha do **seu código** (as linhas de dentro do .NET\n> normalmente não são o problema real).\n\n## 3. Debugger (quebrar e inspecionar)\n\nNo VS Code/Rider:\n1. **Breakpoint** — clique na margem de uma linha (bolinha vermelha).\n2. Rode em modo **Debug** (F5) em vez de Run.\n3. O programa **pausa** na linha. Inspecione **variáveis** no painel.\n4. **Step Over (F10)**: executa a linha e vai para a próxima.\n   **Step Into (F11)**: entra dentro da função chamada.\n5. Use **Watch** para avaliar expressões.\n\nIsso responde à pergunta *\"mas o valor desta variável aqui é o quê?\"* — a pergunta número 1\nde quem depura.\n\n## 4. Teste de mesa (desenhar o estado passo a passo)\n\nAntes de qualquer código, rastreie \"no papel\". Ex.: `SomarDe1Ate(3)`:\n\n| i | soma |\n|---|------|\n| 1 | 1 |\n| 2 | 3 |\n| 3 | 6 |\n\n`return 6`. ✓\n\nTeste de mesa é o método mais confiável para **lógica pura** — faça antes de rodar.\n\n## 5. Erros comuns de iniciante (e como evitá-los)\n\n| Erro | Por quê | Correção |\n|------|---------|----------|\n| `i <= arr.Length` no `for` | último índice é `Length-1` | `i < arr.Length` |\n| Dividir `int/int` e \"perder\" casas | divisão inteira | usar `double`/`decimal` ou converter |\n| Loop infinito | condição nunca vira falsa | garantir incremento/saída (`break`) |\n| Comparar `string` com caixa errada | `==` diferencia caixa | `Equals(..., OrdinalIgnoreCase)` |\n| `=` no lugar de `==` | atribuição | revisar |\n| Não tratar entrada inválida | `Parse` lança | usar `TryParse` |\n| Achar que mudou a `string` | string é imutável | atribuir o retorno: `s = s.ToUpper()` |\n| Variável fora do escopo | declarada dentro de `{}` | declarar onde precisa |\n\n## 6. `Console.WriteLine` para inspecionar (depuração \"pobre\", mas útil)\n\n```csharp\nint parcial = Soma(1, 2);\nConsole.WriteLine($\"[debug] parcial = {parcial}\");   // veja o valor\n```\n\n> Prefira o **debugger** (breakpoints) a encher de `Console.WriteLine`. Se usar print,\n> remova antes de entregar o código.\n\n## 7. Dividir o problema: \"faça o código falhar pequeno\"\n\n1. Isole a função que erra.\n2. Teste com o **menor caso** possível.\n3. Confirme entrada/saída esperadas.\n4. Aumente a complexidade devagar.\n\n## 8. Exercícios\n\n**Fácil — 1.** O código abaixo tem um bug de lógica. Encontre **sem rodar**, usando teste de mesa,\ne depois corrija:\n```csharp\nstatic int SomaPares(int[] nums)\n{\n    int soma = 0;\n    for (int i = 0; i <= nums.Length; i++)\n        if (nums[i] % 2 == 0) soma += nums[i];\n    return soma;\n}\n```\n\n**Médio — 2.** Escreva uma função que deveria devolver a **quantidade** de números negativos\nnum array, mas você deve primeiro escrever o teste de mesa para `[-1,2,-3,4]` e então implementar.\n\n**Desafiador — 3.** No debugger do seu editor, coloque breakpoints e observe o valor de cada\nvariável ao percorrer um `foreach`. Descreva o que o painel \"Watch\"/\"Variables\" mostra a cada\niteração.",
+          "codeExample": null,
+          "codeLanguage": null,
+          "order": 10
+        },
+        {
+          "id": 11,
+          "title": "00.11 — Lógica de programação: exercícios clássicos",
+          "content": "> **Fase 00** · Aula 11 · **Projeto integrador da fase**\n> Objetivo: consolidar tudo da Fase 00 resolvendo problemas clássicos com funções puras + testes.\n\nNesta aula você monta, junto com o `LogicaEmAcao`, um **menu de lógica**. Cada problema vira\numa **função pura** (testável) no `Logica.cs`. NÃO coloque lógica de \"mostrar na tela\" dentro\ndas funções — deixe o `Program` (ou o menu) responsável pela entrada/saída.\n\n## Regras de ouro para esta aula\n1. Antes de codar um problema, faça um **teste de mesa** para 2–3 entradas.\n2. Implemente a **função pura**.\n3. Adicione **testes** no projeto `aplicacao.Tests`.\n4. Depois conecte ao menu do `Program`.\n\n---\n\n## Exercícios (fácil → desafiador)\n\n### 1. FizzBuzz (fácil)\nFunção `static string FizzBuzz(int n)`:\n- múltiplo de 3 e 5 → `\"FizzBuzz\"`; só de 3 → `\"Fizz\"`; só de 5 → `\"Buzz\"`; senão o número.\nTeste: `15→FizzBuzz`, `9→Fizz`, `10→Buzz`, `7→\"7\"`.\n\n### 2. Soma de dígitos (fácil)\n`static int SomarDigitos(int n)` soma os dígitos de um inteiro positivo.\n`123 → 6`; `9999 → 36`. (Dica: use `% 10` para pegar o último dígito e `/ 10` para descartá-lo.)\n\n### 3. Sequência de Fibonacci (médio)\n`static long Fibonacci(int n)` devolve o n-ésimo termo (Fibonacci(0)=0, Fibonacci(1)=1).\nDica: itere com duas variáveis anteriores.\n\n### 4. Maior e menor (médio)\n`static (int Maior, int Menor) MaiorMenor(int[] v)` retorna ambos numa tupla.\n\n### 5. Jogo \"adivinhe o número\" (médio, interativo)\nNão é função pura (usa `Random`/entrada). No `Program`, sorteie 1–100 e dê dicas\n\"maior\"/\"menor\" até acertar, contando tentativas.\n\n### 6. Primos até N (desafiador)\n`static int[] PrimosAte(int n)` retorna todos os primos ≤ n. Reaproveite `EhPrimo`.\n\n### 7. Contar vogais (desafiador)\n`static int ContarVogais(string texto)` conta `a,e,i,o,u` (maiúsculas/minúsculas, ignorar acentos\nou tratá-los — decida e documente).\n\n### 8. Ordenar sem `Sort` (desafiador)\n`static int[] OrdenarCrescente(int[] v)` — implemente **bolha** (bubble sort) você mesmo,\nexplicando por comentário o que cada iteração faz.\n\n---\n\n## Modelo de função + teste\n\n```csharp\n// Logica.cs\npublic static string FizzBuzz(int n) => (n % 3, n % 5) switch\n{\n    (0, 0) => \"FizzBuzz\",\n    (0, _) => \"Fizz\",\n    (_, 0) => \"Buzz\",\n    _      => n.ToString()\n};\n```\n\n```csharp\n// LogicaTests.cs\n[Theory]\n[InlineData(15, \"FizzBuzz\")]\n[InlineData(9, \"Fizz\")]\n[InlineData(10, \"Buzz\")]\n[InlineData(7, \"7\")]\npublic void FizzBuzz_RetornaEsperado(int n, string esperado)\n    => Assert.Equal(esperado, Logica.FizzBuzz(n));\n```\n\n---\n\n## Entrega da Fase 00\n1. Todas as funções acima implementadas **e testadas** no projeto.\n2. Um menu no console que permite escolher e executar cada exercício.\n3. `dotnet test` verde e `dotnet build` sem erros.\n4. (Desafio final) Adicione um problema seu que combine pelo menos **2** dos temas da fase\n   (decisão + laço + array + função). Explique no comentário o raciocínio.",
+          "codeExample": null,
+          "codeLanguage": null,
+          "order": 11
         }
       ],
       "exercises": [
         {
           "id": 1,
-          "title": "Criar struct Dinheiro",
-          "description": "Crie um struct chamado Dinheiro com propriedades Valor (decimal) e Moeda (string). Implemente um construtor e o método ToString().",
-          "initialCode": "using System;\n\n// Crie seu struct aqui\n\n\npublic class Program\n{\n    public static void Main()\n    {\n        var preco = new Dinheiro(15.90m, \"BRL\");\n        Console.WriteLine(preco);\n    }\n}",
-          "expectedOutput": "BRL 15,90",
+          "title": "Par ou ímpar",
           "difficulty": 0,
+          "description": "Escreva o método `EhPar(int numero)` que retorna `true` quando o número é par e `false` caso contrário.",
+          "initialCode": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(EhPar(7));\n        Console.WriteLine(EhPar(8));\n    }\n\n    // TODO: implemente EhPar aqui\n\n}",
+          "expectedOutput": "False\r\nTrue",
           "hints": [
-            "Use 'struct' em vez de 'class'",
-            "ToString() pode usar interpolação de strings"
+            "Use o operador resto `%`.",
+            "Número par tem resto 0 na divisão por 2."
           ],
-          "solution": "public struct Dinheiro\n{\n    public decimal Valor { get; }\n    public string Moeda { get; }\n    \n    public Dinheiro(decimal valor, string moeda = \"BRL\")\n    {\n        Valor = valor;\n        Moeda = moeda;\n    }\n    \n    public override string ToString() => $\"{Moeda} {Valor:N2}\";\n}"
+          "solution": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(EhPar(7));\n        Console.WriteLine(EhPar(8));\n    }\n\n    static bool EhPar(int numero)\n    {\n        return numero % 2 == 0;\n    }\n}"
         },
         {
           "id": 2,
-          "title": "Diferença entre cópia e referência",
-          "description": "Demonstre a diferença entre copiar um struct e copiar uma referência de classe.",
-          "initialCode": "using System;\n\npublic struct Ponto { public int X, Y; }\npublic class Circulo { public int Raio; }\n\npublic class Program\n{\n    public static void Main()\n    {\n        // Demonstre a diferença aqui\n        \n    }\n}",
-          "expectedOutput": "p1.X = 1\r\np2.X = 10\r\nc1.Raio = 10\r\nc2.Raio = 10",
+          "title": "Classificar média",
           "difficulty": 0,
+          "description": "Escreva `ClassificarMedia(double media)` que retorna \"Aprovado\" se média >= 6, senão \"Reprovado\".",
+          "initialCode": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(ClassificarMedia(7.5));\n        Console.WriteLine(ClassificarMedia(4.0));\n    }\n\n    // TODO: implemente ClassificarMedia aqui\n\n}",
+          "expectedOutput": "Aprovado\r\nReprovado",
           "hints": [
-            "Structs são copiados por valor",
-            "Classes compartilham a referência"
+            "Use `if` ou uma expressão `?:`.",
+            "Compare a média com 6."
           ],
-          "solution": "var p1 = new Ponto { X = 1, Y = 2 };\nvar p2 = p1;  // Cópia independente\np2.X = 10;\n\nvar c1 = new Circulo { Raio = 5 };\nvar c2 = c1;  // Mesma referência!\nc2.Raio = 10;\n\nConsole.WriteLine($\"p1.X = {p1.X}\");  // 1\nConsole.WriteLine($\"p2.X = {p2.X}\");  // 10\nConsole.WriteLine($\"c1.Raio = {c1.Raio}\");  // 10\nConsole.WriteLine($\"c2.Raio = {c2.Raio}\");  // 10"
+          "solution": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(ClassificarMedia(7.5));\n        Console.WriteLine(ClassificarMedia(4.0));\n    }\n\n    static string ClassificarMedia(double media)\n    {\n        return media >= 6 ? \"Aprovado\" : \"Reprovado\";\n    }\n}"
         },
         {
           "id": 3,
-          "title": "Performance: ArrayList vs List<T>",
-          "description": "Compare a performance entre ArrayList (com boxing) e List<int> (sem boxing) adicionando 100.000 elementos.",
-          "initialCode": "using System;\nusing System.Collections;\nusing System.Collections.Generic;\nusing System.Diagnostics;\n\npublic class Program\n{\n    public static void Main()\n    {\n        // Meça o tempo de ambos\n        \n    }\n}",
-          "expectedOutput": "ArrayList: *ms\r\nList<int>: *ms",
+          "title": "Número primo",
           "difficulty": 1,
+          "description": "Escreva `EhPrimo(int n)` que retorna `true` se `n` é primo (maior que 1 e divisível só por 1 e por ele mesmo).",
+          "initialCode": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(EhPrimo(7));\n        Console.WriteLine(EhPrimo(10));\n    }\n\n    // TODO: implemente EhPrimo aqui\n\n}",
+          "expectedOutput": "True\r\nFalse",
           "hints": [
-            "Use Stopwatch.StartNew()",
-            "ArrayList faz boxing, List<int> não"
+            "Números < 2 não são primos.",
+            "Teste divisores de 2 até a raiz quadrada de n."
           ],
-          "solution": "var sw = Stopwatch.StartNew();\nvar arrayList = new ArrayList();\nfor (int i = 0; i < 100000; i++)\n    arrayList.Add(i);\nsw.Stop();\nConsole.WriteLine($\"ArrayList: {sw.ElapsedMilliseconds}ms\");\n\nsw.Restart();\nvar listInt = new List<int>();\nfor (int i = 0; i < 100000; i++)\n    listInt.Add(i);\nsw.Stop();\nConsole.WriteLine($\"List<int>: {sw.ElapsedMilliseconds}ms\");"
-        }
-      ],
-      "challenge": {
-        "id": 1,
-        "title": "Desafio 1: Controle de Estoque",
-        "description": "Crie um sistema de controle de estoque completo usando structs para produtos e classes para o estoque.",
-        "gitHubUrl": "https://github.com/kyo1506/fundamentos-csharp",
-        "requirements": [
-          "Criar struct ProdutoPerecivel com Nome, CodigoBarras, Preco, QuantidadeEstoque",
-          "Criar classe Estoque com lista de produtos e métodos de entrada/saída",
-          "Implementar busca por código de barras",
-          "Usar ref/out para atualização em lote",
-          "Criar testes unitários"
-        ]
-      }
-    },
-    {
-      "id": 2,
-      "title": "Programação Orientada a Objetos",
-      "description": "Encapsulamento, Herança, Polimorfismo, Abstração + SOLID",
-      "icon": "🧩",
-      "lessons": [
-        {
-          "id": 1,
-          "title": "Os 4 Pilares da OO",
-          "content": "## Pilares da Orientação a Objetos\n\n### 1. Encapsulamento\nEsconder estado interno, expor apenas o necessário.\n\n```csharp\npublic class ContaBancaria\n{\n    private decimal _saldo;  // Campo privado\n    \n    public decimal Saldo => _saldo;  // Propriedade somente leitura\n    \n    public void Depositar(decimal valor)\n    {\n        if (valor > 0) _saldo += valor;\n    }\n}\n```\n\n### 2. Herança\nReaproveitar código em hierarquias.\n\n```csharp\npublic abstract class Animal\n{\n    public abstract void FazerSom();\n}\n\npublic class Cachorro : Animal\n{\n    public override void FazerSom() => Console.WriteLine(\"Au au!\");\n}\n```\n\n### 3. Polimorfismo\nTratar objetos diferentes de forma uniforme.\n\n```csharp\nList<Animal> animais = new()\n{\n    new Cachorro(),\n    new Gato()\n};\n\nforeach (var animal in animais)\n    animal.FazerSom();  // Cada um faz seu som!\n```\n\n### 4. Abstração\nFocar no essencial, ignorar detalhes.\n\n```csharp\npublic interface IPagamento\n{\n    void Processar(decimal valor);\n}\n\npublic class Pix : IPagamento { /* ... */ }\npublic class Cartao : IPagamento { /* ... */ }\n```",
-          "codeExample": "using System;\nusing System.Collections.Generic;\n\n// Abstração\npublic interface IForma\n{\n    double CalcularArea();\n}\n\n// Implementação\npublic class Circulo : IForma\n{\n    public double Raio { get; set; }\n    public double CalcularArea() => Math.PI * Raio * Raio;\n}\n\npublic class Retangulo : IForma\n{\n    public double Largura { get; set; }\n    public double Altura { get; set; }\n    public double CalcularArea() => Largura * Altura;\n}\n\npublic class Program\n{\n    public static void Main()\n    {\n        List<IForma> formas = new()\n        {\n            new Circulo { Raio = 5 },\n            new Retangulo { Largura = 4, Altura = 6 }\n        };\n        \n        foreach (var forma in formas)\n            Console.WriteLine($\"Área: {forma.CalcularArea():F2}\");\n    }\n}",
-          "codeLanguage": "csharp",
-          "order": 1
+          "solution": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(EhPrimo(7));\n        Console.WriteLine(EhPrimo(10));\n    }\n\n    static bool EhPrimo(int n)\n    {\n        if (n < 2) return false;\n        for (int i = 2; i * i <= n; i++)\n            if (n % i == 0) return false;\n        return true;\n    }\n}"
         },
         {
-          "id": 2,
-          "title": "Princípios SOLID",
-          "content": "## SOLID\n\n### S - Single Responsibility Principle\nUma classe deve ter apenas UMA razão para mudar.\n\n### O - Open/Closed Principle\nAberto para extensão, fechado para modificação.\n\n### L - Liskov Substitution Principle\nDerivadas devem poder substituir bases.\n\n### I - Interface Segregation Principle\nInterfaces pequenas > uma interface grande.\n\n### D - Dependency Inversion Principle\nDependa de abstrações, não de implementações.",
-          "codeExample": "using System;\n\n// SRP: Cada classe tem uma responsabilidade\npublic class ValidadorCpf\n{\n    public bool Validar(string cpf) => cpf.Length == 11;\n}\n\n// OCP: Extensão sem modificar\npublic interface IDesconto\n{\n    decimal Calcular(decimal valor);\n}\n\npublic class DescontoEstudante : IDesconto\n{\n    public decimal Calcular(decimal valor) => valor * 0.5m;\n}\n\n// DIP: Depende de abstração\npublic class ServicoInscricao\n{\n    private readonly IDesconto _desconto;\n    \n    public ServicoInscricao(IDesconto desconto)\n    {\n        _desconto = desconto;\n    }\n    \n    public decimal CalcularPreco(decimal precoBase)\n    {\n        return _desconto.Calcular(precoBase);\n    }\n}\n\npublic class Program\n{\n    public static void Main()\n    {\n        var servico = new ServicoInscricao(new DescontoEstudante());\n        Console.WriteLine($\"Preço com desconto: {servico.CalcularPreco(100m):C}\");\n    }\n}",
-          "codeLanguage": "csharp",
-          "order": 2
-        }
-      ],
-      "exercises": [
+          "id": 4,
+          "title": "Fibonacci",
+          "difficulty": 1,
+          "description": "Escreva `Fibonacci(int n)` que devolve o n-ésimo termo (Fibonacci(0)=0, Fibonacci(1)=1).",
+          "initialCode": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(Fibonacci(6));\n        Console.WriteLine(Fibonacci(10));\n    }\n\n    // TODO: implemente Fibonacci aqui\n\n}",
+          "expectedOutput": "8\r\n55",
+          "hints": [
+            "Use um laço com duas variáveis anteriores.",
+            "Cada termo é a soma dos dois anteriores."
+          ],
+          "solution": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(Fibonacci(6));\n        Console.WriteLine(Fibonacci(10));\n    }\n\n    static long Fibonacci(int n)\n    {\n        if (n <= 1) return n;\n        long a = 0, b = 1;\n        for (int i = 2; i <= n; i++)\n        {\n            long p = a + b; a = b; b = p;\n        }\n        return b;\n    }\n}"
+        },
         {
-          "id": 1,
-          "title": "Encapsulamento com validação",
-          "description": "Crie uma classe Produto com propriedades validadas no setter.",
-          "initialCode": "using System;\n\n// Crie a classe Produto com validação\n\n\npublic class Program\n{\n    public static void Main()\n    {\n        var p = new Produto { Nome = \"Arroz\", Preco = 15.90m };\n        Console.WriteLine($\"{p.Nome}: {p.Preco:C}\");\n        \n        // Deve lançar exceção\n        try { p.Preco = -10m; }\n        catch (ArgumentException ex) { Console.WriteLine(ex.Message); }\n    }\n}",
-          "expectedOutput": "Arroz: R$ 15,90\r\nPreço deve ser maior que zero",
+          "id": 5,
+          "title": "FizzBuzz",
           "difficulty": 0,
+          "description": "Escreva `FizzBuzz(int n)` que retorna \"FizzBuzz\" se múltiplo de 3 e 5, \"Fizz\" se só de 3, \"Buzz\" se só de 5, senão o número como texto.",
+          "initialCode": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        for (int i = 1; i <= 15; i++)\n            Console.WriteLine(FizzBuzz(i));\n    }\n\n    // TODO: implemente FizzBuzz aqui\n\n}",
+          "expectedOutput": "1\r\n2\r\nFizz\r\n4\r\nBuzz\r\nFizz\r\n7\r\n8\r\nFizz\r\nBuzz\r\n11\r\nFizz\r\n13\r\n14\r\nFizzBuzz",
           "hints": [
-            "Use backing field privado",
-            "Valide no setter antes de atribuir"
+            "Use `%` para checar múltiplos.",
+            "Teste múltiplo de 3 E 5 primeiro."
           ],
-          "solution": "public class Produto\n{\n    private string _nome = \"\";\n    private decimal _preco;\n    \n    public string Nome\n    {\n        get => _nome;\n        set => _nome = string.IsNullOrWhiteSpace(value)\n            ? throw new ArgumentException(\"Nome não pode ser vazio\")\n            : value;\n    }\n    \n    public decimal Preco\n    {\n        get => _preco;\n        set => _preco = value <= 0\n            ? throw new ArgumentException(\"Preço deve ser maior que zero\")\n            : value;\n    }\n}"
+          "solution": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        for (int i = 1; i <= 15; i++)\n            Console.WriteLine(FizzBuzz(i));\n    }\n\n    static string FizzBuzz(int n)\n    {\n        if (n % 15 == 0) return \"FizzBuzz\";\n        if (n % 3 == 0) return \"Fizz\";\n        if (n % 5 == 0) return \"Buzz\";\n        return n.ToString();\n    }\n}"
         },
         {
-          "id": 2,
-          "title": "Herança e Polimorfismo",
-          "description": "Crie uma hierarquia de formas geométricas com polimorfismo.",
-          "initialCode": "using System;\nusing System.Collections.Generic;\n\n// Crie as classes aqui\n\n\npublic class Program\n{\n    public static void Main()\n    {\n        List<Forma> formas = new()\n        {\n            new Circulo { Raio = 5 },\n            new Retangulo { Largura = 4, Altura = 6 }\n        };\n        \n        foreach (var f in formas)\n            Console.WriteLine($\"Área: {f.CalcularArea():F2}\");\n    }\n}",
-          "expectedOutput": "Área: 78,54\r\nÁrea: 24,00",
+          "id": 6,
+          "title": "Soma dos dígitos",
           "difficulty": 1,
+          "description": "Escreva `SomarDigitos(int n)` que soma os dígitos de um inteiro positivo (ex.: 123 → 6).",
+          "initialCode": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(SomarDigitos(123));\n        Console.WriteLine(SomarDigitos(9999));\n    }\n\n    // TODO: implemente SomarDigitos aqui\n\n}",
+          "expectedOutput": "6\r\n36",
           "hints": [
-            "Use classe abstrata ou interface",
-            "Cada forma calcula área diferente"
+            "`% 10` pega o último dígito.",
+            "`/ 10` descarta o último dígito."
           ],
-          "solution": "public abstract class Forma\n{\n    public abstract double CalcularArea();\n}\n\npublic class Circulo : Forma\n{\n    public double Raio { get; set; }\n    public override double CalcularArea() => Math.PI * Raio * Raio;\n}\n\npublic class Retangulo : Forma\n{\n    public double Largura { get; set; }\n    public double Altura { get; set; }\n    public override double CalcularArea() => Largura * Altura;\n}"
+          "solution": "using System;\n\npublic class Program\n{\n    public static void Main()\n    {\n        Console.WriteLine(SomarDigitos(123));\n        Console.WriteLine(SomarDigitos(9999));\n    }\n\n    static int SomarDigitos(int n)\n    {\n        int soma = 0;\n        while (n > 0)\n        {\n            soma += n % 10;\n            n /= 10;\n        }\n        return soma;\n    }\n}"
         }
-      ],
-      "challenge": {
-        "id": 2,
-        "title": "Desafio 2: Validação de Formulários",
-        "description": "Crie um sistema de validação de formulários usando interfaces e SOLID.",
-        "gitHubUrl": "https://github.com/kyo1506/fundamentos-csharp",
-        "requirements": [
-          "Interface IValidador com método Validar()",
-          "Validadores separados: CPF, Email, Telefone",
-          "Classe Formulario com lista de validadores",
-          "Aplicar SRP, OCP e DIP",
-          "Testes unitários"
-        ]
-      }
-    },
-    {
-      "id": 3,
-      "title": "Coleções, LINQ e Manipulação de Dados",
-      "description": "List<T>, Dictionary, GroupBy, Where, OrderBy",
-      "icon": "📊",
-      "lessons": [
-        {
-          "id": 1,
-          "title": "Coleções Genéricas",
-          "content": "## Coleções em C#\n\n### List<T>\nLista indexada, permite duplicatas.\n\n```csharp\nList<string> nomes = new();\nnomes.Add(\"Maria\");\nnomes.Add(\"João\");\n```\n\n### Dictionary<TKey, TValue>\nPares chave-valor, busca O(1).\n\n```csharp\nDictionary<int, string> catalogo = new();\ncatalogo[1] = \"Arroz\";\n```\n\n### HashSet<T>\nConjunto sem duplicatas.\n\n```csharp\nHashSet<string> tags = new() { \"C#\", \".NET\" };\n```",
-          "codeExample": "using System;\nusing System.Collections.Generic;\n\npublic class Program\n{\n    public static void Main()\n    {\n        // List<T>\n        var produtos = new List<string> { \"Arroz\", \"Feijão\", \"Arroz\" };\n        Console.WriteLine($\"List: {produtos.Count} itens\");  // 3\n        \n        // Dictionary<K,V>\n        var precos = new Dictionary<string, decimal>\n        {\n            [\"Arroz\"] = 15.90m,\n            [\"Feijão\"] = 8.50m\n        };\n        Console.WriteLine($\"Arroz: {precos[\"Arroz\"]:C}\");\n        \n        // HashSet<T>\n        var categorias = new HashSet<string> { \"Alimentos\", \"Alimentos\" };\n        Console.WriteLine($\"HashSet: {categorias.Count} itens\");  // 1\n    }\n}",
-          "codeLanguage": "csharp",
-          "order": 1
-        },
-        {
-          "id": 2,
-          "title": "LINQ - Consultas Declarativas",
-          "content": "## LINQ\n\n### Filtrar com Where\n```csharp\nvar baratos = produtos.Where(p => p.Preco < 50);\n```\n\n### Projetar com Select\n```csharp\nvar nomes = produtos.Select(p => p.Nome);\n```\n\n### Agrupar com GroupBy\n```csharp\nvar porCategoria = produtos.GroupBy(p => p.Categoria);\n```\n\n### Ordenar com OrderBy\n```csharp\nvar ordenados = produtos.OrderBy(p => p.Preco);\n```",
-          "codeExample": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{\n    public static void Main()\n    {\n        var produtos = new List<(string Nome, string Cat, decimal Preco)>\n        {\n            (\"Arroz\", \"Alimentos\", 15.90m),\n            (\"Notebook\", \"Eletrônicos\", 3500m),\n            (\"Feijão\", \"Alimentos\", 8.50m),\n            (\"Mouse\", \"Eletrônicos\", 89.90m)\n        };\n        \n        // Where + OrderBy\n        var baratos = produtos\n            .Where(p => p.Preco < 100)\n            .OrderBy(p => p.Preco);\n        \n        foreach (var p in baratos)\n            Console.WriteLine($\"{p.Nome}: {p.Preco:C}\");\n        \n        // GroupBy\n        var grupos = produtos.GroupBy(p => p.Cat);\n        foreach (var g in grupos)\n            Console.WriteLine($\"{g.Key}: {g.Count()} itens\");\n    }\n}",
-          "codeLanguage": "csharp",
-          "order": 2
-        }
-      ],
-      "exercises": [
-        {
-          "id": 1,
-          "title": "Filtrar e ordenar com LINQ",
-          "description": "Dada uma lista de produtos, filtre os que custam menos de 100 e ordene por preço.",
-          "initialCode": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{\n    public static void Main()\n    {\n        var produtos = new List<(string Nome, decimal Preco)>\n        {\n            (\"Arroz\", 15.90m),\n            (\"Notebook\", 3500m),\n            (\"Feijão\", 8.50m),\n            (\"Mouse\", 89.90m)\n        };\n        \n        // Filtre e ordene aqui\n        \n    }\n}",
-          "expectedOutput": "Feijão: R$ 8,50\r\nArroz: R$ 15,90\r\nMouse: R$ 89,90",
-          "difficulty": 0,
-          "hints": [
-            "Use Where para filtrar",
-            "Use OrderBy para ordenar"
-          ],
-          "solution": "var baratos = produtos\n    .Where(p => p.Preco < 100)\n    .OrderBy(p => p.Preco);\n\nforeach (var p in baratos)\n    Console.WriteLine($\"{p.Nome}: {p.Preco:C}\");"
-        },
-        {
-          "id": 2,
-          "title": "Agrupar com GroupBy",
-          "description": "Agrupe produtos por categoria e calcule o total por categoria.",
-          "initialCode": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{\n    public static void Main()\n    {\n        var produtos = new List<(string Nome, string Categoria, decimal Preco)>\n        {\n            (\"Arroz\", \"Alimentos\", 15.90m),\n            (\"Feijão\", \"Alimentos\", 8.50m),\n            (\"Notebook\", \"Eletrônicos\", 3500m),\n            (\"Mouse\", \"Eletrônicos\", 89.90m)\n        };\n        \n        // Agrupe por categoria\n        \n    }\n}",
-          "expectedOutput": "Alimentos: R$ 24,40\r\nEletrônicos: R$ 3.589,90",
-          "difficulty": 1,
-          "hints": [
-            "Use GroupBy(p => p.Categoria)",
-            "Use Sum para totalizar"
-          ],
-          "solution": "var grupos = produtos.GroupBy(p => p.Categoria);\n\nforeach (var g in grupos)\n{\n    decimal total = g.Sum(p => p.Preco);\n    Console.WriteLine($\"{g.Key}: {total:C}\");\n}"
-        }
-      ],
-      "challenge": {
-        "id": 3,
-        "title": "Desafio 3: Análise de Vendas",
-        "description": "Crie um sistema de análise de vendas com LINQ.",
-        "gitHubUrl": "https://github.com/kyo1506/fundamentos-csharp",
-        "requirements": [
-          "Gerar 50 vendas aleatórias",
-          "Filtrar por categoria e período",
-          "Agrupar por mês e categoria",
-          "Calcular ticket médio",
-          "Top 5 produtos mais vendidos"
-        ]
-      }
-    },
-    {
-      "id": 4,
-      "title": "ASP.NET Core e Deploy",
-      "description": "Minimal APIs, Razor Pages, Deploy em nuvem",
-      "icon": "🚀",
-      "lessons": [
-        {
-          "id": 1,
-          "title": "Criando uma Minimal API",
-          "content": "## Minimal APIs\n\nForma mais simples de criar APIs no .NET.\n\n```csharp\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\n\napp.MapGet(\"/produtos\", () => \"Lista de produtos\");\napp.MapGet(\"/produtos/{id}\", (int id) => $\"Produto {id}\");\napp.MapPost(\"/produtos\", () => \"Produto criado\");\n\napp.Run();\n```",
-          "codeExample": "using Microsoft.AspNetCore.Builder;\nusing Microsoft.AspNetCore.Http;\n\nvar builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddEndpointsApiExplorer();\nbuilder.Services.AddSwaggerGen();\n\nvar app = builder.Build();\napp.UseSwagger();\napp.UseSwaggerUI();\n\n// GET /produtos\napp.MapGet(\"/produtos\", () =>\n{\n    var produtos = new[]\n    {\n        new { Id = 1, Nome = \"Arroz\" },\n        new { Id = 2, Nome = \"Feijão\" }\n    };\n    return Results.Ok(produtos);\n});\n\n// POST /produtos\napp.MapPost(\"/produtos\", (ProdutoRequest req) =>\n{\n    return Results.Created(\"/produtos/1\", new { Id = 1, req.Nome });\n});\n\napp.Run();\n\npublic record ProdutoRequest(string Nome, decimal Preco);",
-          "codeLanguage": "csharp",
-          "order": 1
-        },
-        {
-          "id": 2,
-          "title": "Deploy em Nuvem",
-          "content": "## Deploy\n\n### Opções Gratuitas\n- **Azure Functions**: 1M req/mês\n- **Railway**: $5 créditos/mês\n- **Render**: 750h/mês\n\n### CI/CD com GitHub Actions\n```yaml\nname: Deploy\non:\n  push:\n    branches: [main]\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-dotnet@v4\n      - run: dotnet build\n      - run: dotnet test\n      - run: dotnet publish -c Release\n```",
-          "codeExample": "// Dockerfile para deploy\nFROM mcr.microsoft.com/dotnet/sdk:8.0 AS build\nWORKDIR /src\nCOPY . .\nRUN dotnet restore\nRUN dotnet publish -c Release -o /app/publish\n\nFROM mcr.microsoft.com/dotnet/aspnet:8.0\nWORKDIR /app\nCOPY --from=build /app/publish .\nEXPOSE 8080\nENTRYPOINT [\"dotnet\", \"MinhaApi.dll\"]",
-          "codeLanguage": "dockerfile",
-          "order": 2
-        }
-      ],
-      "exercises": [
-        {
-          "id": 1,
-          "title": "Criar endpoint GET",
-          "description": "Crie uma Minimal API com um endpoint GET que retorna uma lista de produtos.",
-          "initialCode": "using Microsoft.AspNetCore.Builder;\nusing Microsoft.AspNetCore.Http;\n\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\n\n// Crie seu endpoint aqui\n\n\napp.Run();",
-          "expectedOutput": "GET /produtos -> [{\"id\":1,\"nome\":\"Arroz\"}]",
-          "difficulty": 0,
-          "hints": [
-            "Use app.MapGet()",
-            "Retorne Results.Ok()"
-          ],
-          "solution": "app.MapGet(\"/produtos\", () =>\n{\n    var produtos = new[]\n    {\n        new { Id = 1, Nome = \"Arroz\" },\n        new { Id = 2, Nome = \"Feijão\" }\n    };\n    return Results.Ok(produtos);\n});"
-        },
-        {
-          "id": 2,
-          "title": "Endpoint com validação",
-          "description": "Crie um endpoint POST que valida os dados recebidos.",
-          "initialCode": "using Microsoft.AspNetCore.Builder;\nusing Microsoft.AspNetCore.Http;\n\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\n\n// Crie o endpoint POST com validação\n\n\napp.Run();\n\npublic record ProdutoRequest(string Nome, decimal Preco);",
-          "expectedOutput": "POST /produtos (válido) -> 201\r\nPOST /produtos (inválido) -> 400",
-          "difficulty": 1,
-          "hints": [
-            "Use app.MapPost()",
-            "Valide e retorne BadRequest se inválido"
-          ],
-          "solution": "app.MapPost(\"/produtos\", (ProdutoRequest req) =>\n{\n    if (string.IsNullOrWhiteSpace(req.Nome))\n        return Results.BadRequest(\"Nome é obrigatório\");\n    \n    if (req.Preco <= 0)\n        return Results.BadRequest(\"Preço deve ser maior que zero\");\n    \n    return Results.Created(\"/produtos/1\", new { Id = 1, req.Nome });\n});"
-        }
-      ],
-      "challenge": {
-        "id": 4,
-        "title": "Desafio 4: API de Controle de Estoque",
-        "description": "Crie uma API RESTful completa com CRUD de produtos.",
-        "gitHubUrl": "https://github.com/kyo1506/fundamentos-csharp",
-        "requirements": [
-          "Endpoints GET, POST, PUT, DELETE",
-          "Validação de dados",
-          "Persistência em JSON ou memória",
-          "Swagger/OpenAPI",
-          "Deploy em nuvem gratuita"
-        ]
-      }
+      ]
     }
   ]
 }

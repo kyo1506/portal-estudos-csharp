@@ -9,27 +9,28 @@ public class JsonContentRepositoryTests
     private readonly JsonContentRepository _repository = new();
 
     [Fact]
-    public void GetAllFases_LoadsFourWeeks()
+    public void GetAllFases_LoadsFaseZero()
     {
         var fases = _repository.GetAllFases();
-        Assert.Equal(4, fases.Count);
+        Assert.Single(fases);
+        Assert.Equal(0, fases[0].Id);
     }
 
     [Fact]
-    public void WeekOne_ContainsLessonsExercisesAndChallenge()
+    public void FaseZero_ContemLicoesEExerciciosSemDesafio()
     {
-        var fase = _repository.GetFase(1);
+        var fase = _repository.GetFase(0);
 
         Assert.NotNull(fase);
-        Assert.Equal(3, fase!.Lessons.Count);
-        Assert.Equal(3, fase.Exercises.Count);
-        Assert.NotNull(fase.Challenge);
+        Assert.Equal(11, fase!.Lessons.Count);      // teoria completa da Fase 00
+        Assert.Equal(6, fase.Exercises.Count);
+        Assert.Null(fase.Challenge);                // Fase 00 não tem desafio externo
     }
 
     [Fact]
     public void Difficulty_IsMappedToEnum()
     {
-        var fase = _repository.GetFase(1);
+        var fase = _repository.GetFase(0);
         var easy = fase!.Exercises.First(e => e.Id == 1);
         var medium = fase.Exercises.First(e => e.Id == 3);
 
@@ -40,17 +41,17 @@ public class JsonContentRepositoryTests
     [Fact]
     public void GetLesson_ReturnsLessonById()
     {
-        var lesson = _repository.GetLesson(2, 1);
+        var lesson = _repository.GetLesson(0, 1);
         Assert.NotNull(lesson);
-        Assert.Equal("Os 4 Pilares da OO", lesson!.Title);
+        Assert.Contains("Programar", lesson!.Title);
     }
 
     [Fact]
     public void GetExercise_ReturnsExerciseById()
     {
-        var exercise = _repository.GetExercise(3, 2);
+        var exercise = _repository.GetExercise(0, 6);
         Assert.NotNull(exercise);
-        Assert.Equal("Agrupar com GroupBy", exercise!.Title);
+        Assert.Equal("Soma dos dígitos", exercise!.Title);
     }
 
     [Fact]
@@ -62,7 +63,7 @@ public class JsonContentRepositoryTests
     [Fact]
     public void Lessons_KeepOrderField()
     {
-        var fase = _repository.GetFase(1);
-        Assert.Equal(new[] { 1, 2, 3 }, fase!.Lessons.Select(l => l.Order).ToArray());
+        var fase = _repository.GetFase(0);
+        Assert.Equal(Enumerable.Range(1, 11), fase!.Lessons.Select(l => l.Order));
     }
 }
