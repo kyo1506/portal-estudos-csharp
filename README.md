@@ -67,19 +67,19 @@ Acesse: http://localhost:8080 (a porta usa a variável `PORT` ou `8080` por padr
 dotnet test PortalEstudos.slnx
 ```
 
-## 🐳 Deploy (Docker/Railway)
+## 🐳 Deploy (Render / OCI / Docker / Podman)
 
-O deploy é automático: todo push para `main` dispara o build no Railway
-(imagem Docker multi-stage com cache de camadas). CI adicional via GitHub
-Actions (`build-test.yml`) valida build Release + testes a cada push/PR.
+O deploy em produção é executado como Web Service em container OCI (Render / Coolify / Docker / Podman).
+Todo push para `main` dispara o build automático da imagem Docker multi-stage.
+CI adicional via GitHub Actions (`build-test.yml`) valida build Release + testes a cada push/PR.
 
 ```bash
-# Build local (obrigatório validar antes de push que mexe em build config)
-docker build -t portal-estudos .
-docker run -p 8080:8080 -e PORT=8080 portal-estudos
+# Build e execução local com Podman ou Docker:
+podman build -t portal-estudos .
+podman run -p 8080:8080 -e PORT=8080 portal-estudos
 ```
 
-Smoke test do container: checar `/`, `/weeks`, uma URL inexistente (404 com
+Smoke test do container: checar `/`, `/fases`, uma URL inexistente (404 com
 corpo renderizado) **e `/_framework/blazor.web.js` (200)** — o HTML SSR
 carrega mesmo sem o script Blazor, então o 404 do script só aparece se for
 testado explicitamente.
@@ -88,8 +88,9 @@ Variáveis de ambiente opcionais:
 
 | Variável | Efeito |
 |----------|--------|
+| `PORT` | Porta de escuta HTTP (padrão: `8080`) |
 | `GitHub:Token` | Token GitHub (fine-grained) — eleva o rate limit da API de 60 para 5000 req/h no status de PRs |
-| `DATAPROTECTION_KEYS_PATH` | Onde persistir as chaves de DataProtection (detecta volume Railway automaticamente) |
+| `DATAPROTECTION_KEYS_PATH` | Onde persistir as chaves de DataProtection (padrão efêmero: `/tmp/portal-estudos-keys`) |
 
 ## 📅 Semanas de Estudo
 

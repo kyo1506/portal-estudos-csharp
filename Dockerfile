@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # 1) Copia APENAS os arquivos .csproj/.slnx/.props primeiro: qualquer mudança em código
-#    não invalida o layer do `dotnet restore` (cache do Docker/Railway aproveitado).
+#    não invalida o layer do `dotnet restore` (cache de camadas aproveitado).
 #    Directory.Build.props é obrigatório: contém TargetFramework/Nullable/ImplicitUsings
 #    compartilhados (sem ele o restore falha com NETSDK1013).
 COPY *.slnx ./

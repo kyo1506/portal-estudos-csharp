@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Compressão de resposta: reduz o payload do Blazor Server (SignalR) e assets no Railway free tier.
+// Compressão de resposta: reduz o payload do Blazor Server (SignalR) e assets estáticos.
 // Brotli primeiro (mais eficiente que gzip em texto/JS/CSS); o browser negocia via Accept-Encoding.
 builder.Services.AddResponseCompression(options =>
 {
@@ -23,30 +23,18 @@ builder.Services.AddResponseCompression(options =>
         new[] { "application/octet-stream", "text/css", "application/javascript" });
 });
 
-// Estabiliza o circuito SignalR no Railway (hospedagem efêmera).
-// As chaves de DataProtection PRECISAM sobreviver a redeploys; caso contrário cada novo
-// container gera chave nova e o cookie antiforgery do navegador não é descriptografado
+// Estabiliza o circuito SignalR em hospedagens efêmeras (Render, Podman/Docker, etc.).
+// As chaves de DataProtection PRECISAM sobreviver a redeploys se configuradas com volume persistente;
+// caso contrário cada novo container gera chave nova e o cookie antiforgery do navegador não é descriptografado
 // -> "antiforgery token could not be decrypted" -> circuito não sobe -> nada navega.
 // Resolução em ordem de prioridade:
-//   1. DATAPROTECTION_KEYS_PATH (configurado manualmente)
-//   2. primeiro volume Railway montado em /var/lib/containers/railwayapp/bind-mounts/*/vol_* (auto-detectado)
-//   3. /tmp/portal-estudos-keys (vida do container, só para dev local)
+//   1. DATAPROTECTION_KEYS_PATH (configurado manualmente por env var)
+//   2. /tmp/portal-estudos-keys (fallback padrão efêmero)
 var keysPath = Environment.GetEnvironmentVariable("DATAPROTECTION_KEYS_PATH");
 if (string.IsNullOrWhiteSpace(keysPath))
 {
-    var bindRoot = new DirectoryInfo("/var/lib/containers/railwayapp/bind-mounts");
-    if (bindRoot.Exists)
-    {
-        var vol = bindRoot.EnumerateDirectories("vol_*", SearchOption.AllDirectories)
-                           .OrderBy(d => d.FullName)
-                           .FirstOrDefault();
-        if (vol != null)
-        {
-            keysPath = Path.Combine(vol.FullName, "portal-estudos-keys");
-        }
-    }
+    keysPath = "/tmp/portal-estudos-keys";
 }
-keysPath ??= "/tmp/portal-estudos-keys";
 var keysDir = new DirectoryInfo(keysPath);
 keysDir.Create();
 Console.WriteLine($"[DataProtection] Persistindo chaves em: {keysDir.FullName}");
@@ -81,7 +69,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // HSTS kept off behind Railway's TLS-terminating edge proxy to avoid redirect loops.
+    // HSTS mantido desligado atrás de proxies de borda com terminação TLS (Render/Cloudflare) para evitar loops de redirecionamento.
 }
 
 // URLs desconhecidas (HTTP direto) caem aqui: re-executa para a rota /not-found,
@@ -95,6 +83,6 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// Bind to Railway's PORT (falls back to 8080 locally / other hosts).
+// Bind na porta configurada (PORT ou 8080 por padrão).
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Run($"http://0.0.0.0:{port}");
