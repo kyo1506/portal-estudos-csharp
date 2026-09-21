@@ -65,15 +65,15 @@ else
             <MudItem xs="12" md="6" lg="4" Class="d-flex">
                 <a href="@($"/fase/{fase.Id}/lesson/{lesson.Id}")" class="fase-card-link">
                     <MudCard Class="fase-card-hover flex-fill" Style="width:100%;">
-                        <MudCardContent>
+                        <MudCardContent Class="lesson-card-content">
                             <div style="display:flex; align-items:flex-start; justify-content:space-between;">
                                 <div style="display:flex; align-items:center; gap:0.5rem;">
                                     <MudAvatar Color="Color.Primary" Size="Size.Small">@lesson.Order</MudAvatar>
-                                    <MudText Typo="Typo.subtitle1" Class="font-weight-bold">@lesson.Title</MudText>
+                                    <MudText Typo="Typo.subtitle1" Class="font-weight-bold lesson-card-title">@lesson.Title</MudText>
                                 </div>
                                 <MudIcon Icon="@(done ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Circle)" Color="@(done ? Color.Success : Color.Default)" />
                             </div>
-                            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2">@GetLessonPreview(lesson)</MudText>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2 lesson-card-preview">@GetLessonPreview(lesson)</MudText>
                         </MudCardContent>
                     </MudCard>
                 </a>
@@ -92,15 +92,17 @@ else
             <MudItem xs="12" md="6" lg="4" Class="d-flex">
                 <a href="@($"/fase/{fase.Id}/exercise/{exercise.Id}")" class="fase-card-link">
                     <MudCard Class="fase-card-hover flex-fill" Style="width:100%;">
-                        <MudCardContent>
+                        <MudCardContent Class="exercise-card-content">
                             <div style="display:flex; align-items:flex-start; justify-content:space-between;">
-                                <MudText Typo="Typo.subtitle1" Class="font-weight-bold">@exercise.Title</MudText>
+                                <MudText Typo="Typo.subtitle1" Class="font-weight-bold exercise-card-title">@exercise.Title</MudText>
                                 <MudIcon Icon="@(done ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Circle)" Color="@(done ? Color.Success : Color.Default)" />
                             </div>
-                            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2 mb-2">@exercise.Description</MudText>
-                            <MudChip T="string" Color="@DifficultyPresentation.GetColor(exercise.Difficulty)" Variant="Variant.Filled" Size="Size.Small">
-                                @DifficultyPresentation.GetText(exercise.Difficulty)
-                            </MudChip>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2 mb-2 exercise-card-desc">@exercise.Description</MudText>
+                            <div class="mt-auto">
+                                <MudChip T="string" Color="@DifficultyPresentation.GetColor(exercise.Difficulty)" Variant="Variant.Filled" Size="Size.Small">
+                                    @DifficultyPresentation.GetText(exercise.Difficulty)
+                                </MudChip>
+                            </div>
                         </MudCardContent>
                     </MudCard>
                 </a>

@@ -48,6 +48,88 @@ html, body {
 /* Garante cards de altura uniforme nas grades de lições/exercícios */
 .stretch-grid { align-items: stretch; }
 
+/* Cards de Fase (Fases.razor e Dashboard.razor) — dimensões rigorosamente uniformes */
+.fase-card {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    width: 100% !important;
+}
+
+.fase-card .mud-card-content,
+.fase-card-content {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    flex: 1 1 auto !important;
+}
+
+.fase-card-title {
+    min-height: 2.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.35rem;
+}
+
+.fase-card-description {
+    min-height: 4.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4rem;
+}
+
+.fase-card-footer {
+    margin-top: auto;
+}
+
+/* Cards de Lições e Exercícios (FaseDetail.razor) */
+.lesson-card-content,
+.exercise-card-content {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    flex: 1 1 auto !important;
+}
+
+.lesson-card-title {
+    min-height: 2.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.35rem;
+}
+
+.lesson-card-preview {
+    min-height: 2.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4rem;
+}
+
+.exercise-card-title {
+    min-height: 1.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.exercise-card-desc {
+    min-height: 2.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4rem;
+}
+
 /* Code block (markdown rendering e exemplos) */
 .code-block {
     background: #1e1e2e;
