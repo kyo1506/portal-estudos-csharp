@@ -9,11 +9,12 @@ public class JsonContentRepositoryTests
     private readonly JsonContentRepository _repository = new();
 
     [Fact]
-    public void GetAllFases_LoadsFaseZero()
+    public void GetAllFases_LoadsFasesCadastradas()
     {
         var fases = _repository.GetAllFases();
-        Assert.Single(fases);
-        Assert.Equal(0, fases[0].Id);
+        Assert.Equal(2, fases.Count);
+        Assert.Contains(fases, f => f.Id == 0);
+        Assert.Contains(fases, f => f.Id == 1);
     }
 
     [Fact]
@@ -25,6 +26,17 @@ public class JsonContentRepositoryTests
         Assert.Equal(11, fase!.Lessons.Count);      // teoria completa da Fase 00
         Assert.Equal(6, fase.Exercises.Count);
         Assert.Null(fase.Challenge);                // Fase 00 não tem desafio externo
+    }
+
+    [Fact]
+    public void FaseUm_ContemLicoesEExercicios()
+    {
+        var fase = _repository.GetFase(1);
+
+        Assert.NotNull(fase);
+        Assert.Equal(10, fase!.Lessons.Count);      // 10 aulas da teoria da Fase 01
+        Assert.Equal(6, fase.Exercises.Count);
+        Assert.Contains("C# Básico", fase.Title);
     }
 
     [Fact]
@@ -44,6 +56,10 @@ public class JsonContentRepositoryTests
         var lesson = _repository.GetLesson(0, 1);
         Assert.NotNull(lesson);
         Assert.Contains("Programar", lesson!.Title);
+
+        var lessonFase1 = _repository.GetLesson(1, 1);
+        Assert.NotNull(lessonFase1);
+        Assert.Contains("Valor", lessonFase1!.Title);
     }
 
     [Fact]
@@ -52,6 +68,10 @@ public class JsonContentRepositoryTests
         var exercise = _repository.GetExercise(0, 6);
         Assert.NotNull(exercise);
         Assert.Equal("Soma dos dígitos", exercise!.Title);
+
+        var exerciseFase1 = _repository.GetExercise(1, 1);
+        Assert.NotNull(exerciseFase1);
+        Assert.Contains("Dinheiro", exerciseFase1!.Title);
     }
 
     [Fact]
@@ -63,7 +83,10 @@ public class JsonContentRepositoryTests
     [Fact]
     public void Lessons_KeepOrderField()
     {
-        var fase = _repository.GetFase(0);
-        Assert.Equal(Enumerable.Range(1, 11), fase!.Lessons.Select(l => l.Order));
+        var fase0 = _repository.GetFase(0);
+        Assert.Equal(Enumerable.Range(1, 11), fase0!.Lessons.Select(l => l.Order));
+
+        var fase1 = _repository.GetFase(1);
+        Assert.Equal(Enumerable.Range(1, 10), fase1!.Lessons.Select(l => l.Order));
     }
 }
