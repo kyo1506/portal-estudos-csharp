@@ -12,10 +12,11 @@ public class JsonContentRepositoryTests
     public void GetAllFases_LoadsFasesCadastradas()
     {
         var fases = _repository.GetAllFases();
-        Assert.Equal(3, fases.Count);
+        Assert.Equal(4, fases.Count);
         Assert.Contains(fases, f => f.Id == 0);
         Assert.Contains(fases, f => f.Id == 1);
         Assert.Contains(fases, f => f.Id == 2);
+        Assert.Contains(fases, f => f.Id == 3);
     }
 
     [Fact]
@@ -49,6 +50,17 @@ public class JsonContentRepositoryTests
         Assert.Equal(6, fase!.Lessons.Count);       // 6 aulas da teoria da Fase 02
         Assert.Equal(6, fase.Exercises.Count);
         Assert.Contains("Orientada a Objetos", fase.Title);
+    }
+
+    [Fact]
+    public void FaseTres_ContemLicoesEExercicios()
+    {
+        var fase = _repository.GetFase(3);
+
+        Assert.NotNull(fase);
+        Assert.Equal(6, fase!.Lessons.Count);       // 6 aulas da teoria da Fase 03
+        Assert.Equal(6, fase.Exercises.Count);
+        Assert.Contains("Coleções", fase.Title);
     }
 
     [Fact]
