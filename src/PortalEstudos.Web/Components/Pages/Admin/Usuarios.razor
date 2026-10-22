@@ -1,0 +1,214 @@
+@page "/admin/usuarios"
+@attribute [Authorize(Roles = "Instrutor,Admin")]
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@using PortalEstudos.Application.Abstractions
+@using PortalEstudos.Domain.Entities
+@inject IAuthService AuthService
+@inject ISnackbar Snackbar
+
+<PageTitle>Gestão de Usuários - Portal de Estudos C#</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+    <div class="d-flex justify-space-between align-center mb-6">
+        <div>
+            <MudText Typo="Typo.h4" Class="font-weight-bold">
+                <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" Class="mr-2" /> Gestão de Usuários
+            </MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                Administração de contas, perfis e controle de acesso ao portal
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd"
+                   OnClick="@(() => _exibirFormularioNovo = !_exibirFormularioNovo)">
+            @(_exibirFormularioNovo ? "Fechar Formulário" : "Novo Usuário")
+        </MudButton>
+    </div>
+
+    @if (_exibirFormularioNovo)
+    {
+        <MudCard Elevation="4" Class="mb-6 rounded-lg border">
+            <MudCardHeader>
+                <CardHeaderAvatar>
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Filled">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" />
+                    </MudAvatar>
+                </CardHeaderAvatar>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Cadastrar Novo Usuário</MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">Crie contas com papel de Aluno, Instrutor ou Administrador</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_novoNome" Label="Nome Completo" Variant="Variant.Outlined"
+                                      Placeholder="Ex: Maria Silva" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_novoEmail" Label="Email de Acesso" Variant="Variant.Outlined"
+                                      Placeholder="exemplo@portal.com" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_novaSenha" Label="Senha Provisória" Variant="Variant.Outlined" InputType="InputType.Password"
+                                      Placeholder="Mínimo 6 caracteres" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="_novoPapel" Label="Papel / Perfil" Variant="Variant.Outlined"
+                                   AdornmentIcon="@Icons.Material.Filled.Badge">
+                            <MudSelectItem Value="@Roles.Aluno">Aluno (acesso aos estudos e submissões)</MudSelectItem>
+                            <MudSelectItem Value="@Roles.Instrutor">Instrutor (acesso a mentoria e dúvidas)</MudSelectItem>
+                            <MudSelectItem Value="@Roles.Admin">Administrador (acesso total)</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardActions Class="pa-4 d-flex justify-end gap-2">
+                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="@(() => _exibirFormularioNovo = false)">
+                    Cancelar
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save"
+                           Disabled="@_salvando" OnClick="SalvarNovoUsuarioAsync">
+                    @(_salvando ? "Salvando..." : "Cadastrar")
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    }
+
+    <MudCard Elevation="3" Class="rounded-lg">
+        <MudCardContent Class="pa-0">
+            <MudTable Items="@UsuariosFiltrados" Dense="false" Hover="true" Striped="true" Loading="@_carregando"
+                      Elevation="0">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Usuários Cadastrados (@UsuariosFiltrados.Count)</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_termoBusca" Placeholder="Buscar por nome ou email..."
+                                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                                  IconSize="Size.Medium" Class="mt-0" Immediate="true" />
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Nome</MudTh>
+                    <MudTh>Email</MudTh>
+                    <MudTh>Papel / Perfil</MudTh>
+                    <MudTh>Criado Em</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="ID">#@context.Id</MudTd>
+                    <MudTd DataLabel="Nome">
+                        <div class="d-flex align-center">
+                            <MudAvatar Color="@ObterCorAvatar(context.Role)" Size="Size.Small" Class="mr-2">
+                                @(string.IsNullOrWhiteSpace(context.Nome) ? "?" : context.Nome[..1].ToUpper())
+                            </MudAvatar>
+                            <strong>@context.Nome</strong>
+                        </div>
+                    </MudTd>
+                    <MudTd DataLabel="Email">@context.Email</MudTd>
+                    <MudTd DataLabel="Papel">
+                        <MudChip T="string" Color="@ObterCorRole(context.Role)" Size="Size.Small" Variant="Variant.Filled">
+                            @context.Role
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Criado Em">@context.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText Class="pa-4 text-center mud-text-secondary">Nenhum usuário localizado.</MudText>
+                </NoRecordsContent>
+                <LoadingContent>
+                    <MudText Class="pa-4 text-center">Carregando usuários...</MudText>
+                </LoadingContent>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" />
+                </PagerContent>
+            </MudTable>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private List<Usuario> _usuarios = new();
+    private bool _carregando = true;
+    private bool _exibirFormularioNovo = false;
+    private bool _salvando = false;
+
+    private string _novoNome = string.Empty;
+    private string _novoEmail = string.Empty;
+    private string _novaSenha = string.Empty;
+    private string _novoPapel = Roles.Aluno;
+    private string _termoBusca = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarUsuariosAsync();
+    }
+
+    private async Task CarregarUsuariosAsync()
+    {
+        _carregando = true;
+        try
+        {
+            var lista = await AuthService.ListUsersAsync();
+            _usuarios = lista.OrderByDescending(u => u.Id).ToList();
+        }
+        finally
+        {
+            _carregando = false;
+        }
+    }
+
+    private List<Usuario> UsuariosFiltrados => _usuarios
+        .Where(u => string.IsNullOrWhiteSpace(_termoBusca) ||
+                    u.Nome.Contains(_termoBusca, StringComparison.OrdinalIgnoreCase) ||
+                    u.Email.Contains(_termoBusca, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    private async Task SalvarNovoUsuarioAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_novoNome) || string.IsNullOrWhiteSpace(_novoEmail) || string.IsNullOrWhiteSpace(_novaSenha))
+        {
+            Snackbar.Add("Preencha todos os campos obrigatórios.", Severity.Warning);
+            return;
+        }
+
+        _salvando = true;
+        try
+        {
+            var resultado = await AuthService.RegisterAsync(_novoNome, _novoEmail, _novaSenha, _novoPapel);
+            if (!resultado.Success)
+            {
+                Snackbar.Add(resultado.ErrorMessage ?? "Erro ao cadastrar usuário.", Severity.Error);
+                return;
+            }
+
+            Snackbar.Add($"Usuário '{resultado.User?.Nome}' cadastrado com sucesso!", Severity.Success);
+            _novoNome = string.Empty;
+            _novoEmail = string.Empty;
+            _novaSenha = string.Empty;
+            _novoPapel = Roles.Aluno;
+            _exibirFormularioNovo = false;
+            await CarregarUsuariosAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Falha ao cadastrar: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _salvando = false;
+        }
+    }
+
+    private static Color ObterCorRole(string role) => role switch
+    {
+        Roles.Admin => Color.Warning,
+        Roles.Instrutor => Color.Secondary,
+        _ => Color.Primary
+    };
+
+    private static Color ObterCorAvatar(string role) => role switch
+    {
+        Roles.Admin => Color.Warning,
+        Roles.Instrutor => Color.Secondary,
+        _ => Color.Info
+    };
+}

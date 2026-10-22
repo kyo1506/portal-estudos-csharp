@@ -158,6 +158,63 @@ app.MapPost("/api/auth/login", async (HttpContext httpContext, IAuthService auth
     return Results.Redirect("/dashboard");
 }).DisableAntiforgery();
 
+app.MapPost("/api/auth/register", async (HttpContext httpContext, IAuthService authService) =>
+{
+    var form = await httpContext.Request.ReadFormAsync();
+    var nome = form["nome"].ToString();
+    var email = form["email"].ToString();
+    var password = form["password"].ToString();
+    var confirmPassword = form["confirmPassword"].ToString();
+    var returnUrl = form["returnUrl"].ToString();
+
+    if (password != confirmPassword)
+    {
+        var target = string.IsNullOrWhiteSpace(returnUrl)
+            ? "/login?tab=register&error=senhas_diferentes"
+            : $"/login?tab=register&error=senhas_diferentes&returnUrl={Uri.EscapeDataString(returnUrl)}";
+        return Results.Redirect(target);
+    }
+
+    var result = await authService.RegisterAsync(nome, email, password, PortalEstudos.Domain.Entities.Roles.Aluno);
+    if (!result.Success || result.User == null)
+    {
+        var erro = Uri.EscapeDataString(result.ErrorMessage ?? "Falha ao cadastrar.");
+        var target = string.IsNullOrWhiteSpace(returnUrl)
+            ? $"/login?tab=register&error={erro}"
+            : $"/login?tab=register&error={erro}&returnUrl={Uri.EscapeDataString(returnUrl)}";
+        return Results.Redirect(target);
+    }
+
+    var claims = new List<Claim>
+    {
+        new(ClaimTypes.NameIdentifier, result.User.Id.ToString()),
+        new(ClaimTypes.Name, result.User.Nome),
+        new(ClaimTypes.Email, result.User.Email),
+        new(ClaimTypes.Role, result.User.Role)
+    };
+
+    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    var authProperties = new AuthenticationProperties
+    {
+        IsPersistent = true,
+        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+    };
+
+    await httpContext.SignInAsync(
+        CookieAuthenticationDefaults.AuthenticationScheme,
+        new ClaimsPrincipal(claimsIdentity),
+        authProperties);
+
+    if (!string.IsNullOrWhiteSpace(returnUrl) &&
+        !returnUrl.StartsWith("//") &&
+        (returnUrl.StartsWith('/') || returnUrl.StartsWith('~')))
+    {
+        return Results.Redirect(returnUrl);
+    }
+
+    return Results.Redirect("/dashboard");
+}).DisableAntiforgery();
+
 app.MapGet("/api/auth/logout", async (HttpContext httpContext) =>
 {
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

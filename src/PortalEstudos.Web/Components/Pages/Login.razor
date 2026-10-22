@@ -2,57 +2,164 @@
 @using MudBlazor
 @inject NavigationManager NavigationManager
 
-<PageTitle>Login - Portal de Estudos C#</PageTitle>
+<PageTitle>Autenticação - Portal de Estudos C#</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="d-flex justify-center align-center min-vh-75 py-8">
-    <MudPaper Elevation="4" Class="pa-8 w-100 rounded-lg">
+<MudContainer MaxWidth="MaxWidth.Small" Class="d-flex justify-center align-center min-vh-75 py-10">
+    <MudPaper Elevation="8" Class="pa-8 w-100 rounded-xl" Style="border: 1px solid rgba(102, 126, 234, 0.15); backdrop-filter: blur(8px);">
         <div class="text-center mb-6">
-            <MudIcon Icon="@Icons.Material.Filled.LockPerson" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
-            <MudText Typo="Typo.h5" Class="font-weight-bold">Acesse sua Conta</MudText>
-            <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                Portal de Estudos C# e .NET com persistência em nuvem
+            <div class="d-inline-flex pa-3 rounded-circle mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);">
+                <MudIcon Icon="@Icons.Material.Filled.School" Size="Size.Large" />
+            </div>
+            <MudText Typo="Typo.h5" Class="font-weight-bold" Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Portal de Estudos C# & .NET
+            </MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1">
+                Sincronização em tempo real e mentoria com persistência em nuvem
             </MudText>
         </div>
 
         @if (!string.IsNullOrEmpty(Error))
         {
-            <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4">
-                Credenciais inválidas. Verifique seu email e senha.
+            <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-5 rounded-lg">
+                @MensagemErroAmigavel
             </MudAlert>
         }
 
-        <form method="post" action="/api/auth/login">
-            <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+        <MudTabs @bind-ActivePanelIndex="_activeTab" Centered="true" Rounded="true" ApplyEffectsToContainer="true"
+                 Color="Color.Primary" SliderColor="Color.Secondary" Class="mb-4">
+            
+            @* --- ABA 1: ENTRAR --- *@
+            <MudTabPanel Text="Entrar" Icon="@Icons.Material.Filled.Login">
+                <form method="post" action="/api/auth/login" class="pt-4">
+                    <input type="hidden" name="returnUrl" value="@ReturnUrl" />
 
-            <div class="mb-4">
-                <MudText Typo="Typo.caption" Class="font-weight-bold">Email</MudText>
-                <input type="email" name="email" required placeholder="seu@email.com"
-                       class="mud-input-slot mud-input-root mud-input-root-outlined pa-3 w-100 rounded border mt-1"
-                       style="background: transparent; color: inherit; border-color: rgba(128,128,128,0.4);" />
-            </div>
+                    <div class="mb-4">
+                        <label for="login-email" class="d-flex align-center gap-1 mb-1 font-weight-bold mud-typography-caption">
+                            <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Small" Color="Color.Primary" />
+                            Email
+                        </label>
+                        <input id="login-email" type="email" name="email" required placeholder="seu.email@exemplo.com"
+                               class="auth-input-field" />
+                    </div>
 
-            <div class="mb-6">
-                <MudText Typo="Typo.caption" Class="font-weight-bold">Senha</MudText>
-                <input type="password" name="password" required placeholder="••••••••"
-                       class="mud-input-slot mud-input-root mud-input-root-outlined pa-3 w-100 rounded border mt-1"
-                       style="background: transparent; color: inherit; border-color: rgba(128,128,128,0.4);" />
-            </div>
+                    <div class="mb-5">
+                        <label for="login-password" class="d-flex align-center gap-1 mb-1 font-weight-bold mud-typography-caption">
+                            <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Small" Color="Color.Primary" />
+                            Senha
+                        </label>
+                        <input id="login-password" type="password" name="password" required placeholder="••••••••"
+                               class="auth-input-field" />
+                    </div>
 
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
-                       FullWidth="true" Size="Size.Large" StartIcon="@Icons.Material.Filled.Login">
-                Entrar
-            </MudButton>
-        </form>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                               FullWidth="true" Size="Size.Large" StartIcon="@Icons.Material.Filled.Login"
+                               Class="rounded-lg py-3 font-weight-bold" Style="box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);">
+                        Acessar Minha Conta
+                    </MudButton>
+                </form>
+            </MudTabPanel>
+
+            @* --- ABA 2: CRIAR CONTA --- *@
+            <MudTabPanel Text="Criar Conta" Icon="@Icons.Material.Filled.PersonAdd">
+                <form method="post" action="/api/auth/register" class="pt-4">
+                    <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+
+                    <div class="mb-4">
+                        <label for="reg-nome" class="d-flex align-center gap-1 mb-1 font-weight-bold mud-typography-caption">
+                            <MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" Color="Color.Secondary" />
+                            Nome Completo
+                        </label>
+                        <input id="reg-nome" type="text" name="nome" required placeholder="Como prefere ser chamado?"
+                               class="auth-input-field" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="reg-email" class="d-flex align-center gap-1 mb-1 font-weight-bold mud-typography-caption">
+                            <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Small" Color="Color.Secondary" />
+                            Email
+                        </label>
+                        <input id="reg-email" type="email" name="email" required placeholder="seu.email@exemplo.com"
+                               class="auth-input-field" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="reg-password" class="d-flex align-center gap-1 mb-1 font-weight-bold mud-typography-caption">
+                            <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Small" Color="Color.Secondary" />
+                            Senha (mínimo 6 caracteres)
+                        </label>
+                        <input id="reg-password" type="password" name="password" minlength="6" required placeholder="Crie uma senha segura"
+                               class="auth-input-field" />
+                    </div>
+
+                    <div class="mb-5">
+                        <label for="reg-confirm-password" class="d-flex align-center gap-1 mb-1 font-weight-bold mud-typography-caption">
+                            <MudIcon Icon="@Icons.Material.Filled.LockReset" Size="Size.Small" Color="Color.Secondary" />
+                            Confirme a Senha
+                        </label>
+                        <input id="reg-confirm-password" type="password" name="confirmPassword" minlength="6" required placeholder="Repita a senha"
+                               class="auth-input-field" />
+                    </div>
+
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Secondary"
+                               FullWidth="true" Size="Size.Large" StartIcon="@Icons.Material.Filled.PersonAdd"
+                               Class="rounded-lg py-3 font-weight-bold" Style="box-shadow: 0 4px 14px rgba(118, 75, 162, 0.4);">
+                        Cadastrar e Entrar
+                    </MudButton>
+                </form>
+            </MudTabPanel>
+        </MudTabs>
 
         <MudDivider Class="my-6" />
 
-        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-2">
-            <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Usuários Demonstrativos:</MudText>
-            <MudText Typo="Typo.body2"><strong>Aluno:</strong> aluno@portal.com / Portal@123</MudText>
-            <MudText Typo="Typo.body2"><strong>Instrutor:</strong> instrutor@portal.com / Portal@123</MudText>
-        </MudAlert>
+        <MudExpansionPanels Dense="true" Elevation="0">
+            <MudExpansionPanel Text="Credenciais de Acesso Demonstrativo" Icon="@Icons.Material.Filled.HelpOutline" Class="rounded-lg border">
+                <div class="d-flex flex-column gap-2 py-2">
+                    <div class="d-flex align-center justify-space-between pa-2 rounded" style="background: rgba(102, 126, 234, 0.08);">
+                        <div>
+                            <MudChip T="string" Color="Color.Primary" Size="Size.Small">Aluno</MudChip>
+                            <span class="ml-2 font-weight-bold">aluno@portal.com</span>
+                        </div>
+                        <code class="mud-text-secondary">Portal@123</code>
+                    </div>
+                    <div class="d-flex align-center justify-space-between pa-2 rounded" style="background: rgba(118, 75, 162, 0.08);">
+                        <div>
+                            <MudChip T="string" Color="Color.Secondary" Size="Size.Small">Instrutor</MudChip>
+                            <span class="ml-2 font-weight-bold">instrutor@portal.com</span>
+                        </div>
+                        <code class="mud-text-secondary">Portal@123</code>
+                    </div>
+                    <div class="d-flex align-center justify-space-between pa-2 rounded" style="background: rgba(255, 152, 0, 0.08);">
+                        <div>
+                            <MudChip T="string" Color="Color.Warning" Size="Size.Small">Admin</MudChip>
+                            <span class="ml-2 font-weight-bold">admin@portal.com</span>
+                        </div>
+                        <code class="mud-text-secondary">Portal@123</code>
+                    </div>
+                </div>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
     </MudPaper>
 </MudContainer>
+
+<style>
+    .auth-input-field {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(128, 128, 128, 0.35);
+        background-color: var(--mud-palette-surface);
+        color: var(--mud-palette-text-primary);
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .auth-input-field:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+    }
+</style>
 
 @code {
     [SupplyParameterFromQuery]
@@ -60,4 +167,25 @@
 
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? Tab { get; set; }
+
+    private int _activeTab = 0;
+
+    protected override void OnInitialized()
+    {
+        if (string.Equals(Tab, "register", StringComparison.OrdinalIgnoreCase))
+        {
+            _activeTab = 1;
+        }
+    }
+
+    private string MensagemErroAmigavel => Error switch
+    {
+        "credenciais_invalidas" => "Credenciais incorretas. Verifique seu e-mail e senha.",
+        "senhas_diferentes" => "A senha digitada e a confirmação não conferem.",
+        null or "" => string.Empty,
+        _ => Uri.UnescapeDataString(Error)
+    };
 }

@@ -1,4 +1,5 @@
 using PortalEstudos.Application.Abstractions;
+using PortalEstudos.Domain.Entities;
 
 namespace PortalEstudos.Application.Services;
 
@@ -34,5 +35,48 @@ public sealed class AuthService : IAuthService
         }
 
         return new AuthResult(true, user, null);
+    }
+
+    public async Task<AuthResult> RegisterAsync(string nome, string email, string password, string role = Roles.Aluno, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+        {
+            return new AuthResult(false, null, "Nome é obrigatório.");
+        }
+
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+        {
+            return new AuthResult(false, null, "Email informado é inválido.");
+        }
+
+        if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
+        {
+            return new AuthResult(false, null, "A senha deve conter no mínimo 6 caracteres.");
+        }
+
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var jaExiste = await _userRepository.ExistsByEmailAsync(normalizedEmail, ct);
+        if (jaExiste)
+        {
+            return new AuthResult(false, null, "Já existe uma conta cadastrada com este email.");
+        }
+
+        var roleFinal = role is Roles.Instrutor or Roles.Admin ? role : Roles.Aluno;
+        var novoUsuario = new Usuario
+        {
+            Nome = nome.Trim(),
+            Email = normalizedEmail,
+            SenhaHash = _passwordHasher.HashPassword(password),
+            Role = roleFinal,
+            CriadoEm = DateTime.UtcNow
+        };
+
+        var salvo = await _userRepository.CreateAsync(novoUsuario, ct);
+        return new AuthResult(true, salvo, null);
+    }
+
+    public Task<IReadOnlyList<Usuario>> ListUsersAsync(CancellationToken ct = default)
+    {
+        return _userRepository.GetAllAsync(ct);
     }
 }

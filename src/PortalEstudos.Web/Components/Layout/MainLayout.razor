@@ -42,15 +42,16 @@
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Início</MudNavLink>
             <MudNavLink Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
             <MudNavLink Href="fases" Icon="@Icons.Material.Filled.DateRange">Fases</MudNavLink>
-            <AuthorizeView>
+            <AuthorizeView Roles="Aluno">
                 <Authorized>
                     <MudNavLink Href="minhas-duvidas" Icon="@Icons.Material.Filled.QuestionAnswer">Minhas Dúvidas</MudNavLink>
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Roles="Instrutor">
+            <AuthorizeView Roles="Instrutor,Admin">
                 <Authorized>
                     <MudNavLink Href="mentor/dashboard" Icon="@Icons.Material.Filled.SupervisorAccount">Painel Mentor</MudNavLink>
                     <MudNavLink Href="mentor/duvidas" Icon="@Icons.Material.Filled.SupportAgent">Fila de Dúvidas</MudNavLink>
+                    <MudNavLink Href="admin/usuarios" Icon="@Icons.Material.Filled.ManageAccounts">Gestão de Usuários</MudNavLink>
                 </Authorized>
             </AuthorizeView>
             <MudNavLink Href="https://github.com/kyo1506/fundamentos-csharp" Target="_blank" Icon="@Icons.Material.Filled.EmojiEvents">Desafios (GitHub)</MudNavLink>

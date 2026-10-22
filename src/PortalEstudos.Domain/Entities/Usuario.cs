@@ -19,4 +19,5 @@ public static class Roles
 {
     public const string Aluno = "Aluno";
     public const string Instrutor = "Instrutor";
+    public const string Admin = "Admin";
 }
