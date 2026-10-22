@@ -358,7 +358,7 @@ else
             isCorrect = true;
             resultMessage = "Excelente! Seu código está de acordo com a solução esperada.";
             userCodeOutput = exercise.ExpectedOutput;
-            await ProgressService.MarkExerciseCompleteAsync(exercise.Id, userCode);
+            await ProgressService.RecordExerciseAttemptAsync(exercise.Id, userCode, isCorrect: true, errorMessage: null, faseId: fase?.Id);
             userProgress = await ProgressService.LoadAsync();
         }
         else
@@ -366,6 +366,8 @@ else
             isCorrect = false;
             resultMessage = "Ainda não está igual à solução esperada. Reveja as dicas e tente novamente.";
             userCodeOutput = "";
+            await ProgressService.RecordExerciseAttemptAsync(exercise.Id, userCode, isCorrect: false, errorMessage: resultMessage, faseId: fase?.Id);
+            userProgress = await ProgressService.LoadAsync();
         }
 
         isSubmitting = false;

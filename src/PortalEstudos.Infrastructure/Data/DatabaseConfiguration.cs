@@ -32,6 +32,7 @@ public static class DatabaseConfiguration
         }
 
         services.AddScoped<IUserRepository, EfUserRepository>();
+        services.AddScoped<IUserProgressRepository, EfUserProgressRepository>();
         return services;
     }
 

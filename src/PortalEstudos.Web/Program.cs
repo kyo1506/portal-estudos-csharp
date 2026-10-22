@@ -1,4 +1,5 @@
 using PortalEstudos.Web.Components;
+using PortalEstudos.Web.Services;
 using PortalEstudos.Application.Abstractions;
 using PortalEstudos.Application.Services;
 using PortalEstudos.Infrastructure.Content;
@@ -84,6 +85,7 @@ builder.Services.AddHttpClient<IGitHubApi, GitHubApiClient>();
 builder.Services.AddSingleton<ICatalogService, CatalogService>();
 builder.Services.AddSingleton<IDashboardService, DashboardService>();
 builder.Services.AddSingleton<IExerciseEvaluationService, ExerciseEvaluationService>();
+builder.Services.AddScoped<ICurrentUserAccessor, BlazorCurrentUserAccessor>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<IChallengeStatusService, ChallengeStatusService>();
 

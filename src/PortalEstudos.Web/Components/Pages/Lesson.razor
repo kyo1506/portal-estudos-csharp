@@ -220,7 +220,7 @@ else
     {
         if (lesson != null)
         {
-            await ProgressService.MarkLessonCompleteAsync(lesson.Id);
+            await ProgressService.MarkLessonCompleteAsync(lesson.Id, fase?.Id);
             userProgress = await ProgressService.LoadAsync();
             StateHasChanged();
         }
@@ -230,7 +230,7 @@ else
     {
         if (lesson != null)
         {
-            await ProgressService.MarkLessonIncompleteAsync(lesson.Id);
+            await ProgressService.MarkLessonIncompleteAsync(lesson.Id, fase?.Id);
             userProgress = await ProgressService.LoadAsync();
             StateHasChanged();
         }
