@@ -89,6 +89,7 @@ builder.Services.AddScoped<ICurrentUserAccessor, BlazorCurrentUserAccessor>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<IChallengeStatusService, ChallengeStatusService>();
 builder.Services.AddScoped<IMentoriaService, MentoriaService>();
+builder.Services.AddScoped<IDuvidaService, DuvidaService>();
 
 var app = builder.Build();
 

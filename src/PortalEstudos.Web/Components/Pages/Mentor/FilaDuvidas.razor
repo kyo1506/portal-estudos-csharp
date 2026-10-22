@@ -1,0 +1,197 @@
+@page "/mentor/duvidas"
+@using MudBlazor
+@using PortalEstudos.Application.Dtos
+@attribute [Authorize(Roles = Roles.Instrutor)]
+@inject IDuvidaService DuvidaService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<PageTitle>Fila de Dúvidas - Mentoria</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-6">
+    <div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-4">
+        <div>
+            <div class="d-flex align-center gap-2">
+                <MudIcon Icon="@Icons.Material.Filled.SupportAgent" Color="Color.Primary" Size="Size.Large" />
+                <MudText Typo="Typo.h4" Class="font-weight-bold">Fila de Atendimento Pedagógico</MudText>
+            </div>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1">
+                Atenda e oriente os estudantes nas suas dúvidas contextuais de lições e exercícios
+            </MudText>
+        </div>
+        <div class="d-flex gap-2">
+            <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack"
+                       OnClick="@(() => NavigationManager.NavigateTo("/mentor"))">
+                Painel Geral
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
+                       OnClick="CarregarFila">
+                Atualizar Fila
+            </MudButton>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-center align-center py-12">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        </div>
+    }
+    else
+    {
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+            <MudTabPanel Text="@($"Pendentes ({duvidas.Count(d => d.Status == DuvidaStatus.Pendente)})")" Icon="@Icons.Material.Filled.PendingActions">
+                @RenderListaDuvidas(duvidas.Where(d => d.Status == DuvidaStatus.Pendente))
+            </MudTabPanel>
+            <MudTabPanel Text="@($"Respondidas ({duvidas.Count(d => d.Status == DuvidaStatus.Respondida)})")" Icon="@Icons.Material.Filled.CheckCircle">
+                @RenderListaDuvidas(duvidas.Where(d => d.Status == DuvidaStatus.Respondida))
+            </MudTabPanel>
+            <MudTabPanel Text="@($"Todas ({duvidas.Count})")" Icon="@Icons.Material.Filled.FormatListBulleted">
+                @RenderListaDuvidas(duvidas)
+            </MudTabPanel>
+        </MudTabs>
+    }
+</MudContainer>
+
+@code {
+    private bool isLoading = true;
+    private IReadOnlyList<DuvidaMentoriaDto> duvidas = new List<DuvidaMentoriaDto>();
+    private Dictionary<int, string> respostas = new();
+    private Dictionary<int, bool> enviando = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarFila();
+    }
+
+    private async Task CarregarFila()
+    {
+        isLoading = true;
+        try
+        {
+            duvidas = await DuvidaService.ObterFilaAtendimentoAsync();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task EnviarResposta(int duvidaId)
+    {
+        if (!respostas.TryGetValue(duvidaId, out var texto) || string.IsNullOrWhiteSpace(texto))
+        {
+            Snackbar.Add("Digite uma resposta antes de enviar.", Severity.Warning);
+            return;
+        }
+
+        enviando[duvidaId] = true;
+        StateHasChanged();
+
+        try
+        {
+            var sucesso = await DuvidaService.ResponderDuvidaAsync(duvidaId, texto);
+            if (sucesso)
+            {
+                Snackbar.Add("Resposta enviada com sucesso para o aluno!", Severity.Success);
+                respostas.Remove(duvidaId);
+                await CarregarFila();
+            }
+            else
+            {
+                Snackbar.Add("Falha ao registrar resposta.", Severity.Error);
+            }
+        }
+        finally
+        {
+            enviando[duvidaId] = false;
+            StateHasChanged();
+        }
+    }
+
+    private RenderFragment RenderListaDuvidas(IEnumerable<DuvidaMentoriaDto> lista) => __builder =>
+    {
+        var itens = lista.ToList();
+        if (!itens.Any())
+        {
+            <div class="pa-8 text-center">
+                <MudText Typo="Typo.body1" Class="mud-text-secondary">Nenhuma dúvida encontrada nesta categoria.</MudText>
+            </div>
+            return;
+        }
+
+        <div class="d-flex flex-column gap-4 mt-2">
+            @foreach (var duvida in itens)
+            {
+                <MudPaper Class="pa-5 rounded-lg" Elevation="2">
+                    <div class="d-flex align-center justify-space-between flex-wrap gap-2 mb-2">
+                        <div>
+                            <MudText Typo="Typo.h6" Class="font-weight-bold">@duvida.Titulo</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                                Aluno: <strong>@duvida.NomeAluno</strong> (@duvida.EmailAluno) ·
+                                @duvida.TituloFase
+                                @(string.IsNullOrEmpty(duvida.TituloLicao) ? "" : $" · Lição: {duvida.TituloLicao}")
+                                @(string.IsNullOrEmpty(duvida.TituloExercicio) ? "" : $" · Exercício: {duvida.TituloExercicio}")
+                                · Enviada em @duvida.CriadaEm.ToString("dd/MM/yyyy HH:mm")
+                            </MudText>
+                        </div>
+                        <MudChip T="string" Size="Size.Small"
+                                 Color="@(duvida.Status == DuvidaStatus.Respondida ? Color.Success : Color.Warning)"
+                                 Variant="Variant.Filled">
+                            @(duvida.Status == DuvidaStatus.Respondida ? "Respondida" : "Pendente")
+                        </MudChip>
+                    </div>
+
+                    <MudText Typo="Typo.body1" Class="my-3" Style="white-space: pre-wrap;">
+                        @duvida.Descricao
+                    </MudText>
+
+                    @if (!string.IsNullOrEmpty(duvida.TrechoCodigo))
+                    {
+                        <div class="mb-3">
+                            <MudText Typo="Typo.caption" Class="font-weight-bold text-uppercase mud-text-secondary d-block mb-1">
+                                Código submetido pelo aluno:
+                            </MudText>
+                            <div class="pa-3 rounded" style="background-color: #1e1e2e; color: #f8f8f2; font-family: monospace; font-size: 0.85rem; overflow-x: auto; max-height: 250px;">
+                                <pre style="margin: 0;"><code>@duvida.TrechoCodigo</code></pre>
+                            </div>
+                        </div>
+                    }
+
+                    @if (duvida.Status == DuvidaStatus.Pendente)
+                    {
+                        <MudDivider Class="my-3" />
+                        <div class="mt-2">
+                            <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-1">Redigir Resposta Pedagógica:</MudText>
+                            <MudTextField T="string" Lines="3" Variant="Variant.Outlined"
+                                          Placeholder="Escreva sua explicação, sugestão ou correção pedagógica para o aluno..."
+                                          Value="@(respostas.TryGetValue(duvida.Id, out var r) ? r : "")"
+                                          ValueChanged="@(val => respostas[duvida.Id] = val)"
+                                          Class="mb-3" />
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.Send"
+                                       Disabled="@(enviando.TryGetValue(duvida.Id, out var env) && env)"
+                                       OnClick="@(() => EnviarResposta(duvida.Id))">
+                                Enviar Resposta
+                            </MudButton>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(duvida.RespostaInstrutor))
+                    {
+                        <MudPaper Class="pa-4 mt-3 rounded" Elevation="1" Style="background-color: rgba(102, 126, 234, 0.08); border-left: 4px solid var(--mud-palette-primary);">
+                            <div class="d-flex align-center gap-2 mb-1">
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+                                <MudText Typo="Typo.subtitle2" Class="font-weight-bold" Color="Color.Primary">
+                                    Resposta enviada @(duvida.RespondidaEm.HasValue ? $"em {duvida.RespondidaEm.Value.ToString("dd/MM/yyyy HH:mm")}" : ""):
+                                </MudText>
+                            </div>
+                            <MudText Typo="Typo.body2" Style="white-space: pre-wrap;">
+                                @duvida.RespostaInstrutor
+                            </MudText>
+                        </MudPaper>
+                    }
+                </MudPaper>
+            }
+        </div>
+    };
+}

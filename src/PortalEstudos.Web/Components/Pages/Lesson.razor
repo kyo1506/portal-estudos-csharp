@@ -3,11 +3,14 @@
 @inject ICatalogService CatalogService
 @inject IProgressService ProgressService
 @inject IMarkdownRenderer MarkdownRenderer
+@inject IDuvidaService DuvidaService
+@inject ICurrentUserAccessor CurrentUserAccessor
+@inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 
 <PageTitle>@lesson?.Title - Portal de Estudos C#</PageTitle>
 <HeadContent>
-    <meta name="description" content="Aula de C# e .NET: @lesson?.Title — teoria e exemplos práticos." />
+    <meta name="description" content="Aula de C# e .NET: @lesson?.Title, teoria e exemplos práticos." />
 </HeadContent>
 
 @if (isLoading)
@@ -131,6 +134,49 @@ else
                     </MudItem>
                 </MudGrid>
             </MudPaper>
+
+            <MudPaper Class="pa-4 rounded-lg mt-4" Elevation="2">
+                <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+                    <div class="d-flex align-center gap-2">
+                        <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Color="Color.Primary" />
+                        <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Ficou com dúvida neste conteúdo teórico?</MudText>
+                    </div>
+                    <MudButton Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleDuvidaForm" StartIcon="@Icons.Material.Filled.QuestionAnswer">
+                        @(showDuvidaForm ? "Ocultar" : "Tirar Dúvida")
+                    </MudButton>
+                </div>
+
+                @if (showDuvidaForm)
+                {
+                    <div class="mt-4">
+                        <AuthorizeView>
+                            <Authorized>
+                                @if (duvidaEnviadaComSucesso)
+                                {
+                                    <MudAlert Severity="Severity.Success" Dense="true" Class="mb-3">
+                                        Dúvida enviada com sucesso! Você pode acompanhar as respostas em "Minhas Dúvidas".
+                                    </MudAlert>
+                                }
+                                <MudTextField @bind-Value="duvidaTitulo" Label="Título da Dúvida" Variant="Variant.Outlined" Dense="true" Class="mb-2" />
+                                <MudTextField @bind-Value="duvidaDescricao" Label="Qual conceito ou exemplo não ficou claro?" Lines="3" Variant="Variant.Outlined" Dense="true" Class="mb-3" />
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                           Disabled="@isEnviandoDuvida"
+                                           OnClick="EnviarDuvida" StartIcon="@Icons.Material.Filled.Send">
+                                    Enviar Pergunta ao Mentor
+                                </MudButton>
+                            </Authorized>
+                            <NotAuthorized>
+                                <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">
+                                    Para enviar dúvidas à mentoria, faça login na sua conta.
+                                </MudAlert>
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Class="mt-2" Href="/login">
+                                    Fazer Login
+                                </MudButton>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </div>
+                }
+            </MudPaper>
         </MudItem>
     </MudGrid>
 }
@@ -152,6 +198,12 @@ else
     private UserProgress userProgress = new();
     private string? _loadedKey;
     private int _loadToken;
+
+    private bool showDuvidaForm = false;
+    private bool isEnviandoDuvida = false;
+    private bool duvidaEnviadaComSucesso = false;
+    private string duvidaTitulo = "";
+    private string duvidaDescricao = "";
 
     [Parameter]
     public string? FaseId { get; set; }
@@ -233,6 +285,50 @@ else
             await ProgressService.MarkLessonIncompleteAsync(lesson.Id, fase?.Id);
             userProgress = await ProgressService.LoadAsync();
             StateHasChanged();
+        }
+    }
+
+    private void ToggleDuvidaForm()
+    {
+        showDuvidaForm = !showDuvidaForm;
+        duvidaEnviadaComSucesso = false;
+        if (showDuvidaForm && string.IsNullOrEmpty(duvidaTitulo) && lesson != null)
+        {
+            duvidaTitulo = $"Dúvida em: {lesson.Title}";
+        }
+    }
+
+    private async Task EnviarDuvida()
+    {
+        if (string.IsNullOrWhiteSpace(duvidaTitulo) || string.IsNullOrWhiteSpace(duvidaDescricao))
+        {
+            Snackbar.Add("Preencha o título e a descrição da dúvida.", Severity.Warning);
+            return;
+        }
+
+        var userId = await CurrentUserAccessor.GetCurrentUserIdAsync();
+        if (!userId.HasValue) return;
+
+        isEnviandoDuvida = true;
+        try
+        {
+            var input = new CriarDuvidaInput(
+                FaseId: fase?.Id ?? 0,
+                LicaoId: lesson?.Id,
+                ExercicioId: null,
+                Titulo: duvidaTitulo,
+                Descricao: duvidaDescricao,
+                TrechoCodigo: null
+            );
+
+            await DuvidaService.EnviarDuvidaAsync(userId.Value, input);
+            duvidaEnviadaComSucesso = true;
+            duvidaDescricao = "";
+            Snackbar.Add("Dúvida enviada com sucesso!", Severity.Success);
+        }
+        finally
+        {
+            isEnviandoDuvida = false;
         }
     }
 

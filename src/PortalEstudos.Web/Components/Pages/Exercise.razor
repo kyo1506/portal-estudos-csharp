@@ -5,11 +5,14 @@
 @inject ICatalogService CatalogService
 @inject IProgressService ProgressService
 @inject IExerciseEvaluationService ExerciseEvaluator
+@inject IDuvidaService DuvidaService
+@inject ICurrentUserAccessor CurrentUserAccessor
+@inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 
 <PageTitle>@exercise?.Title - Portal de Estudos C#</PageTitle>
 <HeadContent>
-    <meta name="description" content="Exercício de C# e .NET: @exercise?.Title — pratique e confira o resultado esperado." />
+    <meta name="description" content="Exercício de C# e .NET: @exercise?.Title, pratique e confira o resultado esperado." />
 </HeadContent>
 
 @if (isLoading)
@@ -197,6 +200,46 @@ else
                         </MudButton>
                     }
                 </MudPaper>
+
+                <MudPaper Class="pa-4 rounded-lg mt-4" Elevation="2">
+                    <MudButton Color="Color.Primary" Variant="Variant.Outlined" FullWidth OnClick="ToggleDuvidaForm" StartIcon="@Icons.Material.Filled.HelpOutline">
+                        @(showDuvidaForm ? "Ocultar Formulário de Dúvida" : "Tirar Dúvida com o Mentor")
+                    </MudButton>
+
+                    @if (showDuvidaForm)
+                    {
+                        <div class="mt-3">
+                            <AuthorizeView>
+                                <Authorized>
+                                    @if (duvidaEnviadaComSucesso)
+                                    {
+                                        <MudAlert Severity="Severity.Success" Dense="true" Class="mb-2">
+                                            Dúvida enviada! Acompanhe em "Minhas Dúvidas".
+                                        </MudAlert>
+                                    }
+                                    <MudTextField @bind-Value="duvidaTitulo" Label="Título da Dúvida" Variant="Variant.Outlined" Dense="true" Class="mb-2" />
+                                    <MudTextField @bind-Value="duvidaDescricao" Label="O que você não está entendendo?" Lines="3" Variant="Variant.Outlined" Dense="true" Class="mb-3" />
+                                    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">
+                                        ℹ️ Seu código atual do editor será anexado automaticamente à pergunta.
+                                    </MudText>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" FullWidth
+                                               Disabled="@isEnviandoDuvida"
+                                               OnClick="EnviarDuvida" StartIcon="@Icons.Material.Filled.Send">
+                                        Enviar Dúvida
+                                    </MudButton>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">
+                                        Para enviar dúvidas à mentoria, faça login na sua conta.
+                                    </MudAlert>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" FullWidth Class="mt-2" Href="/login">
+                                        Fazer Login
+                                    </MudButton>
+                                </NotAuthorized>
+                            </AuthorizeView>
+                        </div>
+                    }
+                </MudPaper>
             }
         </MudItem>
     </MudGrid>
@@ -224,6 +267,12 @@ else
     private bool showSolution = false;
     private string? _loadedKey;
     private int _loadToken;
+
+    private bool showDuvidaForm = false;
+    private bool isEnviandoDuvida = false;
+    private bool duvidaEnviadaComSucesso = false;
+    private string duvidaTitulo = "";
+    private string duvidaDescricao = "";
 
     [Parameter]
     public string? FaseId { get; set; }
@@ -373,6 +422,50 @@ else
         isSubmitting = false;
         submitStatus = "Executar e Verificar";
         StateHasChanged();
+    }
+
+    private void ToggleDuvidaForm()
+    {
+        showDuvidaForm = !showDuvidaForm;
+        duvidaEnviadaComSucesso = false;
+        if (showDuvidaForm && string.IsNullOrEmpty(duvidaTitulo) && exercise != null)
+        {
+            duvidaTitulo = $"Dúvida no {exercise.Title}";
+        }
+    }
+
+    private async Task EnviarDuvida()
+    {
+        if (string.IsNullOrWhiteSpace(duvidaTitulo) || string.IsNullOrWhiteSpace(duvidaDescricao))
+        {
+            Snackbar.Add("Preencha o título e a descrição da dúvida.", Severity.Warning);
+            return;
+        }
+
+        var userId = await CurrentUserAccessor.GetCurrentUserIdAsync();
+        if (!userId.HasValue) return;
+
+        isEnviandoDuvida = true;
+        try
+        {
+            var input = new CriarDuvidaInput(
+                FaseId: fase?.Id ?? 0,
+                LicaoId: null,
+                ExercicioId: exercise?.Id,
+                Titulo: duvidaTitulo,
+                Descricao: duvidaDescricao,
+                TrechoCodigo: userCode
+            );
+
+            await DuvidaService.EnviarDuvidaAsync(userId.Value, input);
+            duvidaEnviadaComSucesso = true;
+            duvidaDescricao = "";
+            Snackbar.Add("Dúvida enviada com sucesso!", Severity.Success);
+        }
+        finally
+        {
+            isEnviandoDuvida = false;
+        }
     }
 
     private void NavigateToFase()

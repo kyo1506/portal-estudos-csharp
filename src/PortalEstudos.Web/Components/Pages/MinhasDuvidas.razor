@@ -1,0 +1,130 @@
+@page "/minhas-duvidas"
+@using MudBlazor
+@using PortalEstudos.Application.Dtos
+@attribute [Authorize]
+@inject IDuvidaService DuvidaService
+@inject ICurrentUserAccessor CurrentUserAccessor
+@inject NavigationManager NavigationManager
+
+<PageTitle>Minhas Dúvidas - Portal de Estudos C#</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+    <div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-4">
+        <div>
+            <div class="d-flex align-center gap-2">
+                <MudIcon Icon="@Icons.Material.Filled.QuestionAnswer" Color="Color.Primary" Size="Size.Large" />
+                <MudText Typo="Typo.h4" Class="font-weight-bold">Minhas Dúvidas</MudText>
+            </div>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1">
+                Acompanhe as respostas e orientações pedagógicas dos mentores para suas perguntas
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh" OnClick="CarregarDuvidas">
+            Atualizar
+        </MudButton>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-center align-center py-12">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        </div>
+    }
+    else if (!duvidas.Any())
+    {
+        <MudPaper Class="pa-8 text-center rounded-lg" Elevation="2">
+            <MudIcon Icon="@Icons.Material.Filled.HelpCenter" Color="Color.Default" Size="Size.Large" Class="mb-3" />
+            <MudText Typo="Typo.h6" Class="font-weight-bold">Você ainda não enviou nenhuma dúvida</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
+                Quando estiver estudando uma lição ou resolvendo um exercício, clique no botão "Tirar Dúvida" para enviar sua dúvida com o código anexado.
+            </MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/fases">
+                Explorar Fases
+            </MudButton>
+        </MudPaper>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-4">
+            @foreach (var duvida in duvidas)
+            {
+                <MudPaper Class="pa-5 rounded-lg" Elevation="2">
+                    <div class="d-flex align-center justify-space-between flex-wrap gap-2 mb-2">
+                        <div>
+                            <MudText Typo="Typo.h6" Class="font-weight-bold">@duvida.Titulo</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                                @duvida.TituloFase
+                                @(string.IsNullOrEmpty(duvida.TituloLicao) ? "" : $" · Lição: {duvida.TituloLicao}")
+                                @(string.IsNullOrEmpty(duvida.TituloExercicio) ? "" : $" · Exercício: {duvida.TituloExercicio}")
+                                · Enviada em @duvida.CriadaEm.ToString("dd/MM/yyyy HH:mm")
+                            </MudText>
+                        </div>
+                        <MudChip T="string" Size="Size.Small"
+                                 Color="@(duvida.Status == DuvidaStatus.Respondida ? Color.Success : Color.Warning)"
+                                 Variant="Variant.Filled">
+                            @(duvida.Status == DuvidaStatus.Respondida ? "Respondida" : "Aguardando Mentor")
+                        </MudChip>
+                    </div>
+
+                    <MudText Typo="Typo.body1" Class="my-3" Style="white-space: pre-wrap;">
+                        @duvida.Descricao
+                    </MudText>
+
+                    @if (!string.IsNullOrEmpty(duvida.TrechoCodigo))
+                    {
+                        <div class="mb-3">
+                            <MudText Typo="Typo.caption" Class="font-weight-bold text-uppercase mud-text-secondary d-block mb-1">
+                                Código Anexado:
+                            </MudText>
+                            <div class="pa-3 rounded" style="background-color: #1e1e2e; color: #f8f8f2; font-family: monospace; font-size: 0.85rem; overflow-x: auto; max-height: 200px;">
+                                <pre style="margin: 0;"><code>@duvida.TrechoCodigo</code></pre>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(duvida.RespostaInstrutor))
+                    {
+                        <MudPaper Class="pa-4 mt-4 rounded" Elevation="1" Style="background-color: rgba(102, 126, 234, 0.08); border-left: 4px solid var(--mud-palette-primary);">
+                            <div class="d-flex align-center gap-2 mb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.School" Color="Color.Primary" Size="Size.Small" />
+                                <MudText Typo="Typo.subtitle2" Class="font-weight-bold" Color="Color.Primary">
+                                    Resposta do Mentor @(duvida.RespondidaEm.HasValue ? $"({duvida.RespondidaEm.Value.ToString("dd/MM/yyyy HH:mm")})" : "")
+                                </MudText>
+                            </div>
+                            <MudText Typo="Typo.body2" Style="white-space: pre-wrap;">
+                                @duvida.RespostaInstrutor
+                            </MudText>
+                        </MudPaper>
+                    }
+                </MudPaper>
+            }
+        </div>
+    }
+</MudContainer>
+
+@code {
+    private bool isLoading = true;
+    private IReadOnlyList<DuvidaMentoriaDto> duvidas = new List<DuvidaMentoriaDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarDuvidas();
+    }
+
+    private async Task CarregarDuvidas()
+    {
+        isLoading = true;
+        try
+        {
+            var userId = await CurrentUserAccessor.GetCurrentUserIdAsync();
+            if (userId.HasValue)
+            {
+                duvidas = await DuvidaService.ObterMinhasDuvidasAsync(userId.Value);
+            }
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
