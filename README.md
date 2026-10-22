@@ -61,6 +61,18 @@ dotnet run --project src/PortalEstudos.Web/PortalEstudos.Web.csproj
 
 Acesse: http://localhost:8080 (a porta usa a variável `PORT` ou `8080` por padrão).
 
+## 👥 Usuários de Demonstração (Desenvolvimento)
+
+O banco de dados híbrido (SQLite/Postgres) inicializa automaticamente com os seguintes usuários padrão:
+
+| Papel | Email | Senha | Acesso |
+|---|---|---|---|
+| **Aluno** | `aluno@portal.com` | `Portal@123` | Dashboard, lições, submissões e Minhas Dúvidas |
+| **Instrutor** | `instrutor@portal.com` | `Portal@123` | Painel do Mentor, Fila de Dúvidas e Gestão de Usuários |
+| **Admin** | `admin@portal.com` | `Portal@123` | Acesso administrativo completo e Gestão de Usuários |
+
+Novos usuários alunos também podem ser criados pela tela `/registro` ou gerenciados por instrutores/admins em `/admin/usuarios`.
+
 ## ✅ Testes
 
 ```bash
