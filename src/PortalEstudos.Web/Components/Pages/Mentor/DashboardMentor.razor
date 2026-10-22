@@ -1,0 +1,221 @@
+@page "/mentor"
+@page "/mentor/dashboard"
+@using MudBlazor
+@using PortalEstudos.Application.Dtos
+@attribute [Authorize(Roles = Roles.Instrutor)]
+@inject IMentoriaService MentoriaService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Painel do Mentor - Portal de Estudos C#</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-6">
+    <div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-4">
+        <div>
+            <div class="d-flex align-center gap-2">
+                <MudIcon Icon="@Icons.Material.Filled.SupervisorAccount" Color="Color.Primary" Size="Size.Large" />
+                <MudText Typo="Typo.h4" Class="font-weight-bold">Painel de Mentoria</MudText>
+            </div>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1">
+                Acompanhamento pedagógico, ritmo de estudo e auditoria de código dos alunos
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh" OnClick="CarregarDados">
+            Atualizar Dados
+        </MudButton>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-center align-center py-12">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        </div>
+    }
+    else if (overview != null)
+    {
+        @* Métricas em Cards *@
+        <MudGrid Class="mb-6">
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 d-flex align-center gap-4" Elevation="2">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large">
+                        <MudIcon Icon="@Icons.Material.Filled.School" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Alunos Ativos</MudText>
+                        <MudText Typo="Typo.h5" Class="font-weight-bold">@overview.TotalAlunos</MudText>
+                    </div>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 d-flex align-center gap-4" Elevation="2">
+                    <MudAvatar Color="Color.Info" Variant="Variant.Filled" Size="Size.Large">
+                        <MudIcon Icon="@Icons.Material.Filled.MenuBook" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Média Lições / Aluno</MudText>
+                        <MudText Typo="Typo.h5" Class="font-weight-bold">@overview.MediaLicoesConcluidas</MudText>
+                    </div>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 d-flex align-center gap-4" Elevation="2">
+                    <MudAvatar Color="Color.Success" Variant="Variant.Filled" Size="Size.Large">
+                        <MudIcon Icon="@Icons.Material.Filled.Terminal" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Média Exercícios / Aluno</MudText>
+                        <MudText Typo="Typo.h5" Class="font-weight-bold">@overview.MediaExerciciosConcluidos</MudText>
+                    </div>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4 d-flex align-center gap-4" Elevation="2">
+                    <MudAvatar Color="@(overview.TotalAlertasDificuldade > 0 ? Color.Warning : Color.Dark)" Variant="Variant.Filled" Size="Size.Large">
+                        <MudIcon Icon="@Icons.Material.Filled.WarningAmber" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Alertas de Dificuldade</MudText>
+                        <MudText Typo="Typo.h5" Class="font-weight-bold">@overview.TotalAlertasDificuldade</MudText>
+                    </div>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        @* Seção de Alertas de Travamento *@
+        @if (overview.Alertas.Any())
+        {
+            <MudPaper Class="pa-5 mb-6 rounded-lg" Elevation="2" Style="border-left: 5px solid var(--mud-palette-warning);">
+                <div class="d-flex align-center gap-2 mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.PriorityHigh" Color="Color.Warning" />
+                    <MudText Typo="Typo.h6" Class="font-weight-bold">Pontos de Atenção Pedagógica (3+ tentativas)</MudText>
+                </div>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
+                    Alunos que registraram alto índice de repetição ou falhas frequentes em desafios específicos.
+                </MudText>
+                <MudSimpleTable Dense="true" Hover="true" Striped="true" Style="overflow-x: auto;">
+                    <thead>
+                        <tr>
+                            <th>Aluno</th>
+                            <th>Fase</th>
+                            <th>Exercício</th>
+                            <th>Tentativas</th>
+                            <th>Último Erro Registrado</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var alerta in overview.Alertas)
+                        {
+                            <tr>
+                                <td><strong>@alerta.NomeAluno</strong></td>
+                                <td>@alerta.TituloFase</td>
+                                <td>@alerta.TituloExercicio</td>
+                                <td>
+                                    <MudChip T="string" Color="Color.Error" Size="Size.Small" Variant="Variant.Filled">
+                                        @alerta.Tentativas tentativas
+                                    </MudChip>
+                                </td>
+                                <td>
+                                    <MudText Typo="Typo.caption" Color="Color.Error">
+                                        @(string.IsNullOrEmpty(alerta.UltimoErro) ? "Falha na validação" : alerta.UltimoErro)
+                                    </MudText>
+                                </td>
+                                <td>
+                                    <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary"
+                                               StartIcon="@Icons.Material.Filled.Search"
+                                               OnClick="@(() => NavigationManager.NavigateTo($"/mentor/alunos/{alerta.AlunoId}"))">
+                                        Inspecionar
+                                    </MudButton>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            </MudPaper>
+        }
+
+        @* Tabela Principal de Alunos *@
+        <MudPaper Class="pa-5 rounded-lg" Elevation="2">
+            <div class="d-flex align-center justify-space-between mb-4 flex-wrap gap-2">
+                <div>
+                    <MudText Typo="Typo.h6" Class="font-weight-bold">Turma de Estudantes</MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Visão geral do avanço individual de cada aluno</MudText>
+                </div>
+            </div>
+
+            @if (!overview.Alunos.Any())
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                    Nenhum aluno registrado na plataforma até o momento.
+                </MudAlert>
+            }
+            else
+            {
+                <MudSimpleTable Hover="true" Striped="true" Style="overflow-x: auto;">
+                    <thead>
+                        <tr>
+                            <th>Estudante</th>
+                            <th>Email</th>
+                            <th>Lições</th>
+                            <th>Exercícios</th>
+                            <th>Progresso Total</th>
+                            <th>Última Atividade</th>
+                            <th>Detetive de Código</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var aluno in overview.Alunos)
+                        {
+                            <tr>
+                                <td><strong>@aluno.Nome</strong></td>
+                                <td>@aluno.Email</td>
+                                <td>@aluno.TotalLicoes</td>
+                                <td>@aluno.TotalExercicios</td>
+                                <td style="min-width: 140px;">
+                                    <div class="d-flex align-center gap-2">
+                                        <MudProgressLinear Color="Color.Primary" Value="@aluno.PercentualGeral" Class="my-2" />
+                                        <MudText Typo="Typo.caption">@($"{aluno.PercentualGeral}%")</MudText>
+                                    </div>
+                                </td>
+                                <td>
+                                    <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                                        @(aluno.UltimaAtividade.HasValue ? aluno.UltimaAtividade.Value.ToString("dd/MM/yyyy HH:mm") : "Sem atividade")
+                                    </MudText>
+                                </td>
+                                <td>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                               StartIcon="@Icons.Material.Filled.Code"
+                                               OnClick="@(() => NavigationManager.NavigateTo($"/mentor/alunos/{aluno.AlunoId}"))">
+                                        Ver Código
+                                    </MudButton>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            }
+        </MudPaper>
+    }
+</MudContainer>
+
+@code {
+    private bool isLoading = true;
+    private TurmaOverviewDto? overview;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarDados();
+    }
+
+    private async Task CarregarDados()
+    {
+        isLoading = true;
+        try
+        {
+            overview = await MentoriaService.GetTurmaOverviewAsync();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

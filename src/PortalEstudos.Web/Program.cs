@@ -88,6 +88,7 @@ builder.Services.AddSingleton<IExerciseEvaluationService, ExerciseEvaluationServ
 builder.Services.AddScoped<ICurrentUserAccessor, BlazorCurrentUserAccessor>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<IChallengeStatusService, ChallengeStatusService>();
+builder.Services.AddScoped<IMentoriaService, MentoriaService>();
 
 var app = builder.Build();
 

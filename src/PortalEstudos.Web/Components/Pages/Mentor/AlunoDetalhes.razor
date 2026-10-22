@@ -1,0 +1,136 @@
+@page "/mentor/alunos/{Id:int}"
+@using MudBlazor
+@using PortalEstudos.Application.Dtos
+@attribute [Authorize(Roles = Roles.Instrutor)]
+@inject IMentoriaService MentoriaService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Detetive de Código - Portal de Estudos C#</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-6">
+    <div class="mb-4">
+        <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack"
+                   OnClick="@(() => NavigationManager.NavigateTo("/mentor"))">
+            Voltar ao Painel de Mentoria
+        </MudButton>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-center align-center py-12">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        </div>
+    }
+    else if (aluno == null)
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Filled">
+            Estudante não encontrado ou identificador inválido.
+        </MudAlert>
+    }
+    else
+    {
+        @* Perfil do Aluno *@
+        <MudPaper Class="pa-6 mb-6 rounded-lg" Elevation="2">
+            <div class="d-flex align-center justify-space-between flex-wrap gap-4">
+                <div class="d-flex align-center gap-4">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large">
+                        <MudIcon Icon="@Icons.Material.Filled.Person" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.h5" Class="font-weight-bold">@aluno.Nome</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">@aluno.Email · Cadastrado em @aluno.CriadoEm.ToString("dd/MM/yyyy")</MudText>
+                    </div>
+                </div>
+                <div class="d-flex gap-3">
+                    <MudChip T="string" Color="Color.Info" Variant="Variant.Filled">
+                        <MudIcon Icon="@Icons.Material.Filled.MenuBook" Class="mr-1" /> @aluno.TotalLicoes lições concluídas
+                    </MudChip>
+                    <MudChip T="string" Color="Color.Success" Variant="Variant.Filled">
+                        <MudIcon Icon="@Icons.Material.Filled.Terminal" Class="mr-1" /> @aluno.TotalExercicios exercícios resolvidos
+                    </MudChip>
+                </div>
+            </div>
+        </MudPaper>
+
+        <div class="d-flex align-center gap-2 mb-4">
+            <MudIcon Icon="@Icons.Material.Filled.Search" Color="Color.Primary" Size="Size.Medium" />
+            <MudText Typo="Typo.h6" Class="font-weight-bold">Detetive de Código: Submissões do Estudante</MudText>
+        </div>
+
+        @if (!aluno.Submissoes.Any())
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                Este aluno ainda não realizou nenhuma submissão de exercício na plataforma.
+            </MudAlert>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-4">
+                @foreach (var sub in aluno.Submissoes)
+                {
+                    <MudPaper Class="pa-5 rounded-lg" Elevation="2">
+                        <div class="d-flex align-center justify-space-between flex-wrap gap-2 mb-3">
+                            <div>
+                                <MudText Typo="Typo.subtitle1" Class="font-weight-bold">@sub.TituloExercicio</MudText>
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary">@sub.TituloFase · Atualizado em @sub.AtualizadoEm.ToString("dd/MM/yyyy HH:mm")</MudText>
+                            </div>
+                            <div class="d-flex align-center gap-2">
+                                <MudChip T="string" Size="Size.Small" Color="@(sub.PassouNosTestes ? Color.Success : Color.Error)" Variant="Variant.Filled">
+                                    @(sub.PassouNosTestes ? "Aprovado" : "Falhou nos Testes")
+                                </MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">
+                                    @sub.Tentativas @(sub.Tentativas == 1 ? "tentativa" : "tentativas")
+                                </MudChip>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(sub.MensagemErro))
+                        {
+                            <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+                                <MudText Typo="Typo.caption"><strong>Último erro retornado:</strong> @sub.MensagemErro</MudText>
+                            </MudAlert>
+                        }
+
+                        <MudText Typo="Typo.caption" Class="font-weight-bold text-uppercase mud-text-secondary d-block mb-1">
+                            Código submetido pelo aluno:
+                        </MudText>
+                        <div class="pa-3 rounded" style="background-color: #1e1e2e; color: #f8f8f2; font-family: monospace; font-size: 0.875rem; overflow-x: auto; max-height: 350px;">
+                            <pre style="margin: 0;"><code>@sub.CodigoSubmetido</code></pre>
+                        </div>
+                    </MudPaper>
+                }
+            </div>
+        }
+    }
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool isLoading = true;
+    private AlunoDetalhesDto? aluno;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarAluno();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await CarregarAluno();
+    }
+
+    private async Task CarregarAluno()
+    {
+        isLoading = true;
+        try
+        {
+            aluno = await MentoriaService.GetAlunoDetalhesAsync(Id);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
