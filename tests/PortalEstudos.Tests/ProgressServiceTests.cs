@@ -67,14 +67,52 @@ public class ProgressServiceTests
     }
 
     [Fact]
+    public async Task LoadAsync_WithForceReload_RefreshesFromStore()
+    {
+        var store = new InMemoryProgressStore();
+        var service = new ProgressService(store);
+
+        var initial = await service.LoadAsync();
+        Assert.Empty(initial.CompletedLessons);
+
+        // Simula uma nova carga externa do store (outra instância com novos dados)
+        store.Stored = new UserProgress { CompletedLessons = { 42 } };
+
+        // Sem forceReload, usa a instância antiga em cache
+        var cached = await service.LoadAsync(forceReload: false);
+        Assert.Empty(cached.CompletedLessons);
+
+        // Com forceReload, recarrega a nova instância do store
+        var reloaded = await service.LoadAsync(forceReload: true);
+        Assert.Contains(42, reloaded.CompletedLessons);
+    }
+
+    [Fact]
+    public async Task SaveAsync_TriggersOnChange()
+    {
+        var store = new InMemoryProgressStore();
+        var service = new ProgressService(store);
+        var changed = false;
+        service.OnChange += () => changed = true;
+
+        await service.MarkLessonCompleteAsync(1);
+
+        Assert.True(changed);
+    }
+
+    [Fact]
     public async Task Reset_ClearsAndInvalidatesCache()
     {
         var store = new InMemoryProgressStore();
         var service = new ProgressService(store);
         await service.MarkLessonCompleteAsync(1);
 
+        var changed = false;
+        service.OnChange += () => changed = true;
+
         await service.ResetAsync();
 
+        Assert.True(changed);
         var after = await service.LoadAsync();
         Assert.Empty(after.CompletedLessons);
     }

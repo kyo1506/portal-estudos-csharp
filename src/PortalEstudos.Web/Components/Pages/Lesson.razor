@@ -189,6 +189,15 @@ else
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            userProgress = await ProgressService.LoadAsync(forceReload: true);
+            StateHasChanged();
+        }
+    }
+
     private string ConvertMarkdownToHtml(string markdown) => MarkdownRenderer.ToHtml(markdown);
 
     private string? GetPreviousLessonHref()

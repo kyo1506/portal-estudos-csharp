@@ -5,7 +5,8 @@ namespace PortalEstudos.Application.Services;
 
 public interface IProgressService
 {
-    Task<UserProgress> LoadAsync();
+    event Action? OnChange;
+    Task<UserProgress> LoadAsync(bool forceReload = false);
     Task SaveAsync(UserProgress progress);
     Task MarkLessonCompleteAsync(int lessonId);
     Task MarkLessonIncompleteAsync(int lessonId);
@@ -21,14 +22,19 @@ public sealed class ProgressService : IProgressService
     private readonly IProgressStore _store;
     private UserProgress? _cache;
 
+    public event Action? OnChange;
+
     public ProgressService(IProgressStore store)
     {
         _store = store;
     }
 
-    public async Task<UserProgress> LoadAsync()
+    public async Task<UserProgress> LoadAsync(bool forceReload = false)
     {
-        _cache ??= await _store.LoadAsync();
+        if (_cache == null || forceReload)
+        {
+            _cache = await _store.LoadAsync();
+        }
         return _cache;
     }
 
@@ -36,6 +42,7 @@ public sealed class ProgressService : IProgressService
     {
         _cache = progress;
         await _store.SaveAsync(progress);
+        OnChange?.Invoke();
     }
 
     public async Task MarkLessonCompleteAsync(int lessonId)
@@ -80,5 +87,6 @@ public sealed class ProgressService : IProgressService
     {
         _cache = null;
         await _store.ResetAsync();
+        OnChange?.Invoke();
     }
 }

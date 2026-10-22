@@ -82,3 +82,44 @@ internal static class TestData
         } : null
     };
 }
+
+internal sealed class FakeJSRuntime : Microsoft.JSInterop.IJSRuntime
+{
+    public Dictionary<string, string?> Storage { get; } = new();
+    public bool SimulateSsr { get; set; }
+
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args)
+    {
+        if (SimulateSsr)
+        {
+            throw new InvalidOperationException("JavaScript interop calls cannot be issued at this time.");
+        }
+
+        if (identifier is "portalStorage.get" or "localStorage.getItem")
+        {
+            var key = args?[0]?.ToString() ?? "";
+            Storage.TryGetValue(key, out var val);
+            return ValueTask.FromResult((TValue)(object?)val!);
+        }
+
+        if (identifier is "portalStorage.set" or "localStorage.setItem")
+        {
+            var key = args?[0]?.ToString() ?? "";
+            var val = args?[1]?.ToString();
+            Storage[key] = val;
+            return ValueTask.FromResult(default(TValue)!);
+        }
+
+        if (identifier is "portalStorage.remove" or "localStorage.removeItem")
+        {
+            var key = args?[0]?.ToString() ?? "";
+            Storage.Remove(key);
+            return ValueTask.FromResult(default(TValue)!);
+        }
+
+        return ValueTask.FromResult(default(TValue)!);
+    }
+
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args)
+        => InvokeAsync<TValue>(identifier, args);
+}

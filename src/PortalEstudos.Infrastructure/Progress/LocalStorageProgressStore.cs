@@ -24,7 +24,16 @@ public sealed class LocalStorageProgressStore : IProgressStore
             // JSRuntime não está disponível durante a pré-renderização (SSR).
             // Devolvemos progresso vazio nesse momento; o componente será reexecutado
             // após a hidratação interativa e fará a leitura de verdade.
-            var json = await _js.InvokeAsync<string?>("localStorage.getItem", StorageKey);
+            string? json = null;
+            try
+            {
+                json = await _js.InvokeAsync<string?>("portalStorage.get", StorageKey);
+            }
+            catch (JSException)
+            {
+                json = await _js.InvokeAsync<string?>("localStorage.getItem", StorageKey);
+            }
+
             if (!string.IsNullOrEmpty(json))
             {
                 var progress = JsonSerializer.Deserialize<UserProgress>(json);
@@ -37,11 +46,11 @@ public sealed class LocalStorageProgressStore : IProgressStore
         }
         catch (JSDisconnectedException)
         {
-            // Circuito caiu entre o await e a continuação — irrelevante para carregar estado.
+            // Circuito caiu entre o await e a continuação: irrelevante para carregar estado.
         }
         catch (JSException)
         {
-            // Erro no JS (localStorage bloqueado, etc.) — devolvemos vazio.
+            // Erro no JS (localStorage bloqueado, etc.): devolvemos vazio.
         }
         catch
         {
@@ -56,7 +65,14 @@ public sealed class LocalStorageProgressStore : IProgressStore
         var json = JsonSerializer.Serialize(progress);
         try
         {
-            await _js.InvokeVoidAsync("localStorage.setItem", StorageKey, json);
+            try
+            {
+                await _js.InvokeVoidAsync("portalStorage.set", StorageKey, json);
+            }
+            catch (JSException)
+            {
+                await _js.InvokeVoidAsync("localStorage.setItem", StorageKey, json);
+            }
         }
         catch (InvalidOperationException) { /* SSR */ }
         catch (JSDisconnectedException) { /* circuito caiu */ }
@@ -67,7 +83,14 @@ public sealed class LocalStorageProgressStore : IProgressStore
     {
         try
         {
-            await _js.InvokeVoidAsync("localStorage.removeItem", StorageKey);
+            try
+            {
+                await _js.InvokeVoidAsync("portalStorage.remove", StorageKey);
+            }
+            catch (JSException)
+            {
+                await _js.InvokeVoidAsync("localStorage.removeItem", StorageKey);
+            }
         }
         catch (InvalidOperationException) { /* SSR */ }
         catch (JSDisconnectedException) { /* circuito caiu */ }

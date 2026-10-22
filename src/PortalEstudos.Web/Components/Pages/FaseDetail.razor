@@ -224,6 +224,16 @@ else
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && int.TryParse(Id, out int faseId))
+        {
+            userProgress = await ProgressService.LoadAsync(forceReload: true);
+            CalculateProgress();
+            StateHasChanged();
+        }
+    }
+
     private void CalculateProgress()
     {
         if (fase == null) return;

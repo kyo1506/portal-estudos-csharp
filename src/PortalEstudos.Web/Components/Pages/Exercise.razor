@@ -254,6 +254,16 @@ else
             if (exercise != null)
             {
                 ResetExerciseEditor(exercise);
+                if (userProgress.ExerciseAnswers.TryGetValue(exercise.Id, out var savedAnswer) && !string.IsNullOrEmpty(savedAnswer))
+                {
+                    userCode = savedAnswer;
+                    if (userProgress.CompletedExercises.Contains(exercise.Id))
+                    {
+                        isCorrect = true;
+                        resultMessage = "Exercício já concluído anteriormente.";
+                        userCodeOutput = exercise.ExpectedOutput;
+                    }
+                }
             }
         }
         userProgress = await ProgressService.LoadAsync();
@@ -261,6 +271,25 @@ else
         if (token == _loadToken)
         {
             isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && exercise != null)
+        {
+            userProgress = await ProgressService.LoadAsync(forceReload: true);
+            if (userProgress.ExerciseAnswers.TryGetValue(exercise.Id, out var savedAnswer) && !string.IsNullOrEmpty(savedAnswer))
+            {
+                userCode = savedAnswer;
+                if (userProgress.CompletedExercises.Contains(exercise.Id))
+                {
+                    isCorrect = true;
+                    resultMessage = "Exercício já concluído anteriormente.";
+                    userCodeOutput = exercise.ExpectedOutput;
+                }
+            }
             StateHasChanged();
         }
     }

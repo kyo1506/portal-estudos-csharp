@@ -21,6 +21,31 @@
     <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
     <script src="/_content/MudBlazor/MudBlazor.min.js"></script>
+    <script>
+        window.portalStorage = {
+            get: function (key) {
+                try {
+                    return window.localStorage ? window.localStorage.getItem(key) : null;
+                } catch (e) {
+                    return null;
+                }
+            },
+            set: function (key, value) {
+                try {
+                    if (window.localStorage) {
+                        window.localStorage.setItem(key, value);
+                    }
+                } catch (e) {}
+            },
+            remove: function (key) {
+                try {
+                    if (window.localStorage) {
+                        window.localStorage.removeItem(key);
+                    }
+                } catch (e) {}
+            }
+        };
+    </script>
 </body>
 
 </html>

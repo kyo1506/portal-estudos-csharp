@@ -144,6 +144,16 @@ else
         isLoading = false;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            userProgress = await ProgressService.LoadAsync(forceReload: true);
+            stats = DashboardService.GetStats(userProgress);
+            StateHasChanged();
+        }
+    }
+
     private double GetFaseProgress(Fase fase) => DashboardService.GetFaseProgress(fase, userProgress);
 
     private bool IsFaseCompleted(Fase fase) => DashboardService.IsFaseCompleted(fase, userProgress);

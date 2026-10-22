@@ -116,6 +116,16 @@ else
         stats = DashboardService.GetStats(progress);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var progress = await ProgressService.LoadAsync(forceReload: true);
+            stats = DashboardService.GetStats(progress);
+            StateHasChanged();
+        }
+    }
+
     private void NavigateToFases() => NavigationManager.NavigateTo("/fases");
     private void NavigateToDashboard() => NavigationManager.NavigateTo("/dashboard");
 }
