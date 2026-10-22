@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using PortalEstudos.Web.Components.Pages
 
@@ -7,7 +7,15 @@
    re-executado pelo UseStatusCodePagesWithReExecute no Program.cs). *@
 <Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                <MudContainer MaxWidth="MaxWidth.Small" Class="pa-8 text-center">
+                    <MudText Typo="Typo.h5" Color="Color.Error" GutterBottom="true">Acesso Restrito</MudText>
+                    <MudText Typo="Typo.body1" Class="mb-4">Você precisa estar autenticado para acessar este recurso.</MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Ir para o Login</MudButton>
+                </MudContainer>
+            </NotAuthorized>
+        </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>

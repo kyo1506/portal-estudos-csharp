@@ -11,7 +11,22 @@
         <MudIconButton Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                        Color="Color.Inherit" OnClick="ToggleDarkMode" title="Alternar tema claro/escuro"
                        aria-label="Alternar tema claro/escuro" />
-        <MudChip T="string" Color="Color.Inherit" Variant="Variant.Filled" Size="Size.Small" Class="appbar-chip">
+        <AuthorizeView>
+            <Authorized>
+                <MudChip T="string" Color="Color.Surface" Variant="Variant.Filled" Size="Size.Small" Class="mr-2">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Class="mr-1" /> @context.User.Identity?.Name (@context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)
+                </MudChip>
+                <MudButton Variant="Variant.Outlined" Color="Color.Inherit" Size="Size.Small" Href="/api/auth/logout" StartIcon="@Icons.Material.Filled.Logout">
+                    Sair
+                </MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" Href="/login" StartIcon="@Icons.Material.Filled.Login">
+                    Entrar
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+        <MudChip T="string" Color="Color.Inherit" Variant="Variant.Filled" Size="Size.Small" Class="appbar-chip ml-2">
             <MudIcon Icon="@Icons.Material.Filled.School" Class="mr-1" /> .NET 10
         </MudChip>
     </MudAppBar>
@@ -20,13 +35,18 @@
         <MudDrawerHeader>
             <div class="drawer-brand">
                 <MudText Typo="Typo.h6" Class="font-weight-bold">📚 Portal de Estudos</MudText>
-                <MudText Typo="Typo.caption" Class="mud-text-secondary">C# e .NET · Jornada de 4 fases</MudText>
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">C# e .NET · Trilha Completa</MudText>
             </div>
         </MudDrawerHeader>
         <MudNavMenu>
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Início</MudNavLink>
             <MudNavLink Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
             <MudNavLink Href="fases" Icon="@Icons.Material.Filled.DateRange">Fases</MudNavLink>
+            <AuthorizeView Roles="Instrutor">
+                <Authorized>
+                    <MudNavLink Href="mentor/dashboard" Icon="@Icons.Material.Filled.SupervisorAccount">Painel Mentor</MudNavLink>
+                </Authorized>
+            </AuthorizeView>
             <MudNavLink Href="https://github.com/kyo1506/fundamentos-csharp" Target="_blank" Icon="@Icons.Material.Filled.EmojiEvents">Desafios (GitHub)</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
@@ -34,7 +54,7 @@
     @* MudMainContent empilha @Body (flex: 1) + footer (mt-auto): com pouco conteúdo o
        footer é empurrado ao fim do min-height:100vh; com muito conteúdo ele rola junto.
        Quando o drawer persistente está aberto, o .app-footer-wrap recebe margin-left
-       automático via CSS (regra :has no app.css) — sem dependência de estrutura. *@
+       automático via CSS (regra :has no app.css), sem dependência de estrutura. *@
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.False" Class="pa-4 flex-grow-1">
             @Body
@@ -43,7 +63,7 @@
 
     <footer class="app-footer-wrap">
         <div class="app-footer">
-            <span>📚 Portal de Estudos C# e .NET — aprenda na prática, no seu ritmo.</span>
+            <span>📚 Portal de Estudos C# e .NET: aprenda na prática, no seu ritmo.</span>
             <span class="app-footer-credit">Desenvolvido por <strong>kyo1506</strong> · Com muito amor para <strong>Beatriz</strong> ❤️</span>
             <div class="app-footer-links">
                 <MudLink Href="fases" Class="app-footer-link">Fases</MudLink>
@@ -95,7 +115,7 @@
         }
         catch
         {
-            // localStorage indisponível (ex.: pré-render) — ignora
+            // localStorage indisponível (ex.: pré-render), ignora
         }
     }
 

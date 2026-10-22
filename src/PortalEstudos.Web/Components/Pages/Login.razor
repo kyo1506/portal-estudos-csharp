@@ -1,0 +1,63 @@
+@page "/login"
+@using MudBlazor
+@inject NavigationManager NavigationManager
+
+<PageTitle>Login - Portal de Estudos C#</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="d-flex justify-center align-center min-vh-75 py-8">
+    <MudPaper Elevation="4" Class="pa-8 w-100 rounded-lg">
+        <div class="text-center mb-6">
+            <MudIcon Icon="@Icons.Material.Filled.LockPerson" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+            <MudText Typo="Typo.h5" Class="font-weight-bold">Acesse sua Conta</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                Portal de Estudos C# e .NET com persistência em nuvem
+            </MudText>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Error))
+        {
+            <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-4">
+                Credenciais inválidas. Verifique seu email e senha.
+            </MudAlert>
+        }
+
+        <form method="post" action="/api/auth/login">
+            <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+
+            <div class="mb-4">
+                <MudText Typo="Typo.caption" Class="font-weight-bold">Email</MudText>
+                <input type="email" name="email" required placeholder="seu@email.com"
+                       class="mud-input-slot mud-input-root mud-input-root-outlined pa-3 w-100 rounded border mt-1"
+                       style="background: transparent; color: inherit; border-color: rgba(128,128,128,0.4);" />
+            </div>
+
+            <div class="mb-6">
+                <MudText Typo="Typo.caption" Class="font-weight-bold">Senha</MudText>
+                <input type="password" name="password" required placeholder="••••••••"
+                       class="mud-input-slot mud-input-root mud-input-root-outlined pa-3 w-100 rounded border mt-1"
+                       style="background: transparent; color: inherit; border-color: rgba(128,128,128,0.4);" />
+            </div>
+
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                       FullWidth="true" Size="Size.Large" StartIcon="@Icons.Material.Filled.Login">
+                Entrar
+            </MudButton>
+        </form>
+
+        <MudDivider Class="my-6" />
+
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-2">
+            <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Usuários Demonstrativos:</MudText>
+            <MudText Typo="Typo.body2"><strong>Aluno:</strong> aluno@portal.com / Portal@123</MudText>
+            <MudText Typo="Typo.body2"><strong>Instrutor:</strong> instrutor@portal.com / Portal@123</MudText>
+        </MudAlert>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+}

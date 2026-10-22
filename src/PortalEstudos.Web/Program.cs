@@ -2,13 +2,18 @@ using PortalEstudos.Web.Components;
 using PortalEstudos.Application.Abstractions;
 using PortalEstudos.Application.Services;
 using PortalEstudos.Infrastructure.Content;
+using PortalEstudos.Infrastructure.Data;
 using PortalEstudos.Infrastructure.GitHub;
 using PortalEstudos.Infrastructure.Markdown;
 using PortalEstudos.Infrastructure.Progress;
+using PortalEstudos.Infrastructure.Security;
 using MudBlazor;
 using MudBlazor.Services;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +55,25 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 builder.Services.AddMemoryCache();
 
+// --- Persistência de Dados (EF Core Híbrido: SQLite / PostgreSQL) ---
+builder.Services.AddPortalDbContext(builder.Configuration);
+
+// --- Segurança e Autenticação RBAC ---
+builder.Services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "PortalEstudos.Auth";
+        options.LoginPath = "/login";
+        options.LogoutPath = "/api/auth/logout";
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+        options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+
 // --- Camada de Infraestrutura (adaptadores) ---
 builder.Services.AddSingleton<IContentRepository, JsonContentRepository>();
 builder.Services.AddScoped<IProgressStore, LocalStorageProgressStore>();
@@ -78,10 +102,69 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 
 app.UseResponseCompression();
 app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
+
+// Endpoints HTTP nativos para Login e Logout (compatíveis com emissão de cookies de sessão)
+app.MapPost("/api/auth/login", async (HttpContext httpContext, IAuthService authService) =>
+{
+    var form = await httpContext.Request.ReadFormAsync();
+    var email = form["email"].ToString();
+    var password = form["password"].ToString();
+    var returnUrl = form["returnUrl"].ToString();
+
+    var result = await authService.AuthenticateAsync(email, password);
+    if (!result.Success || result.User == null)
+    {
+        var target = string.IsNullOrWhiteSpace(returnUrl)
+            ? "/login?error=credenciais_invalidas"
+            : $"/login?error=credenciais_invalidas&returnUrl={Uri.EscapeDataString(returnUrl)}";
+        return Results.Redirect(target);
+    }
+
+    var claims = new List<Claim>
+    {
+        new(ClaimTypes.NameIdentifier, result.User.Id.ToString()),
+        new(ClaimTypes.Name, result.User.Nome),
+        new(ClaimTypes.Email, result.User.Email),
+        new(ClaimTypes.Role, result.User.Role)
+    };
+
+    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    var authProperties = new AuthenticationProperties
+    {
+        IsPersistent = true,
+        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+    };
+
+    await httpContext.SignInAsync(
+        CookieAuthenticationDefaults.AuthenticationScheme,
+        new ClaimsPrincipal(claimsIdentity),
+        authProperties);
+
+    if (!string.IsNullOrWhiteSpace(returnUrl) &&
+        !returnUrl.StartsWith("//") &&
+        (returnUrl.StartsWith('/') || returnUrl.StartsWith('~')))
+    {
+        return Results.Redirect(returnUrl);
+    }
+
+    return Results.Redirect("/dashboard");
+}).DisableAntiforgery();
+
+app.MapGet("/api/auth/logout", async (HttpContext httpContext) =>
+{
+    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Results.Redirect("/login");
+});
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Inicializa o banco de dados e cria os usuários padrão de forma idempotente
+await DatabaseConfiguration.MigrateAndSeedAsync(app.Services);
 
 // Bind na porta configurada (PORT ou 8080 por padrão).
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";

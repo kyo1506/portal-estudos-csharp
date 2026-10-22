@@ -1,0 +1,10 @@
+using PortalEstudos.Domain.Entities;
+
+namespace PortalEstudos.Application.Abstractions;
+
+public record AuthResult(bool Success, Usuario? User, string? ErrorMessage);
+
+public interface IAuthService
+{
+    Task<AuthResult> AuthenticateAsync(string email, string password, CancellationToken ct = default);
+}
