@@ -12,7 +12,7 @@ public class JsonContentRepositoryTests
     public void GetAllFases_LoadsFasesCadastradas()
     {
         var fases = _repository.GetAllFases();
-        Assert.Equal(8, fases.Count);
+        Assert.Equal(9, fases.Count);
         Assert.Contains(fases, f => f.Id == 0);
         Assert.Contains(fases, f => f.Id == 1);
         Assert.Contains(fases, f => f.Id == 2);
@@ -21,6 +21,7 @@ public class JsonContentRepositoryTests
         Assert.Contains(fases, f => f.Id == 5);
         Assert.Contains(fases, f => f.Id == 6);
         Assert.Contains(fases, f => f.Id == 7);
+        Assert.Contains(fases, f => f.Id == 8);
     }
 
     [Fact]
@@ -160,5 +161,10 @@ public class JsonContentRepositoryTests
 
         var fase1 = _repository.GetFase(1);
         Assert.Equal(Enumerable.Range(1, 10), fase1!.Lessons.Select(l => l.Order));
+
+        var fase8 = _repository.GetFase(8);
+        Assert.NotNull(fase8);
+        Assert.Equal(Enumerable.Range(1, 5), fase8!.Lessons.Select(l => l.Order));
+        Assert.Equal(6, fase8.Exercises.Count);
     }
 }
