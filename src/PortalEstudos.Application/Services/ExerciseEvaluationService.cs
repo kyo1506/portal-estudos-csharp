@@ -1,17 +1,34 @@
+namespace PortalEstudos.Application.Services;
+
 using System.Text.RegularExpressions;
 using PortalEstudos.Domain.Entities;
 
-namespace PortalEstudos.Application.Services;
+public sealed record ExerciseEvaluationResult(
+    bool IsCorrect,
+    string ActualOutput,
+    string? ErrorMessage = null,
+    string? CompilerErrors = null
+);
 
 public interface IExerciseEvaluationService
 {
+    Task<ExerciseEvaluationResult> EvaluateAsync(string userCode, ExerciseModel exercise, CancellationToken ct = default);
     bool IsCorrect(string userCode, ExerciseModel exercise);
 }
 
-/// <summary>Avalia o código do aluno contra a solução esperada (lógica pura, testável).</summary>
-public sealed partial class ExerciseEvaluationService : IExerciseEvaluationService
+public partial class ExerciseEvaluationService : IExerciseEvaluationService
 {
-    public bool IsCorrect(string userCode, ExerciseModel exercise)
+    public virtual Task<ExerciseEvaluationResult> EvaluateAsync(string userCode, ExerciseModel exercise, CancellationToken ct = default)
+    {
+        var correct = IsCorrect(userCode, exercise);
+        return Task.FromResult(new ExerciseEvaluationResult(
+            correct,
+            correct ? exercise.ExpectedOutput : string.Empty,
+            correct ? null : "Código não atende aos requisitos esperados."
+        ));
+    }
+
+    public virtual bool IsCorrect(string userCode, ExerciseModel exercise)
     {
         if (string.IsNullOrWhiteSpace(userCode)) return false;
         if (string.IsNullOrWhiteSpace(exercise.Solution)) return userCode.Contains("Console.WriteLine");
@@ -21,7 +38,6 @@ public sealed partial class ExerciseEvaluationService : IExerciseEvaluationServi
 
         if (userNorm == solutionNorm) return true;
 
-        // Solução usada como template: aceita se o aluno produziu saída e trouxe a lógica central.
         var hasOutput = userCode.Contains("Console.WriteLine");
         var solutionTokens = ExtractTokens(solutionNorm);
         var matched = solutionTokens.Count > 0
@@ -30,22 +46,19 @@ public sealed partial class ExerciseEvaluationService : IExerciseEvaluationServi
         return hasOutput && matched;
     }
 
-    internal static List<string> ExtractTokens(string normalizedCode)
+    public static List<string> ExtractTokens(string normalizedCode)
     {
-        // Palavras com 4+ chars (identificadores/keywords relevantes), ignorando pontuação.
         return IdentifierRegex().Matches(normalizedCode)
             .Select(m => m.Value)
             .Distinct()
             .ToList();
     }
 
-    internal static string NormalizeCode(string code)
+    public static string NormalizeCode(string code)
     {
         var noComments = LineCommentRegex().Replace(code, "");
         noComments = BlockCommentRegex().Replace(noComments, "");
-        // Remove strings literais (para não penalizar textos diferentes).
         noComments = StringLiteralRegex().Replace(noComments, "\"\"");
-        // Colapsa espaços/quebras.
         return WhitespaceRegex().Replace(noComments, " ").Trim();
     }
 

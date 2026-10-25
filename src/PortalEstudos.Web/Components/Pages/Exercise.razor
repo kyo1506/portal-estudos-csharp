@@ -140,11 +140,17 @@ else
             {
                 <MudPaper Class="mb-4" Elevation="2" Style="@($"border-left:4px solid {(isCorrect ? "#28a745" : "#dc3545")};")">
                     <MudAlert Severity="@(isCorrect ? Severity.Success : Severity.Error)" NoIcon="false">
-                        <MudText Class="font-weight-bold">@(isCorrect ? "Correto!" : "Resultado")</MudText>
+                        <MudText Class="font-weight-bold">@(isCorrect ? "Sucesso!" : "Resultado da Avaliação")</MudText>
                         <div>@resultMessage</div>
-                        @if (!isCorrect && !string.IsNullOrEmpty(userCodeOutput))
+                        @if (!string.IsNullOrEmpty(compilerErrors))
                         {
-                            <div class="code-block mt-2">@userCodeOutput</div>
+                            <MudText Typo="Typo.caption" Class="font-weight-bold mt-2 d-block" Style="color:#ff8080;">Diagnóstico do Compilador Roslyn:</MudText>
+                            <pre class="code-block mt-1" style="background:#2a1215; color:#ff8080; border:1px solid #752025; white-space:pre-wrap;">@compilerErrors</pre>
+                        }
+                        @if (!string.IsNullOrEmpty(userCodeOutput))
+                        {
+                            <MudText Typo="Typo.caption" Class="font-weight-bold mt-2 d-block">Saída obtida no console:</MudText>
+                            <pre class="code-block mt-1" style="white-space:pre-wrap;">@userCodeOutput</pre>
                         }
                     </MudAlert>
                 </MudPaper>
@@ -343,11 +349,14 @@ else
         }
     }
 
+    private string? compilerErrors;
+
     private void ResetExerciseEditor(ExerciseModel exercise)
     {
         userCode = exercise.InitialCode;
         resultMessage = "";
         userCodeOutput = "";
+        compilerErrors = null;
         isCorrect = false;
         isSubmitting = false;
         submitStatus = "Executar e Verificar";
@@ -395,26 +404,26 @@ else
         if (exercise == null) return;
 
         isSubmitting = true;
-        submitStatus = "Verificando...";
+        submitStatus = "Compilando e Executando...";
+        compilerErrors = null;
         StateHasChanged();
 
-        await Task.Delay(400);
+        var eval = await ExerciseEvaluator.EvaluateAsync(userCode, exercise);
 
-        var correct = ExerciseEvaluator.IsCorrect(userCode, exercise);
-
-        if (correct)
+        if (eval.IsCorrect)
         {
             isCorrect = true;
-            resultMessage = "Excelente! Seu código está de acordo com a solução esperada.";
-            userCodeOutput = exercise.ExpectedOutput;
+            resultMessage = "Excelente! Seu código compilou e gerou a saída esperada com sucesso!";
+            userCodeOutput = eval.ActualOutput;
             await ProgressService.RecordExerciseAttemptAsync(exercise.Id, userCode, isCorrect: true, errorMessage: null, faseId: fase?.Id);
             userProgress = await ProgressService.LoadAsync();
         }
         else
         {
             isCorrect = false;
-            resultMessage = "Ainda não está igual à solução esperada. Reveja as dicas e tente novamente.";
-            userCodeOutput = "";
+            resultMessage = eval.ErrorMessage ?? "A saída do console foi diferente da saída esperada para o exercício.";
+            compilerErrors = eval.CompilerErrors;
+            userCodeOutput = eval.ActualOutput;
             await ProgressService.RecordExerciseAttemptAsync(exercise.Id, userCode, isCorrect: false, errorMessage: resultMessage, faseId: fase?.Id);
             userProgress = await ProgressService.LoadAsync();
         }
